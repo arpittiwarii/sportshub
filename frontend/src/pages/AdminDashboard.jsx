@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
-import { FiLogOut, FiUsers, FiDollarSign, FiCheckCircle, FiXCircle, FiClock, FiTrash2, FiFileText, FiTrendingUp, FiAlertCircle } from 'react-icons/fi';
-import { motion, AnimatePresence } from 'framer-motion';
+import { FiLogOut, FiUsers, FiDollarSign, FiCheckCircle, FiXCircle, FiClock, FiTrash2, FiFileText, FiTrendingUp, FiAlertCircle, FiUploadCloud, FiUser } from 'react-icons/fi';
+import { motion } from 'framer-motion';
 import { toast } from 'react-toastify';
 import DashboardCard from '../components/DashboardCard';
 
@@ -12,17 +12,22 @@ const AdminDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('pending'); // pending, students, payments, generate
   const [generateForm, setGenerateForm] = useState({ month: 'January', year: new Date().getFullYear(), amount: 1000 });
+  const [adminProfile, setAdminProfile] = useState(null);
+  const [adminProfileImageFile, setAdminProfileImageFile] = useState(null);
+  const [uploadingAdminProfileImage, setUploadingAdminProfileImage] = useState(false);
   const navigate = useNavigate();
 
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [studentsRes, paymentsRes] = await Promise.all([
+      const [studentsRes, paymentsRes, adminProfileRes] = await Promise.all([
         api.get('/athletes'),
-        api.get('/payments')
+        api.get('/payments'),
+        api.get('/admin/profile'),
       ]);
       setStudents(studentsRes.data);
       setPayments(paymentsRes.data);
+      setAdminProfile(adminProfileRes.data);
     } catch (error) {
       if (error.response?.status === 401) {
         handleLogout();
@@ -102,6 +107,32 @@ const AdminDashboard = () => {
       toast.error('Failed to generate payments.');
     }
   };
+  
+  const uploadAdminProfileImage = async (e) => {
+    e.preventDefault();
+    if (!adminProfileImageFile) {
+      toast.warning('Please select a profile image.');
+      return;
+    }
+
+    setUploadingAdminProfileImage(true);
+    try {
+      const payload = new FormData();
+      payload.append('profileImage', adminProfileImageFile);
+
+      const res = await api.put('/admin/profile', payload, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+
+      setAdminProfile(res.data);
+      setAdminProfileImageFile(null);
+      toast.success('Admin profile image updated!');
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to upload admin image.');
+    } finally {
+      setUploadingAdminProfileImage(false);
+    }
+  };
 
   const pendingStudents = students.filter(s => s.status === 'pending');
   const approvedStudents = students.filter(s => s.status === 'approved');
@@ -129,7 +160,7 @@ const AdminDashboard = () => {
             </div>
             <div>
               <h1 className="text-4xl font-bold text-white">Admin Dashboard</h1>
-              <p className="text-gray-400 text-lg">ICAAA Management Center</p>
+              <p className="text-gray-400 text-lg">Arambh Atheletes Management Center</p>
             </div>
           </div>
 
@@ -139,6 +170,51 @@ const AdminDashboard = () => {
           >
             <FiLogOut /> Logout
           </button>
+        </motion.div>
+
+        {/* ==================== ADMIN PROFILE (embedded) ==================== */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+          className="mb-10"
+        >
+          <div className="bg-gradient-to-br from-dark-800 to-dark-900 border border-dark-700 hover:border-primary/40 rounded-2xl p-6 shadow-xl flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+            <div className="flex items-center gap-4">
+              <div className="w-16 h-16 rounded-full overflow-hidden bg-dark-800 border border-dark-700 flex items-center justify-center">
+                {adminProfile?.profileImage ? (
+                  <img
+                    src={adminProfile.profileImage}
+                    alt="Admin profile"
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <FiUser className="text-primary w-7 h-7" />
+                )}
+              </div>
+              <div>
+                <p className="text-white font-bold text-lg">{adminProfile?.name || 'Admin'}</p>
+                <p className="text-gray-400 text-sm">{adminProfile?.email || ''}</p>
+              </div>
+            </div>
+
+            <form onSubmit={uploadAdminProfileImage} className="flex items-center gap-3">
+              <input
+                type="file"
+                accept=".jpg,.jpeg,.png,image/jpeg,image/png"
+                onChange={(e) => setAdminProfileImageFile(e.target.files?.[0] || null)}
+                disabled={uploadingAdminProfileImage}
+                className="bg-dark-900 border border-dark-700 text-gray-300 rounded-lg px-3 py-2 text-sm"
+              />
+              <button
+                type="submit"
+                disabled={uploadingAdminProfileImage}
+                className="btn-primary px-4 py-2 text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {uploadingAdminProfileImage ? 'Uploading...' : 'Update'}
+              </button>
+            </form>
+          </div>
         </motion.div>
 
         {/* ==================== STATISTICS SECTION ==================== */}
@@ -253,7 +329,20 @@ const AdminDashboard = () => {
               >
                 <div>
                   <div className="flex justify-between items-start mb-4 gap-2">
-                    <h3 className="text-lg sm:text-xl font-bold text-white group-hover:text-primary transition-colors truncate flex-1">{student.name}</h3>
+                    <div className="flex items-start gap-3 flex-1">
+                      {student.profileImage ? (
+                        <img
+                          src={student.profileImage}
+                          alt={`${student.name} profile`}
+                          className="w-10 h-10 rounded-full object-cover bg-dark-800 border border-dark-700 flex-shrink-0"
+                        />
+                      ) : (
+                        <div className="w-10 h-10 rounded-full bg-dark-800 border border-dark-700 flex items-center justify-center text-primary font-bold flex-shrink-0">
+                          {student.name?.slice(0, 1)?.toUpperCase()}
+                        </div>
+                      )}
+                      <h3 className="text-lg sm:text-xl font-bold text-white group-hover:text-primary transition-colors truncate flex-1">{student.name}</h3>
+                    </div>
                     <span className="px-3 py-1 bg-primary/15 text-primary text-xs rounded-full border border-primary/30 font-semibold whitespace-nowrap flex-shrink-0">Pending</span>
                   </div>
                   
@@ -272,7 +361,9 @@ const AdminDashboard = () => {
                     {/* Athletic Information */}
                     <div>
                       <p className="text-gray-500 font-semibold text-xs uppercase mb-1">Sport</p>
-                      <p className="text-primary font-bold">{student.sport || 'N/A'}</p>
+                      <p className="text-primary font-bold">
+                        {Array.isArray(student.sport) ? student.sport.join(', ') : (student.sport || 'N/A')}
+                      </p>
                     </div>
                     <div>
                       <p className="text-gray-500 font-semibold text-xs uppercase mb-1">Age</p>
@@ -285,8 +376,8 @@ const AdminDashboard = () => {
                       <p className="text-gray-300 text-xs sm:text-sm">{student.schoolName || 'N/A'}</p>
                     </div>
                     <div>
-                      <p className="text-gray-500 font-semibold text-xs uppercase mb-1">Aadhar Number</p>
-                      <p className="text-gray-300 font-mono text-xs sm:text-sm">{student.aadhar ? student.aadhar.slice(-4).padStart(student.aadhar.length, '*') : 'N/A'}</p>
+                      <p className="text-gray-500 font-semibold text-xs uppercase mb-1">AFI ID</p>
+                      <p className="text-gray-300 font-mono text-xs sm:text-sm">{student.afiId || 'N/A'}</p>
                     </div>
                   </div>
                 </div>
@@ -331,7 +422,20 @@ const AdminDashboard = () => {
               >
                 <div>
                   <div className="flex justify-between items-start mb-4 gap-2">
-                    <h3 className="text-lg sm:text-xl font-bold text-white group-hover:text-primary transition-colors truncate flex-1">{student.name}</h3>
+                    <div className="flex items-start gap-3 flex-1">
+                      {student.profileImage ? (
+                        <img
+                          src={student.profileImage}
+                          alt={`${student.name} profile`}
+                          className="w-10 h-10 rounded-full object-cover bg-dark-800 border border-dark-700 flex-shrink-0"
+                        />
+                      ) : (
+                        <div className="w-10 h-10 rounded-full bg-dark-800 border border-dark-700 flex items-center justify-center text-primary font-bold flex-shrink-0">
+                          {student.name?.slice(0, 1)?.toUpperCase()}
+                        </div>
+                      )}
+                      <h3 className="text-lg sm:text-xl font-bold text-white group-hover:text-primary transition-colors truncate flex-1">{student.name}</h3>
+                    </div>
                     <span className="px-3 py-1 bg-green-500/15 text-green-400 text-xs rounded-full border border-green-500/30 font-semibold whitespace-nowrap flex-shrink-0 flex items-center gap-1">
                       <FiCheckCircle size={14} /> Approved
                     </span>
@@ -352,7 +456,9 @@ const AdminDashboard = () => {
                     {/* Athletic Information */}
                     <div>
                       <p className="text-gray-500 font-semibold text-xs uppercase mb-1">Sport</p>
-                      <p className="text-primary font-bold">{student.sport || 'N/A'}</p>
+                      <p className="text-primary font-bold">
+                        {Array.isArray(student.sport) ? student.sport.join(', ') : (student.sport || 'N/A')}
+                      </p>
                     </div>
                     <div>
                       <p className="text-gray-500 font-semibold text-xs uppercase mb-1">Age</p>
@@ -365,8 +471,8 @@ const AdminDashboard = () => {
                       <p className="text-gray-300 text-xs sm:text-sm">{student.schoolName || 'N/A'}</p>
                     </div>
                     <div>
-                      <p className="text-gray-500 font-semibold text-xs uppercase mb-1">Aadhar Number</p>
-                      <p className="text-gray-300 font-mono text-xs sm:text-sm">{student.aadhar ? student.aadhar.slice(-4).padStart(student.aadhar.length, '*') : 'N/A'}</p>
+                      <p className="text-gray-500 font-semibold text-xs uppercase mb-1">AFI ID</p>
+                      <p className="text-gray-300 font-mono text-xs sm:text-sm">{student.afiId || 'N/A'}</p>
                     </div>
                   </div>
                 </div>
@@ -427,20 +533,24 @@ const AdminDashboard = () => {
                     </div>
                     <div>
                       <p className="text-gray-500 font-semibold text-xs uppercase mb-1">Sport</p>
-                      <p className="text-primary font-bold text-xs">{payment.studentId?.sport || 'N/A'}</p>
+                      <p className="text-primary font-bold text-xs">
+                        {Array.isArray(payment.studentId?.sport)
+                          ? payment.studentId.sport.join(', ')
+                          : (payment.studentId?.sport || 'N/A')}
+                      </p>
                     </div>
                   </div>
 
                   {/* Payment Screenshot */}
                   {payment.screenshot && (
                     <a
-                      href={`https://sportshub-backend-mzth.onrender.com${payment.screenshot}`}
+                      href={payment.screenshot.startsWith('http') ? payment.screenshot : `https://sportshub-backend-mzth.onrender.com${payment.screenshot}`}
                       target="_blank"
                       rel="noreferrer"
                       className="block w-full h-40 mb-4 bg-dark-900 rounded-lg border border-dark-700 overflow-hidden relative group/img hover:border-primary/50 transition-colors"
                     >
                       <img
-                        src={`https://sportshub-backend-mzth.onrender.com${payment.screenshot}`}
+                        src={payment.screenshot.startsWith('http') ? payment.screenshot : `https://sportshub-backend-mzth.onrender.com${payment.screenshot}`}
                         alt="Payment proof"
                         className="w-full h-full object-cover"
                       />
@@ -510,7 +620,11 @@ const AdminDashboard = () => {
                   </div>
                   <div>
                     <p className="text-gray-500 font-semibold text-xs uppercase mb-1">Sport</p>
-                    <p className="text-primary font-bold text-xs">{payment.athleteId?.sport || 'N/A'}</p>
+                    <p className="text-primary font-bold text-xs">
+                      {Array.isArray(payment.athleteId?.sport)
+                        ? payment.athleteId.sport.join(', ')
+                        : (payment.athleteId?.sport || 'N/A')}
+                    </p>
                   </div>
                   <div>
                     <p className="text-gray-500 font-semibold text-xs uppercase mb-1">Age</p>
@@ -582,6 +696,7 @@ const AdminDashboard = () => {
           </motion.div>
         )}
 
+        
 
       </div>
     </div>

@@ -11,12 +11,15 @@ const Register = () => {
     email: '',
     password: '',
     age: '',
-    sport: 'Cricket',
+    sport: 'Shot Put',
     contact: '',
-    aadhar: '',
+    afiId: '',
     schoolName: ''
   });
   
+  const [birthCertificateFile, setBirthCertificateFile] = useState(null);
+  const [aadharCardFile, setAadharCardFile] = useState(null);
+
   const [status, setStatus] = useState({ type: '', message: '' });
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -28,19 +31,75 @@ const Register = () => {
     });
   };
 
+  const handleBirthCertificateFileChange = (e) => {
+    const f = e.target.files && e.target.files[0];
+    if (f) {
+      const allowed = ['application/pdf', 'image/jpeg', 'image/png'];
+      if (!allowed.includes(f.type)) {
+        toast.error('Birth Certificate must be PDF, JPG, or PNG.');
+        setBirthCertificateFile(null);
+        return;
+      }
+    }
+    setBirthCertificateFile(f || null);
+  };
+
+  const handleAadharCardFileChange = (e) => {
+    const f = e.target.files && e.target.files[0];
+    if (f) {
+      const allowed = ['application/pdf', 'image/jpeg', 'image/png'];
+      if (!allowed.includes(f.type)) {
+        toast.error('Aadhar Card must be PDF, JPG, or PNG.');
+        setAadharCardFile(null);
+        return;
+      }
+    }
+    setAadharCardFile(f || null);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setStatus({ type: '', message: '' });
 
     try {
-      await api.post('/athletes', formData);
+      if (!birthCertificateFile) {
+        toast.error('Birth Certificate file is required.');
+        return;
+      }
+      if (!aadharCardFile) {
+        toast.error('Aadhar Card file is required.');
+        return;
+      }
+      if (!formData.afiId || !String(formData.afiId).trim()) {
+        toast.error('AFI ID is required.');
+        return;
+      }
+
+      const payload = new FormData();
+      payload.append('name', formData.name);
+      payload.append('email', formData.email);
+      payload.append('password', formData.password);
+      payload.append('age', formData.age);
+      payload.append('sport', formData.sport);
+      payload.append('contact', formData.contact);
+      payload.append('schoolName', formData.schoolName);
+      payload.append('afiId', formData.afiId);
+      payload.append('aadharCard', aadharCardFile);
+      payload.append('birthCertificate', birthCertificateFile);
+
+      await api.post('/athletes', payload, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+
       setStatus({ 
         type: 'success', 
         message: 'Registration successful! Your account is pending admin approval.'
       });
       toast.success('Registration complete! Please wait for admin approval.');
-      setFormData({ name: '', email: '', password: '', age: '', sport: 'Cricket', contact: '', aadhar: '', schoolName: '' });
+      setFormData({ name: '', email: '', password: '', age: '', sport: 'Shot Put', contact: '', afiId: '', schoolName: '' });
+      setBirthCertificateFile(null);
+      setAadharCardFile(null);
       setTimeout(() => navigate('/login'), 2000);
     } catch (error) {
       setStatus({ 
@@ -144,20 +203,39 @@ const Register = () => {
               </div>
 
               <div>
-                <label className="block text-gray-300 font-medium mb-2" htmlFor="sport">Sport</label>
-                <select 
-                  id="sport"
-                  name="sport"
-                  value={formData.sport}
-                  onChange={handleChange}
-                  required
-                  className="w-full bg-dark-900 border border-dark-700 focus:border-primary focus:ring-1 focus:ring-primary outline-none text-white rounded-xl px-4 py-3 appearance-none transition-colors"
-                >
-                  <option value="Cricket">Cricket</option>
-                  <option value="Football">Football</option>
-                  <option value="Fitness">Fitness & Conditioning</option>
-                  <option value="Tennis">Tennis</option>
-                </select>
+                <label className="block text-gray-300 font-medium mb-2" htmlFor="sport">Sport (Select one)</label>
+                <div className="grid grid-cols-2 gap-3">
+                  {[
+                    'Shot Put',
+                    'Long Jump',
+                    'High Jump',
+                    'Running 100m',
+                    'Running 400m',
+                    'Running 800m',
+                    'Running 1600m',
+                    'Other',
+                  ].map((s) => (
+                    <label
+                      key={s}
+                      className="flex items-center gap-2 bg-dark-900/30 border border-dark-700 rounded-xl px-3 py-2 cursor-pointer hover:border-primary/40 transition-colors"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={formData.sport === s}
+                        onChange={(e) => {
+                          const checked = e.target.checked;
+                          setFormData((prev) => {
+                            if (checked) return { ...prev, sport: s };
+                            if (prev.sport === s) return { ...prev, sport: 'Other' };
+                            return prev;
+                          });
+                        }}
+                        className="accent-primary"
+                      />
+                      <span className="text-sm text-white/90">{s}</span>
+                    </label>
+                  ))}
+                </div>
               </div>
             </div>
 
@@ -175,18 +253,52 @@ const Register = () => {
               />
             </div>
 
-            <div>
-              <label className="block text-gray-300 font-medium mb-2" htmlFor="aadhar">Aadhar Number</label>
-              <input 
-                type="text" 
-                id="aadhar"
-                name="aadhar"
-                value={formData.aadhar}
-                onChange={handleChange}
-                required
-                className="w-full bg-dark-900 border border-dark-700 focus:border-primary focus:ring-1 focus:ring-primary outline-none text-white rounded-xl px-4 py-3 transition-colors"
-                placeholder="12-digit Aadhar number"
-              />
+            <div className="grid grid-cols-1 gap-6">
+              <div>
+                <label className="block text-gray-300 font-medium mb-2" htmlFor="birthCertificate">
+                  Birth Certificate (PDF/JPG/PNG)
+                </label>
+                <input
+                  type="file"
+                  id="birthCertificate"
+                  name="birthCertificate"
+                  accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"
+                  onChange={handleBirthCertificateFileChange}
+                  required
+                  className="w-full bg-dark-900 border border-dark-700 text-white rounded-xl px-4 py-3 transition-colors"
+                />
+              </div>
+
+              <div>
+                <label className="block text-gray-300 font-medium mb-2" htmlFor="aadharCard">
+                  Aadhar Card (PDF/JPG/PNG)
+                </label>
+                <input
+                  type="file"
+                  id="aadharCard"
+                  name="aadharCard"
+                  accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"
+                  onChange={handleAadharCardFileChange}
+                  required
+                  className="w-full bg-dark-900 border border-dark-700 text-white rounded-xl px-4 py-3 transition-colors"
+                />
+              </div>
+
+              <div>
+                <label className="block text-gray-300 font-medium mb-2" htmlFor="afiId">
+                  AFI ID
+                </label>
+                <input
+                  type="text"
+                  id="afiId"
+                  name="afiId"
+                  value={formData.afiId}
+                  onChange={handleChange}
+                  required
+                  className="w-full bg-dark-900 border border-dark-700 focus:border-primary focus:ring-1 focus:ring-primary outline-none text-white rounded-xl px-4 py-3 transition-colors"
+                  placeholder="Enter your AFI ID"
+                />
+              </div>
             </div>
 
             <div>

@@ -1,5 +1,5 @@
 import axios from 'axios';
-const node_type="production";
+const node_type="development";
 // Use environment variable for API URL, fallback to localhost for development
 
 

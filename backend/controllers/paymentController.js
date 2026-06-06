@@ -1,12 +1,15 @@
 const Payment = require('../models/Payment');
 const User = require('../models/User');
+const { uploadBufferToCloudinary } = require('../services/cloudinaryUpload');
 
 // @desc    Get all payments (Admin)
 // @route   GET /api/payments
 // @access  Private (Admin)
 const getAllPayments = async (req, res) => {
   try {
-    const payments = await Payment.find().populate('athleteId', 'name email status').sort({ createdAt: -1 });
+    const payments = await Payment.find()
+      .populate('athleteId', 'name email status sport contact age schoolName afiId profileImage')
+      .sort({ createdAt: -1 });
     res.status(200).json(payments);
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
@@ -78,7 +81,13 @@ const uploadPaymentProof = async (req, res) => {
       return res.status(400).json({ message: 'Please upload a file' });
     }
 
-    payment.screenshot = `/uploads/${req.file.filename}`;
+    const folder = `sports-hub/payments/${payment._id.toString()}`;
+    const result = await uploadBufferToCloudinary(req.file.buffer, {
+      folder,
+      publicId: 'screenshot',
+    });
+
+    payment.screenshot = result.secure_url;
     payment.status = 'pending'; // reset status if they re-upload
     payment.submittedAt = Date.now();
 

@@ -26,9 +26,46 @@ const userSchema = new mongoose.Schema({
     min: [5, 'Age must be at least 5'],
     max: [60, 'Age cannot exceed 60']
   },
-  sport: String,
+  sport: {
+    type: String,
+    validate: {
+      validator: function (s) {
+        const allowed = [
+          'Shot Put',
+          'Long Jump',
+          'High Jump',
+          'Running 100m',
+          'Running 400m',
+          'Running 800m',
+          'Running 1600m',
+          'Other',
+        ];
+        return !s || allowed.includes(s);
+      },
+      message: 'Invalid sport value',
+    },
+  },
   contact: String,
   aadhar: String,
+  birthCertificate: {
+    type: String,
+    required: function () {
+      return this.role === 'athlete';
+    },
+  },
+  aadharCard: {
+    type: String,
+    required: function () {
+      return this.role === 'athlete';
+    },
+  },
+  afiId: {
+    type: String,
+    required: function () {
+      return this.role === 'athlete';
+    },
+  },
+  profileImage: String,
   schoolName: String,
   
   status: {

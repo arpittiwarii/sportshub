@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
-const path = require('path');
 const {
   getAllPayments,
   getMyPayments,
@@ -11,16 +10,21 @@ const {
 } = require('../controllers/paymentController');
 const { protect, restrictTo } = require('../middleware/authMiddleware');
 
-// Multer Storage Configuration
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, 'uploads/')
+// Multer Storage Configuration (memory -> upload to Cloudinary)
+const storage = multer.memoryStorage();
+
+const ALLOWED_MIME_TYPES = new Set(['image/jpeg', 'image/png']);
+const upload = multer({
+  storage,
+  limits: {
+    fileSize: 5 * 1024 * 1024, // 5MB
   },
-  filename: function (req, file, cb) {
-    cb(null, 'payment-' + Date.now() + path.extname(file.originalname))
-  }
+  fileFilter: (req, file, cb) => {
+    const isAllowed = ALLOWED_MIME_TYPES.has(file.mimetype);
+    if (!isAllowed) return cb(new Error('Invalid file type. Only JPG/PNG are allowed.'));
+    cb(null, true);
+  },
 });
-const upload = multer({ storage: storage });
 
 // Routes for Athlete
 router.get('/my-payments', protect, getMyPayments);

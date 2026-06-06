@@ -6,9 +6,11 @@ import Home from './pages/Home';
 import Register from './pages/Register';
 import Login from './pages/Login';
 import AdminDashboard from './pages/AdminDashboard';
+
 import StudentDashboard from './pages/StudentDashboard';
 import EditRegistration from './pages/EditRegistration';
 import AdminPaymentPage from './pages/AdminPaymentPage';
+import Blogs from './pages/Blogs';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -49,6 +51,22 @@ class ErrorBoundary extends React.Component {
   }
 }
 
+// Redirect logged-in users away from public pages
+const PublicRoute = ({ children }) => {
+  const token = localStorage.getItem('token');
+  const userStr = localStorage.getItem('user');
+  let role = null;
+  if(userStr) {
+    try { role = JSON.parse(userStr).role; } catch(e){}
+  }
+
+  if (token && role) {
+    if (role === 'admin') return <Navigate to="/admin" replace />;
+    if (role === 'athlete') return <Navigate to="/dashboard" replace />;
+  }
+  return children;
+};
+
 // Admin Protected Route Component
 const AdminRoute = ({ children }) => {
   const token = localStorage.getItem('token');
@@ -88,9 +106,9 @@ function App() {
           <Navbar />
           <main className="flex-grow">
             <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/register" element={<Register />} />
-              <Route path="/login" element={<Login />} />
+              <Route path="/" element={<PublicRoute><Home /></PublicRoute>} />
+              <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
+              <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
               <Route 
                 path="/admin" 
                 element={
@@ -105,6 +123,14 @@ function App() {
                   <StudentRoute>
                     <StudentDashboard />
                   </StudentRoute>
+                } 
+              />
+              <Route 
+                path="/home" 
+                element={
+                  
+                    <Home />
+                  
                 } 
               />
               <Route 
@@ -123,6 +149,8 @@ function App() {
                   </AdminRoute>
                 } 
               />
+              
+              <Route path="/blogs" element={<Blogs />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </main>

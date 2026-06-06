@@ -1,20 +1,66 @@
 const User = require('../models/User');
 
+const allowedSports = [
+  'Shot Put',
+  'Long Jump',
+  'High Jump',
+  'Running 100m',
+  'Running 400m',
+  'Running 800m',
+  'Running 1600m',
+  'Other',
+];
+
+const { uploadBufferToCloudinary } = require('../services/cloudinaryUpload');
+
 // @desc    Register a new athlete
 // @route   POST /api/athletes
 // @access  Public
 const createAthlete = async (req, res) => {
   try {
-    const { name, email, password, age, sport, contact, aadhar, schoolName } = req.body;
+    const { name, email, password, age, sport, contact, schoolName, afiId } = req.body;
 
-    if (!name || !email || !password || !age || !sport || !contact || !aadhar || !schoolName) {
+    const aadharCardFile = req.files?.aadharCard?.[0];
+    const birthCertificateFile = req.files?.birthCertificate?.[0];
+
+    if (!name || !email || !password || !age || !sport || !contact || !schoolName || !afiId) {
       return res.status(400).json({ message: 'All fields are required' });
+    }
+
+    if (!allowedSports.includes(sport)) {
+      return res.status(400).json({ message: 'Invalid sport value' });
+    }
+
+    if (!aadharCardFile) {
+      return res.status(400).json({ message: 'Aadhar Card file is required.' });
+    }
+
+    if (!birthCertificateFile) {
+      return res.status(400).json({ message: 'Birth Certificate file is required.' });
+    }
+
+    const normalizedAfiId = String(afiId).trim();
+    if (!normalizedAfiId) {
+      return res.status(400).json({ message: 'AFI ID is required.' });
     }
 
     const userExists = await User.findOne({ email });
     if (userExists) {
       return res.status(400).json({ message: 'User already exists with this email' });
     }
+
+    // Upload documents first so we can store URLs during user creation.
+    const safeEmail = String(email).toLowerCase().replace(/[^a-z0-9]+/g, '-');
+    const folder = `sports-hub/students/${safeEmail}`;
+    const birthResult = await uploadBufferToCloudinary(birthCertificateFile.buffer, {
+      folder,
+      publicId: 'birthCertificate',
+    });
+
+    const aadharResult = await uploadBufferToCloudinary(aadharCardFile.buffer, {
+      folder,
+      publicId: 'aadharCard',
+    });
 
     const athlete = new User({
       name,
@@ -24,7 +70,9 @@ const createAthlete = async (req, res) => {
       age,
       sport,
       contact,
-      aadhar,
+      birthCertificate: birthResult.secure_url,
+      aadharCard: aadharResult.secure_url,
+      afiId: normalizedAfiId,
       schoolName
     });
 
@@ -74,7 +122,7 @@ const getAthleteById = async (req, res) => {
 // @access  Public (athlete updates their info)
 const updateAthlete = async (req, res) => {
   try {
-    const { name, age, sport, contact, aadhar, schoolName } = req.body;
+    const { name, age, sport, contact, schoolName } = req.body;
     
     let athlete = await User.findById(req.params.id);
     
@@ -84,9 +132,20 @@ const updateAthlete = async (req, res) => {
 
     athlete.name = name || athlete.name;
     athlete.age = age || athlete.age;
-    athlete.sport = sport || athlete.sport;
+    if (sport) {
+      let sportValue = sport;
+      if (Array.isArray(sportValue)) sportValue = sportValue[0];
+      if (typeof sportValue === 'string' && sportValue.includes(',')) {
+        sportValue = sportValue.split(',')[0];
+      }
+      sportValue = String(sportValue).trim();
+
+      if (!allowedSports.includes(sportValue)) {
+        return res.status(400).json({ message: 'Invalid sport value' });
+      }
+      athlete.sport = sportValue;
+    }
     athlete.contact = contact || athlete.contact;
-    athlete.aadhar = aadhar || athlete.aadhar;
     athlete.schoolName = schoolName || athlete.schoolName;
 
     const updatedAthlete = await athlete.save();

@@ -107,7 +107,9 @@ const AdminPaymentPage = () => {
   const handleViewScreenshot = (screenshotUrl) => {
     setScreenshotModal({
       isOpen: true,
-      imageUrl: `https://sportshub-backend-mzth.onrender.com${screenshotUrl}`
+      imageUrl: screenshotUrl?.startsWith('http')
+        ? screenshotUrl
+        : `https://sportshub-backend-mzth.onrender.com${screenshotUrl}`,
     });
   };
 
@@ -133,7 +135,7 @@ const AdminPaymentPage = () => {
             </div>
             <div>
               <h1 className="text-3xl font-bold text-white">Payment Management</h1>
-              <p className="text-gray-400">Verify and manage student payments</p>
+              <p className="text-gray-400">Verify and manage atheletes payments</p>
             </div>
           </div>
 

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { FiMenu, FiX } from 'react-icons/fi';
 import { motion } from 'framer-motion';
+import logo from "../assets/logo.jpg";
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -25,12 +26,14 @@ const Navbar = () => {
   const renderNavLinks = () => {
     return (
       <>
-        <Link to="/" className={`nav-link ${location.pathname === '/' ? 'text-primary' : ''}`} onClick={() => setMobileMenuOpen(false)}>Home</Link>
+        <Link to="/home" className={`nav-link ${location.pathname === '/home' ? 'text-primary' : ''}`} onClick={() => setMobileMenuOpen(false)}>Home</Link>
+        <Link to="/blogs" className={`nav-link ${location.pathname === '/blogs' ? 'text-primary' : ''}`} onClick={() => setMobileMenuOpen(false)}>Blogs</Link>
 
         {role === 'admin' && (
           <>
             <Link to="/admin" className={`nav-link ${location.pathname === '/admin' ? 'text-primary' : ''}`} onClick={() => setMobileMenuOpen(false)}>Dashboard</Link>
             <Link to="/admin/payments" className={`nav-link ${location.pathname === '/admin/payments' ? 'text-primary' : ''}`} onClick={() => setMobileMenuOpen(false)}>Payments</Link>
+            
           </>
         )}
 
@@ -46,24 +49,24 @@ const Navbar = () => {
       className={`fixed top-0 w-full z-50 transition-all duration-300 ${isScrolled ? 'bg-dark-900/90 backdrop-blur-md border-b border-white/10 py-3' : 'bg-transparent py-5'
         }`}
     >
-      <div className="container mx-auto px-6 md:px-12 flex justify-between items-center">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 flex justify-between items-center">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-3 group">
-          <div className="relative w-10 h-10 bg-primary rounded-xl flex items-center justify-center font-bold text-black text-lg shadow-lg shadow-primary/50 group-hover:scale-110 transition-transform duration-300">
-            🏃
+          <div className="w-16 h-16">
+            <img src={logo} alt="logo" className="w-full h-full object-contain" />
           </div>
           <div className="flex flex-col">
-            <span className="font-bold text-xl tracking-wider text-white leading-tight">ICAAA</span>
-            <span className="text-xs text-gray-400 font-semibold uppercase">Athletics Indore</span>
+            <span className="font-bold text-xl tracking-wider text-white leading-tight">Arambh</span>
+            <span className="text-xs text-gray-400 font-semibold uppercase">Athletics Hub Indore</span>
           </div>
         </Link>
 
         {/* Desktop Nav */}
-        <nav className="hidden md:flex items-center gap-8">
+        <nav className="hidden lg:flex items-center gap-4 xl:gap-8">
           {renderNavLinks()}
 
-          {!role ? (
-          <div className="flex items-center gap-4">
+          {!role && (
+            <div className="flex items-center gap-4">
               <Link
                 to="/login"
                 className="text-gray-400 hover:text-primary font-semibold transition-colors"
@@ -77,13 +80,13 @@ const Navbar = () => {
                 Join Now
               </Link>
             </div>
-          ) : null}
+          )}
         </nav>
         <motion.div
           initial={false}
           animate={mobileMenuOpen ? { height: 'auto', opacity: 1 } : { height: 0, opacity: 0 }}
           transition={{ duration: 0.3 }}
-          className="md:hidden overflow-hidden absolute top-full left-0 w-full z-40"
+          className="lg:hidden overflow-hidden absolute top-full left-0 w-full z-40"
         >
           <div className="bg-dark-900 border-b border-primary/20 p-4 sm:p-6 flex flex-col gap-4 shadow-2xl">
             {renderNavLinks()}
@@ -105,13 +108,27 @@ const Navbar = () => {
                   Join Now
                 </Link>
               </div>
-            ) : null}
+            ) : (
+              <div className="flex flex-col gap-3 mt-2 border-t border-dark-700 pt-4">
+                <button
+                  onClick={() => {
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('user');
+                    setMobileMenuOpen(false);
+                    window.location.href = '/';
+                  }}
+                  className="text-red-500 font-semibold text-lg hover:text-red-400 transition-colors text-left"
+                >
+                  Logout
+                </button>
+              </div>
+            )}
           </div>
         </motion.div>
 
         {/* Mobile Menu Toggle Button */}
         <button
-          className="md:hidden text-white text-2xl"
+          className="lg:hidden text-white text-2xl focus:outline-none"
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
         >
           {mobileMenuOpen ? <FiX /> : <FiMenu />}

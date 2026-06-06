@@ -1,0 +1,14 @@
+const express = require('express');
+const router = express.Router();
+
+const { getBlogs, createBlog, updateBlog, deleteBlog } = require('../controllers/blogController');
+const { protect, restrictTo } = require('../middleware/authMiddleware');
+
+router.get('/', getBlogs);
+router.post('/', protect, restrictTo('admin'), createBlog);
+
+router.put('/:id', protect, restrictTo('admin'), updateBlog);
+router.delete('/:id', protect, restrictTo('admin'), deleteBlog);
+
+module.exports = router;
+

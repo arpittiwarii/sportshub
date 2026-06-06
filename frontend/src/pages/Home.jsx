@@ -8,9 +8,7 @@ import TrainingLocationCard from '../components/TrainingLocationCard';
 import DashboardCard from '../components/DashboardCard';
 import SectionHeader from '../components/SectionHeader';
 import { FiUsers, FiTrendingUp, FiMap, FiCalendar, FiAward, FiMapPin, FiClock, FiTarget } from 'react-icons/fi';
-
-const IMG_HERO = "https://images.unsplash.com/photo-1517649763962-0c623066013b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80";
-const IMG_TRACK = "https://images.unsplash.com/photo-1552674605-5defe6aa44bb?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80";
+import hero_background from "../assets/hero_background.png";
 
 const staggerContainer = {
   hidden: { opacity: 0 },
@@ -38,15 +36,15 @@ const Home = () => {
     <div className="overflow-hidden">
       {/* ==================== HERO SECTION ==================== */}
       <HeroSection 
-        badge="ESTABLISHED 1980s"
-        title="Indore Corporation Area"
-        titleHighlight="Athletics Association"
+        badge="ESTABLISHED 2026"
+        title="Arambh Athletics Hub"
+        titleHighlight="Indore"
         subtitle="Empowering youth through athletics. 🐖 Eat like a pig, 🐆 Run like a jaguar!"
         ctaText="Join Our Programs"
         ctaLink="/register"
         secondaryCtaText="Explore More"
         secondaryCtaLink="#about"
-        backgroundImage={IMG_HERO}
+        backgroundImage={hero_background}
       />
 
       {/* ==================== STATS SECTION ==================== */}
@@ -61,9 +59,9 @@ const Home = () => {
           >
             {[
               { label: "Athletes", value: "500+", icon: FiUsers },
-              { label: "Years Active", value: "40+", icon: FiTrendingUp },
-              { label: "Coaches", value: "5+", icon: FiAward },
-              { label: "Locations", value: "3", icon: FiMap }
+              { label: "Years Active", value: "18+", icon: FiTrendingUp },
+              { label: "Coaches", value: "3+", icon: FiAward },
+              { label: "Locations", value: "1", icon: FiMap }
             ].map((stat, i) => (
               <motion.div 
                 key={i}
@@ -93,10 +91,10 @@ const Home = () => {
             <div className="w-full">
               <SectionHeader 
                 badge="OUR LEGACY"
-                title="About ICAAA"
-                description="Founded in the 1980s"
+                title="About AAH"
+                description="Founded in the 2026"
                 centered={true}
-                highlightWords={["ICAAA"]}
+                highlightWords={["AAH"]}
               />
 
               <motion.div 
@@ -110,7 +108,7 @@ const Home = () => {
                   <h3 className="text-2xl font-bold text-white mb-3 flex items-center justify-center gap-3">
                     <span className="text-3xl">🏛️</span> Founder
                   </h3>
-                  <p className="text-gray-400">Late Shri Jagdish Chandra Verma founded ICAAA with a vision to develop athletic talent in Indore. His legacy continues through decades of excellence.</p>
+                  <p className="text-gray-400">Coach Rhythm Sigh Sikrarwar founded AAH with a vision to develop athletic talent in Indore.</p>
                 </motion.div>
 
                 <motion.div variants={fadeUpVariant} className="bg-dark-800 border border-dark-700 rounded-2xl p-6">
@@ -129,7 +127,7 @@ const Home = () => {
       <section className="py-24 bg-dark-800">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <SectionHeader 
-            badge="EXPERT LEADERSHIP"
+            badge="EXPERIENCED LEADERSHIP"
             title="Meet Our Coaches"
             description="Experienced professionals dedicated to developing athletic excellence"
             highlightWords={["Coaches"]}
@@ -140,29 +138,21 @@ const Home = () => {
             whileInView="visible"
             viewport={{ once: true }}
             variants={staggerContainer}
-            className="grid md:grid-cols-3 gap-8"
+            className="grid md:grid-cols-2 gap-8"
           >
             <CoachCard 
-              index={0}
-              name="Mr. Rajendra Verma"
-              role="Head Coach"
-              experience="45+ years in athletics training"
-              specialty="Marathon & Endurance Training"
-              icon={FiAward}
+              index={1}
+              name="Rhythm Singh"
+              role="FOUNDER"
+              experience="5+ years in athlete development"
+              specialty="Strength & Conditioning"
+              icon={FiTrendingUp}
             />
             <CoachCard 
               index={1}
-              name="Manish Gaud"
+              name="Aryan Slathia"
               role="Assistant Coach"
-              experience="20+ years coaching experience"
-              specialty="Sprint Training & Speed Work"
-              icon={FiTarget}
-            />
-            <CoachCard 
-              index={2}
-              name="Rhythm Singh"
-              role="Assistant Coach"
-              experience="15+ years in athlete development"
+              experience="5+ years in athlete development"
               specialty="Strength & Conditioning"
               icon={FiTrendingUp}
             />
@@ -185,30 +175,15 @@ const Home = () => {
             whileInView="visible"
             viewport={{ once: true }}
             variants={staggerContainer}
-            className="grid md:grid-cols-3 gap-8"
+            className="grid md:grid-cols-1 gap-10"
           >
-            <TrainingLocationCard
-              index={0}
-              name="Nehru Stadium"
-              description="Primary training facility with professional-grade athletics track and training equipment."
-              timing="6:00 AM - 8:00 PM"
-              capacity="200+ athletes"
-              icon={FiMapPin}
-            />
+          
             <TrainingLocationCard
               index={1}
               name="Malhar Ashram"
               description="Secondary training center perfect for group sessions and specialized conditioning programs."
               timing="6:00 AM - 7:00 PM"
               capacity="150+ athletes"
-              icon={FiMapPin}
-            />
-            <TrainingLocationCard
-              index={2}
-              name="Chiman Bagh"
-              description="Multipurpose outdoor facility ideal for marathon training and open-air sessions."
-              timing="5:00 AM - 8:00 PM"
-              capacity="300+ athletes"
               icon={FiMapPin}
             />
           </motion.div>
@@ -221,7 +196,7 @@ const Home = () => {
           <SectionHeader 
             badge="MEMBER ACTIVITIES"
             title="What We Offer"
-            description="Diverse programs tailored for every athlete"
+            description="Structured training programs designed for every event and goal"
             highlightWords={["Offer"]}
           />
 
@@ -230,17 +205,19 @@ const Home = () => {
             whileInView="visible"
             viewport={{ once: true }}
             variants={staggerContainer}
-            className="grid md:grid-cols-3 gap-8 w-fit mx-auto"
+            className="grid md:grid-cols-2 gap-8 w-fit mx-auto"
           >
             <motion.div 
               variants={fadeUpVariant}
               className="bg-gradient-to-br from-dark-900 to-dark-800 border border-dark-700 hover:border-primary/30 rounded-2xl p-8 hover:shadow-lg hover:shadow-primary/10 transition-all duration-300 group"
             >
               <div className="w-16 h-16 bg-primary/10 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                <span className="text-3xl">🏃</span>
+                <span className="text-3xl">
+                  <FiTarget />
+                </span>
               </div>
-              <h3 className="text-2xl font-bold text-white mb-3">Daily Training</h3>
-              <p className="text-gray-400">Regular training sessions led by experienced coaches to build endurance, speed, and technique.</p>
+              <h3 className="text-2xl font-bold text-white mb-3">Sprint Training</h3>
+              <p className="text-gray-400">Explosive starts, acceleration mechanics, and speed endurance drills tailored for 100m/400m events.</p>
             </motion.div>
 
             <motion.div 
@@ -248,10 +225,12 @@ const Home = () => {
               className="bg-gradient-to-br from-dark-900 to-dark-800 border border-dark-700 hover:border-primary/30 rounded-2xl p-8 hover:shadow-lg hover:shadow-primary/10 transition-all duration-300 group"
             >
               <div className="w-16 h-16 bg-primary/10 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                <span className="text-3xl">🏅</span>
+                <span className="text-3xl">
+                  <FiClock />
+                </span>
               </div>
-              <h3 className="text-2xl font-bold text-white mb-3">Marathon Training</h3>
-              <p className="text-gray-400">Comprehensive marathon preparation programs with nutrition guidance and race strategy coaching.</p>
+              <h3 className="text-2xl font-bold text-white mb-3">Endurance Training</h3>
+              <p className="text-gray-400">Aerobic base building, tempo runs, and recovery coaching to help you perform consistently across longer races.</p>
             </motion.div>
 
             <motion.div 
@@ -259,10 +238,12 @@ const Home = () => {
               className="bg-gradient-to-br from-dark-900 to-dark-800 border border-dark-700 hover:border-primary/30 rounded-2xl p-8 hover:shadow-lg hover:shadow-primary/10 transition-all duration-300 group"
             >
               <div className="w-16 h-16 bg-primary/10 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                <span className="text-3xl">🎖️</span>
+                <span className="text-3xl">
+                  <FiTrendingUp />
+                </span>
               </div>
-              <h3 className="text-2xl font-bold text-white mb-3">Government Job Physical Prep</h3>
-              <p className="text-gray-400">Specialized training for government job entry examinations including physical fitness standards.</p>
+              <h3 className="text-2xl font-bold text-white mb-3">Strength & Conditioning</h3>
+              <p className="text-gray-400">Functional strength, injury-prevention mobility, and performance-focused conditioning under expert guidance.</p>
             </motion.div>
 
             <motion.div 
@@ -270,10 +251,12 @@ const Home = () => {
               className="bg-gradient-to-br from-dark-900 to-dark-800 border border-dark-700 hover:border-primary/30 rounded-2xl p-8 hover:shadow-lg hover:shadow-primary/10 transition-all duration-300 group md:col-start-2"
             >
               <div className="w-16 h-16 bg-primary/10 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                <span className="text-3xl">🏆</span>
+                <span className="text-3xl">
+                  <FiAward />
+                </span>
               </div>
-              <h3 className="text-2xl font-bold text-white mb-3">District Competitions</h3>
-              <p className="text-gray-400">Regular participation in district-level athletic competitions to showcase and develop talent.</p>
+              <h3 className="text-2xl font-bold text-white mb-3">Jump Training</h3>
+              <p className="text-gray-400">Vertical power, take-off technique, and coordination drills designed for long jump and high jump development.</p>
             </motion.div>
           </motion.div>
         </div>
@@ -360,12 +343,12 @@ const Home = () => {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <SectionHeader 
             badge="MEMBER BENEFITS"
-            title="Why Join ICAAA?"
+            title="Why Join AAH?"
             description="Comprehensive programs and support for your athletic journey"
             highlightWords={["Join"]}
           />
 
-          <motion.div 
+          <motion.div   
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
@@ -391,8 +374,8 @@ const Home = () => {
             <DashboardCard
               index={2}
               title="Multiple Venues"
-              value="3"
-              subtitle="Training locations"
+              value="1"
+              subtitle="Training location"
               icon={FiMapPin}
               gradient="from-primary to-accent-red"
             />

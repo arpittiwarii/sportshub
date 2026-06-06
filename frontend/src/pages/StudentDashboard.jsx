@@ -28,6 +28,8 @@ const StudentDashboard = () => {
   const [uploadModal, setUploadModal] = useState({ isOpen: false, paymentId: null });
   const [dragActive, setDragActive] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [profileImageFile, setProfileImageFile] = useState(null);
+  const [uploadingProfileImage, setUploadingProfileImage] = useState(false);
   const navigate = useNavigate();
 
   const userStr = localStorage.getItem('user');
@@ -129,6 +131,33 @@ const StudentDashboard = () => {
     }
   };
 
+  const handleProfileImageSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!profileImageFile) {
+      toast.warning('Please select an image.');
+      return;
+    }
+
+    setUploadingProfileImage(true);
+    try {
+      const payload = new FormData();
+      payload.append('profileImage', profileImageFile);
+
+      const res = await api.put(`/athletes/${userId}/profile-image`, payload, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+
+      setProfile(res.data);
+      setProfileImageFile(null);
+      toast.success('Profile image updated successfully!');
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to update profile image.');
+    } finally {
+      setUploadingProfileImage(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen pt-24 bg-dark-900 flex items-center justify-center">
@@ -221,6 +250,42 @@ const StudentDashboard = () => {
               <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
                 <FiUser className="text-primary" /> Complete Profile
               </h2>
+
+              <div className="flex items-center justify-center mb-6">
+                {profile?.profileImage ? (
+                  <img
+                    src={profile.profileImage}
+                    alt="Profile"
+                    className="w-24 h-24 rounded-full object-cover bg-dark-800 border border-dark-700"
+                  />
+                ) : (
+                  <div className="w-24 h-24 rounded-full bg-dark-800 border border-dark-700 flex items-center justify-center text-primary font-bold text-3xl">
+                    {profile?.name?.slice(0, 1)?.toUpperCase() || '—'}
+                  </div>
+                )}
+              </div>
+
+              <form onSubmit={handleProfileImageSubmit} className="mt-2 flex flex-col gap-2">
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center flex-wrap justify-center">
+                  <input
+                    type="file"
+                    accept=".jpg,.jpeg,.png,image/jpeg,image/png"
+                    onChange={(e) => setProfileImageFile(e.target.files?.[0] || null)}
+                    disabled={uploadingProfileImage}
+                    className="sm:flex-1 bg-dark-900 border border-dark-700 text-gray-300 rounded-lg px-1 py-1 text-sm"
+                  />
+                  <br />
+                  <button
+                    type="submit"
+                    disabled={uploadingProfileImage}
+                    className="w-full sm:w-auto px-1 py-1 btn-primary text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  >
+                    <FiUploadCloud size={16} />
+                    {uploadingProfileImage ? 'Uploading...' : 'Update'}
+                  </button>
+                </div>
+              </form>
+
               <div className="space-y-3">
                 {/* Personal Information */}
                 <div className="pb-3 border-b border-dark-700">
@@ -239,7 +304,9 @@ const StudentDashboard = () => {
                 {/* Athletic Information */}
                 <div className="pb-3 border-b border-dark-700">
                   <p className="text-gray-400 text-xs uppercase font-semibold tracking-wider mb-1">Sport</p>
-                  <p className="text-primary font-semibold text-lg">{profile?.sport || 'N/A'}</p>
+                  <p className="text-primary font-semibold text-lg">
+                    {Array.isArray(profile?.sport) ? profile.sport.join(', ') : (profile?.sport || 'N/A')}
+                  </p>
                 </div>
                 <div className="pb-3 border-b border-dark-700">
                   <p className="text-gray-400 text-xs uppercase font-semibold tracking-wider mb-1">Age</p>
@@ -252,8 +319,8 @@ const StudentDashboard = () => {
                   <p className="text-white text-sm">{profile?.schoolName || 'N/A'}</p>
                 </div>
                 <div className="pb-3">
-                  <p className="text-gray-400 text-xs uppercase font-semibold tracking-wider mb-1">Aadhar Number</p>
-                  <p className="text-white font-mono text-sm">{profile?.aadhar ? profile.aadhar.slice(-4).padStart(profile.aadhar.length, '*') : 'N/A'}</p>
+                  <p className="text-gray-400 text-xs uppercase font-semibold tracking-wider mb-1">AFI ID</p>
+                  <p className="text-white font-mono text-sm">{profile?.afiId || 'N/A'}</p>
                 </div>
               </div>
               <button
@@ -424,7 +491,7 @@ const StudentDashboard = () => {
                         <>
                           {payment.screenshot && (
                             <a
-                              href={`https://sportshub-backend-mzth.onrender.com${payment.screenshot}`}
+                              href={payment.screenshot.startsWith('http') ? payment.screenshot : `https://sportshub-backend-mzth.onrender.com${payment.screenshot}`}
                               target="_blank"
                               rel="noreferrer"
                               className="px-4 py-2 text-sm rounded-lg bg-dark-700 hover:bg-dark-600 text-gray-300 border border-dark-600 transition-all flex items-center gap-2"

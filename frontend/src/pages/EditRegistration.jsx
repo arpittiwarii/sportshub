@@ -6,10 +6,27 @@ import { FiCheckCircle, FiAlertCircle, FiArrowLeft } from 'react-icons/fi';
 import { toast } from 'react-toastify';
 
 const EditRegistration = () => {
+  const allowedSports = [
+    'Shot Put',
+    'Long Jump',
+    'High Jump',
+    'Running 100m',
+    'Running 400m',
+    'Running 800m',
+    'Running 1600m',
+    'Other',
+  ];
+
   const [formData, setFormData] = useState(null);
   const [status, setStatus] = useState({ type: '', message: '' });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [docs, setDocs] = useState({
+    birthCertificate: null,
+    aadharCard: null,
+    afiId: '',
+  });
+  const [uploadingDocs, setUploadingDocs] = useState(false);
   const navigate = useNavigate();
 
   const userStr = localStorage.getItem('user');
@@ -25,7 +42,12 @@ const EditRegistration = () => {
       setLoading(true);
       try {
         const res = await api.get(`/athletes/${userId}`);
-        setFormData(res.data);
+        const rawSport = res.data?.sport;
+        const sportValue = Array.isArray(rawSport) ? rawSport[0] : rawSport;
+        const normalizedSport =
+          typeof sportValue === 'string' && allowedSports.includes(sportValue) ? sportValue : 'Other';
+        setFormData({ ...res.data, sport: normalizedSport });
+        setDocs((prev) => ({ ...prev, afiId: res.data?.afiId || '' }));
       } catch (error) {
         toast.error('Failed to load profile. Please try again.');
         navigate('/dashboard');
@@ -65,6 +87,70 @@ const EditRegistration = () => {
       toast.error('Failed to update profile.');
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleFileChange = (e) => {
+    const { name, files } = e.target;
+    if (files && files[0]) {
+      setDocs((prev) => ({ ...prev, [name]: files[0] }));
+    } else {
+      setDocs((prev) => ({ ...prev, [name]: null }));
+    }
+  };
+
+  const handleAfiIdChange = (e) => {
+    setDocs((prev) => ({ ...prev, afiId: e.target.value }));
+  };
+
+  const handleSportToggle = (sportValue, checked) => {
+    setFormData((prev) => {
+      if (!prev) return prev;
+      const current = Array.isArray(prev.sport) ? prev.sport : [];
+      if (checked) {
+        return { ...prev, sport: [...new Set([...current, sportValue])] };
+      }
+      const next = current.filter((s) => s !== sportValue);
+      return { ...prev, sport: next.length ? next : ['Other'] };
+    });
+  };
+
+  const handleUploadDocuments = async (e) => {
+    e.preventDefault();
+
+    if (!userId) return;
+
+    if (!docs.birthCertificate) {
+      toast.error('Birth Certificate file is required.');
+      return;
+    }
+    if (!docs.aadharCard) {
+      toast.error('Aadhar Card file is required.');
+      return;
+    }
+    if (!docs.afiId || !String(docs.afiId).trim()) {
+      toast.error('AFI ID is required.');
+      return;
+    }
+
+    setUploadingDocs(true);
+    try {
+      const payload = new FormData();
+      if (docs.birthCertificate) payload.append('birthCertificate', docs.birthCertificate);
+      if (docs.aadharCard) payload.append('aadharCard', docs.aadharCard);
+      payload.append('afiId', docs.afiId);
+
+      const res = await api.put(`/athletes/${userId}/documents`, payload, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+
+      setFormData(res.data);
+      setDocs({ birthCertificate: null, aadharCard: null, afiId: res.data?.afiId || '' });
+      toast.success('Documents uploaded successfully!');
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Document upload failed.');
+    } finally {
+      setUploadingDocs(false);
     }
   };
 
@@ -139,19 +225,22 @@ const EditRegistration = () => {
 
                 <div>
                   <label className="block text-gray-300 font-medium mb-2" htmlFor="sport">Sport</label>
-                  <select 
-                    id="sport"
-                    name="sport"
-                    value={formData.sport}
-                    onChange={handleChange}
-                    required
-                    className="w-full bg-dark-900 border border-dark-700 focus:border-primary focus:ring-1 focus:ring-primary outline-none text-white rounded-xl px-4 py-3 appearance-none transition-colors"
-                  >
-                    <option value="Cricket">Cricket</option>
-                    <option value="Football">Football</option>
-                    <option value="Fitness">Fitness & Conditioning</option>
-                    <option value="Tennis">Tennis</option>
-                  </select>
+                  <div className="grid grid-cols-2 gap-3">
+                    {allowedSports.map((s) => (
+                      <label
+                        key={s}
+                        className="flex items-center gap-2 bg-dark-900/30 border border-dark-700 rounded-xl px-3 py-2 cursor-pointer hover:border-primary/40 transition-colors"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={Array.isArray(formData.sport) ? formData.sport.includes(s) : false}
+                          onChange={(e) => handleSportToggle(s, e.target.checked)}
+                          className="accent-primary"
+                        />
+                        <span className="text-sm text-white/90">{s}</span>
+                      </label>
+                    ))}
+                  </div>
                 </div>
               </div>
 
@@ -198,6 +287,88 @@ const EditRegistration = () => {
                 </button>
               </div>
             </form>
+
+            <div className="mt-8 pt-6 border-t border-dark-700">
+              <h2 className="text-xl font-bold text-white mb-4">Upload Documents</h2>
+              <form onSubmit={handleUploadDocuments} className="space-y-4">
+                <div className="grid grid-cols-1 gap-4">
+                  <div>
+                    <label className="block text-gray-300 font-medium mb-2" htmlFor="birthCertificate">
+                      Birth Certificate (PDF/JPG/PNG)
+                    </label>
+                    <input
+                      type="file"
+                      id="birthCertificate"
+                      name="birthCertificate"
+                      accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"
+                      onChange={handleFileChange}
+                      disabled={uploadingDocs}
+                      className="w-full bg-dark-900 border border-dark-700 text-white rounded-xl px-4 py-3"
+                    />
+                    {formData.birthCertificate && (
+                      <a
+                        href={formData.birthCertificate}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-primary text-sm hover:underline block mt-2"
+                      >
+                        View existing
+                      </a>
+                    )}
+                  </div>
+
+                  <div>
+                    <label className="block text-gray-300 font-medium mb-2" htmlFor="aadharCard">
+                      Aadhar Card (PDF/JPG/PNG)
+                    </label>
+                    <input
+                      type="file"
+                      id="aadharCard"
+                      name="aadharCard"
+                      accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"
+                      onChange={handleFileChange}
+                      disabled={uploadingDocs}
+                      className="w-full bg-dark-900 border border-dark-700 text-white rounded-xl px-4 py-3"
+                    />
+                    {formData.aadharCard && (
+                      <a
+                        href={formData.aadharCard}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-primary text-sm hover:underline block mt-2"
+                      >
+                        View existing
+                      </a>
+                    )}
+                  </div>
+
+                  <div>
+                    <label className="block text-gray-300 font-medium mb-2" htmlFor="afiId">
+                      AFI ID
+                    </label>
+                    <input
+                      type="text"
+                      id="afiId"
+                      name="afiId"
+                      value={docs.afiId}
+                      onChange={handleAfiIdChange}
+                      required
+                      disabled={uploadingDocs}
+                      className="w-full bg-dark-900 border border-dark-700 text-white rounded-xl px-4 py-3"
+                      placeholder="Enter your AFI ID"
+                    />
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={uploadingDocs}
+                  className="w-full btn-primary flex justify-center items-center disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {uploadingDocs ? 'Uploading...' : 'Upload Documents'}
+                </button>
+              </form>
+            </div>
           </motion.div>
         )}
       </div>
