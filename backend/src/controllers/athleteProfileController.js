@@ -1,4 +1,4 @@
-const User = require('../models/User');
+const User = require('../models/user.model');
 const { uploadBufferToCloudinary } = require('../services/cloudinaryUpload');
 
 // @desc  Athlete updates their own profile image

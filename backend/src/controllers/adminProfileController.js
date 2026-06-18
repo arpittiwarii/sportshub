@@ -1,4 +1,4 @@
-const User = require('../models/User');
+const User = require('../models/user.model');
 const cloudinary = require('../config/cloudinary');
 const { PassThrough } = require('stream');
 

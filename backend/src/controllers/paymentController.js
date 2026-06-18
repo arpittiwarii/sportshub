@@ -1,5 +1,5 @@
-const Payment = require('../models/Payment');
-const User = require('../models/User');
+const Payment = require('../models/payment.model');
+const User = require('../models/user.model');
 const { uploadBufferToCloudinary } = require('../services/cloudinaryUpload');
 
 // @desc    Get all payments (Admin)
@@ -34,7 +34,7 @@ const getMyPayments = async (req, res) => {
 const generateMonthlyPayments = async (req, res) => {
   try {
     const { month, year, amount } = req.body;
-    
+
     if (!month || !year || !amount) {
       return res.status(400).json({ message: 'Month, year, and amount are required' });
     }

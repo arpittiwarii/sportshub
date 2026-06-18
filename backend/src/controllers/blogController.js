@@ -1,4 +1,4 @@
-const Blog = require('../models/Blog');
+const Blog = require('../models/blog.model');
 
 // @desc   Get all blogs
 // @route  GET /api/blogs
