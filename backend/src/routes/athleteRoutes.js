@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
 const {
-  createAthlete,
   getAllAthletes,
   getAthleteById,
   updateAthlete,
@@ -10,19 +9,11 @@ const {
 } = require('../controllers/athleteController');
 const { protect, restrictTo } = require('../middleware/authMiddleware');
 const { upload } = require('../middleware/studentDocsUpload');
-const { uploadStudentDocuments } = require('../controllers/studentDocumentController');
+const { uploadStudentDocumentsController } = require('../controllers/studentDocumentController');
 const { upload: profileImageUpload } = require('../middleware/profileImageUpload');
-const { updateAthleteProfileImage } = require('../controllers/athleteProfileController');
+const { updateAthleteProfileImageController } = require('../controllers/athleteProfileController');
 
-// Public route for registering
-router.post(
-  '/',
-  upload.fields([
-    { name: 'aadharCard', maxCount: 1 },
-    { name: 'birthCertificate', maxCount: 1 },
-  ]),
-  createAthlete
-);
+
 
 // Protected routes for Athlete & Admin to view/update profile
 router.get('/:id', protect, getAthleteById);
@@ -32,26 +23,26 @@ router.put('/:id', protect, updateAthlete);
 router.put(
   '/:id/profile-image',
   protect,
-  restrictTo('athlete'),
+  restrictTo('ATHLETE'),
   profileImageUpload.single('profileImage'),
-  updateAthleteProfileImage
+  updateAthleteProfileImageController
 );
 
 // Upload athlete documents (Cloudinary-backed)
 router.put(
   '/:id/documents',
   protect,
-  restrictTo('athlete'),
+  restrictTo('ATHLETE'),
   upload.fields([
     { name: 'birthCertificate', maxCount: 1 },
     { name: 'aadharCard', maxCount: 1 },
   ]),
-  uploadStudentDocuments
+  uploadStudentDocumentsController
 );
 
 // Protected routes for Admin only
-router.get('/', protect, restrictTo('admin'), getAllAthletes);
-router.delete('/:id', protect, restrictTo('admin'), deleteAthlete);
-router.put('/:id/status', protect, restrictTo('admin'), updateAthleteStatus);
-
+router.get('/', protect, restrictTo('ADMIN'), getAllAthletes);
+router.delete('/:id', protect, restrictTo('ADMIN'), deleteAthlete);
+// router.put('/:id/status', protect, restrictTo('admin'), updateAthleteStatus);
+router.put('/:id/status', updateAthleteStatus);
 module.exports = router;

@@ -14,6 +14,9 @@ const Blogs = () => {
   const [blogs, setBlogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [admin, setAdmin] = useState({})
+  let userStr;
+  // let user;
   const emptyForm = {
     id: null,
     title: '',
@@ -21,9 +24,10 @@ const Blogs = () => {
   };
   const fetchUser = () => {
     try {
-      const userStr = localStorage.getItem('user');
-      const user = userStr ? JSON.parse(userStr) : null;
-      setIsAdmin(user?.role === 'admin'); 
+       userStr = localStorage.getItem('user');
+       const user = userStr ? JSON.parse(userStr) : null;
+       setAdmin(user)
+      setIsAdmin(user?.role === 'ADMIN');
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to load user.');
     }
@@ -35,7 +39,8 @@ const Blogs = () => {
     const fetchBlogs = async () => {
       try {
         const res = await api.get('/blogs');
-        setBlogs(res.data || []);
+        const blogData = res.data?.data || res.data;
+        setBlogs(blogData || []);
       } catch (error) {
         toast.error(error.response?.data?.message || 'Failed to load blogs.');
       } finally {
@@ -45,7 +50,7 @@ const Blogs = () => {
     fetchUser()
 
     fetchBlogs();
-  }, []);
+  }, [blogs]);
 
   if (loading) {
     return <div className="min-h-screen pt-24 bg-dark-900 text-center text-gray-400">Loading blogs...</div>;
@@ -53,7 +58,6 @@ const Blogs = () => {
 
   const handleCreateOrUpdate = async (e) => {
     e.preventDefault();
-
     const title = form.title?.trim();
     const content = form.content?.trim();
     if (!title || !content) {
@@ -65,14 +69,17 @@ const Blogs = () => {
     try {
       if (form.id) {
         const res = await api.put(`/blogs/${form.id}`, { title, content });
+        const updatedBlog = res.data?.data || res.data;
         toast.success('Blog updated successfully!');
         setForm(emptyForm);
-        setBlogs((prev) => prev.map((b) => (b._id === res.data._id ? res.data : b)));
+        setBlogs((prev) => prev.map((b) => (b._id === updatedBlog._id ? updatedBlog : b)));
       } else {
-        const res = await api.post('/blogs', { title, content });
+
+        const res = await api.post('/blogs', { title, content, userId:admin.id });
+        const createdBlog = res.data?.data || res.data;
         toast.success('Blog created successfully!');
         setForm(emptyForm);
-        setBlogs((prev) => [res.data, ...prev]);
+        setBlogs((prev) => [createdBlog, ...prev]);
       }
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to save blog.');
@@ -83,7 +90,7 @@ const Blogs = () => {
 
   const handleEdit = (blog) => {
     setForm({
-      id: blog._id,
+      id: blog.id,
       title: blog.title || '',
       content: blog.content || '',
     });
@@ -183,56 +190,56 @@ const Blogs = () => {
           </div>
         ) : (
           <div>
-          <h2 className="text-xl font-bold text-white mb-4">Existing Posts</h2>
-          {loading ? (
-            <div className="text-center text-gray-400 py-10">Loading...</div>
-          ) : blogs.length === 0 ? (
-            <div className="text-center text-gray-400 py-10 border border-dark-700 rounded-2xl bg-dark-800/30">
-              No blogs yet.
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {blogs.map((blog) => (
-                <motion.div
-                  key={blog._id}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.25 }}
-                  className="bg-dark-800/30 border border-dark-700 hover:border-primary/40 rounded-2xl p-6 shadow-xl"
-                >
-                  <div className="flex items-start justify-between gap-4">
-                    <h3 className="text-lg font-bold text-white truncate">{blog.title}</h3>
-                    {isAdmin && (<div className="flex items-center gap-2">
-                      <button
-                        type="button"
-                        onClick={() => handleEdit(blog)}
-                        className="px-3 py-2 rounded-lg bg-primary/10 hover:bg-primary/15 text-primary border border-primary/30 transition-colors"
-                      >
-                        <FiEdit2 />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleDelete(blog._id)}
-                        className="px-3 py-2 rounded-lg bg-red-500/10 hover:bg-red-500/15 text-red-300 border border-red-500/30 transition-colors"
-                      >
-                        <FiTrash2 />
-                      </button>
-                    </div>)
-                    }
-                  </div>
+            <h2 className="text-xl font-bold text-white mb-4">Existing Posts</h2>
+            {loading ? (
+              <div className="text-center text-gray-400 py-10">Loading...</div>
+            ) : blogs.length === 0 ? (
+              <div className="text-center text-gray-400 py-10 border border-dark-700 rounded-2xl bg-dark-800/30">
+                No blogs yet.
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {blogs.map((blog) => (
+                  <motion.div
+                    key={blog._id}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.25 }}
+                    className="bg-dark-800/30 border border-dark-700 hover:border-primary/40 rounded-2xl p-6 shadow-xl"
+                  >
+                    <div className="flex items-start justify-between gap-4">
+                      <h3 className="text-lg font-bold text-white truncate">{blog.title}</h3>
+                      {isAdmin && (<div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => handleEdit(blog)}
+                          className="px-3 py-2 rounded-lg bg-primary/10 hover:bg-primary/15 text-primary border border-primary/30 transition-colors"
+                        >
+                          <FiEdit2 />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDelete(blog.id)}
+                          className="px-3 py-2 rounded-lg bg-red-500/10 hover:bg-red-500/15 text-red-300 border border-red-500/30 transition-colors"
+                        >
+                          <FiTrash2 />
+                        </button>
+                      </div>)
+                      }
+                    </div>
 
-                  <p className="text-gray-400 text-sm mt-3 leading-relaxed">
-                    {blog.content?.slice(0, 160) ? `${blog.content.slice(0, 160)}...` : blog.content}
-                  </p>
+                    <p className="text-gray-400 text-sm mt-3 leading-relaxed">
+                      {blog.content?.slice(0, 160) ? `${blog.content.slice(0, 160)}...` : blog.content}
+                    </p>
 
-                  <p className="text-gray-500 text-xs mt-4">
-                    {blog.createdAt ? new Date(blog.createdAt).toLocaleDateString() : '—'}
-                  </p>
-                </motion.div>
-              ))}
-            </div>
-          )}
-        </div>
+                    <p className="text-gray-500 text-xs mt-4">
+                      {blog.createdAt ? new Date(blog.createdAt).toLocaleDateString() : '—'}
+                    </p>
+                  </motion.div>
+                ))}
+              </div>
+            )}
+          </div>
         )}
       </div>
     </div>

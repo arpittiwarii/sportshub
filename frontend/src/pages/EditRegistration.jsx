@@ -30,7 +30,7 @@ const EditRegistration = () => {
   const navigate = useNavigate();
 
   const userStr = localStorage.getItem('user');
-  const userId = userStr ? JSON.parse(userStr)._id : null;
+  const userId = userStr ? JSON.parse(userStr).id : null;
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -38,16 +38,17 @@ const EditRegistration = () => {
         navigate('/login');
         return;
       }
-      
+
       setLoading(true);
       try {
-        const res = await api.get(`/athletes/${userId}`);
-        const rawSport = res.data?.sport;
+        const res = await api.get(`/athlete/${userId}`);
+        const athleteData = res.data?.data || res.data;
+        const rawSport = athleteData?.sport;
         const sportValue = Array.isArray(rawSport) ? rawSport[0] : rawSport;
         const normalizedSport =
           typeof sportValue === 'string' && allowedSports.includes(sportValue) ? sportValue : 'Other';
-        setFormData({ ...res.data, sport: normalizedSport });
-        setDocs((prev) => ({ ...prev, afiId: res.data?.afiId || '' }));
+        setFormData({ ...athleteData, sport: normalizedSport });
+        setDocs((prev) => ({ ...prev, afiId: athleteData?.afiId || '' }));
       } catch (error) {
         toast.error('Failed to load profile. Please try again.');
         navigate('/dashboard');
@@ -72,17 +73,17 @@ const EditRegistration = () => {
     setStatus({ type: '', message: '' });
 
     try {
-      await api.put(`/athletes/${userId}`, formData);
-      setStatus({ 
-        type: 'success', 
+      await api.put(`/athlete/${userId}`, formData);
+      setStatus({
+        type: 'success',
         message: 'Profile updated successfully!'
       });
       toast.success('Profile updated successfully!');
       setTimeout(() => navigate('/dashboard'), 1500);
     } catch (error) {
-      setStatus({ 
-        type: 'error', 
-        message: error.response?.data?.message || 'Update failed. Please try again.' 
+      setStatus({
+        type: 'error',
+        message: error.response?.data?.message || 'Update failed. Please try again.'
       });
       toast.error('Failed to update profile.');
     } finally {
@@ -140,12 +141,13 @@ const EditRegistration = () => {
       if (docs.aadharCard) payload.append('aadharCard', docs.aadharCard);
       payload.append('afiId', docs.afiId);
 
-      const res = await api.put(`/athletes/${userId}/documents`, payload, {
+      const res = await api.put(`/athlete/${userId}/documents`, payload, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
 
-      setFormData(res.data);
-      setDocs({ birthCertificate: null, aadharCard: null, afiId: res.data?.afiId || '' });
+      const uploadedData = res.data?.data || res.data;
+      setFormData(uploadedData);
+      setDocs({ birthCertificate: null, aadharCard: null, afiId: uploadedData?.afiId || '' });
       toast.success('Documents uploaded successfully!');
     } catch (error) {
       toast.error(error.response?.data?.message || 'Document upload failed.');
@@ -161,16 +163,16 @@ const EditRegistration = () => {
   return (
     <div className="min-h-screen pt-24 pb-16 bg-dark-900 relative">
       <div className="absolute top-0 right-0 w-1/3 h-full bg-primary/5 blur-3xl rounded-full"></div>
-      
+
       <div className="container mx-auto px-6 max-w-2xl relative z-10">
-        <button 
+        <button
           onClick={() => navigate('/dashboard')}
           className="flex items-center gap-2 text-gray-400 hover:text-primary mb-8 transition-colors"
         >
           <FiArrowLeft /> Back to Dashboard
         </button>
 
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="text-center mb-10"
@@ -181,7 +183,7 @@ const EditRegistration = () => {
         </motion.div>
 
         {formData && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             className="glass-panel p-8 md:p-10"
@@ -196,8 +198,8 @@ const EditRegistration = () => {
             <form onSubmit={handleUpdate} className="space-y-6">
               <div>
                 <label className="block text-gray-300 font-medium mb-2" htmlFor="name">Full Name</label>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   id="name"
                   name="name"
                   value={formData.name}
@@ -210,8 +212,8 @@ const EditRegistration = () => {
               <div className="grid grid-cols-2 gap-6">
                 <div>
                   <label className="block text-gray-300 font-medium mb-2" htmlFor="age">Age</label>
-                  <input 
-                    type="number" 
+                  <input
+                    type="number"
                     id="age"
                     name="age"
                     value={formData.age}
@@ -246,8 +248,8 @@ const EditRegistration = () => {
 
               <div>
                 <label className="block text-gray-300 font-medium mb-2" htmlFor="contact">Contact Number</label>
-                <input 
-                  type="tel" 
+                <input
+                  type="tel"
                   id="contact"
                   name="contact"
                   value={formData.contact}
@@ -259,8 +261,8 @@ const EditRegistration = () => {
 
               <div>
                 <label className="block text-gray-300 font-medium mb-2" htmlFor="email">Email</label>
-                <input 
-                  type="email" 
+                <input
+                  type="email"
                   id="email"
                   name="email"
                   value={formData.email}
@@ -271,15 +273,15 @@ const EditRegistration = () => {
               </div>
 
               <div className="flex gap-4 pt-4">
-                <button 
-                  type="submit" 
+                <button
+                  type="submit"
                   disabled={saving}
                   className="flex-1 btn-primary flex justify-center items-center"
                 >
                   {saving ? 'Saving...' : 'Save Changes'}
                 </button>
-                <button 
-                  type="button" 
+                <button
+                  type="button"
                   onClick={() => navigate('/dashboard')}
                   className="flex-1 border border-dark-700 text-gray-300 hover:text-white hover:border-dark-600 px-6 py-3 rounded-xl transition-colors font-medium"
                 >

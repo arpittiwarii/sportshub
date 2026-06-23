@@ -17,7 +17,7 @@ const AdminProfile = () => {
       setLoading(true);
       try {
         const res = await api.get('/admin/profile');
-        setProfile(res.data);
+        setProfile(res.data?.data || res.data);
       } catch (error) {
         toast.error(error.response?.data?.message || 'Failed to load profile.');
         navigate('/admin');
@@ -46,7 +46,7 @@ const AdminProfile = () => {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
 
-      setProfile(res.data);
+      setProfile(res.data?.data || res.data);
       setFile(null);
       toast.success('Profile image updated successfully!');
     } catch (error) {

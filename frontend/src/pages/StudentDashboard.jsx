@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { FiLogOut, FiUser, FiUploadCloud, FiCheckCircle, FiClock, FiXCircle, FiEdit2, FiDollarSign, FiAlertCircle, FiX, FiTrendingUp, FiAward } from 'react-icons/fi';
 import { toast } from 'react-toastify';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion as Motion, AnimatePresence } from 'framer-motion';
+/* eslint-disable no-unused-vars */
 import DashboardCard from '../components/DashboardCard';
 
 // Animation variants
@@ -20,6 +21,9 @@ const staggerContainerVariant = {
   }
 };
 
+// Keep lowercase `motion` available for existing JSX usages
+const motion = Motion;
+
 const StudentDashboard = () => {
   const [profile, setProfile] = useState(null);
   const [payments, setPayments] = useState([]);
@@ -32,18 +36,29 @@ const StudentDashboard = () => {
   const [uploadingProfileImage, setUploadingProfileImage] = useState(false);
   const navigate = useNavigate();
 
-  const userStr = localStorage.getItem('user');
-  const userId = userStr ? JSON.parse(userStr)._id : null;
+  const userId = useMemo(() => {
+    try {
+      const user = JSON.parse(localStorage.getItem("user") || "{}");
+      return user?.id || null;
+    } catch {
+      return null;
+    }
+  }, []);
+
+  // console.log(userId)
+
+  // Redirect and initial data fetch should happen in an effect
 
   const fetchDashboardData = async () => {
     setLoading(true);
     try {
       const [profileRes, paymentsRes] = await Promise.all([
-        api.get(`/athletes/${userId}`),
-        api.get('/payments/my-payments')
+        api.get(`/athlete/${userId}`),
+        api.get('/payments/my-fees')
       ]);
-      setProfile(profileRes.data);
-      setPayments(paymentsRes.data);
+      // API uses a wrapper { success, message, data }
+      setProfile(profileRes.data?.data || profileRes.data);
+      setPayments(paymentsRes.data?.data || paymentsRes.data || []);
     } catch (error) {
       if (error.response?.status === 401) {
         handleLogout();
@@ -55,11 +70,17 @@ const StudentDashboard = () => {
     }
   };
 
+  // Run redirect and initial fetch when userId is known
   useEffect(() => {
-    if (userId) fetchDashboardData();
-    else navigate('/login');
-    // eslint-disable-next-line
+    if (!userId) {
+      navigate('/login', { replace: true });
+      return;
+    }
+
+    fetchDashboardData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userId]);
+
 
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -67,9 +88,9 @@ const StudentDashboard = () => {
     navigate('/login');
   };
 
-  const handleUploadClick = (paymentId) => {
-    setUploadModal({ isOpen: true, paymentId });
-  };
+  // const handleUploadClick = (paymentId) => {
+  //   setUploadModal({ isOpen: true, paymentId });
+  // };
 
   const handleFileChange = (e) => {
     if (e.target.files && e.target.files[0]) {
@@ -107,25 +128,28 @@ const StudentDashboard = () => {
     }
   };
 
-  const submitUpload = async (e) => {
-    e.preventDefault();
-    if (!uploadFile) return toast.warning('Please select a file to upload');
+  const applytopaid = async (paymentId) => {
+    // e.preventDefault();
+    // console.log('clicked')
+    // if (!uploadFile) return toast.warning('Please select a file to upload');
 
-    setUploading(true);
-    const paymentId = uploadModal.paymentId;
-    const formData = new FormData();
-    formData.append('screenshot', uploadFile);
+    // setUploading(true);
+    console.log(userId, paymentId)
+    const formData = {
+      userId:userId
+    }
+    // formData.append({submitedAt:new Date()})
+
+    // formData.append('screenshot', uploadFile);
 
     try {
-      await api.put(`/payments/${paymentId}/upload`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
-      toast.success('✓ Payment proof uploaded successfully!');
-      setUploadModal({ isOpen: false, paymentId: null });
-      setUploadFile(null);
+      await api.put(`/payments/${paymentId}/approve`, formData);
+      toast.success('✓ payment approval sent to admin successfully!');
+      // setUploadModal({ isOpen: false, paymentId: null });
+      // setUploadFile(null);
       fetchDashboardData();
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to upload proof.');
+      toast.error(error.response?.data?.message || 'Failed to send approval.');
     } finally {
       setUploading(false);
     }
@@ -144,11 +168,11 @@ const StudentDashboard = () => {
       const payload = new FormData();
       payload.append('profileImage', profileImageFile);
 
-      const res = await api.put(`/athletes/${userId}/profile-image`, payload, {
+      const res = await api.put(`/athlete/${userId}/profile-image`, payload, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
 
-      setProfile(res.data);
+      setProfile(res.data?.data || res.data);
       setProfileImageFile(null);
       toast.success('Profile image updated successfully!');
     } catch (error) {
@@ -157,11 +181,29 @@ const StudentDashboard = () => {
       setUploadingProfileImage(false);
     }
   };
+  // Calculate payment statistics (must be declared before any early returns)
+  const stats = useMemo(() => ({
+    total: payments.reduce(
+      (sum, p) => sum + (p.amount || 0),
+      0
+    ),
+    approved: payments.reduce(
+      (sum, p) =>
+        p.status === 'APPROVED'
+          ? sum + (p.amount || 0)
+          : sum,
+      0
+    ),
+    pending: payments.filter(
+      p => p.status === 'PENDING'
+    ).length,
+    upcoming: payments.length
+  }), [payments]);
 
   if (loading) {
     return (
       <div className="min-h-screen pt-24 bg-dark-900 flex items-center justify-center">
-        <motion.div
+        <Motion.div
           animate={{ rotate: 360 }}
           transition={{ duration: 2, repeat: Infinity }}
           className="w-12 h-12 border-3 border-primary border-t-transparent rounded-full"
@@ -171,12 +213,6 @@ const StudentDashboard = () => {
   }
 
   // Calculate payment statistics
-  const stats = {
-    total: payments.reduce((sum, p) => sum + (p.amount || 0), 0),
-    approved: payments.reduce((sum, p) => p.status === 'approved' ? sum + (p.amount || 0) : sum, 0),
-    pending: payments.filter(p => p.status === 'pending').length,
-    upcoming: payments.length
-  };
 
   return (
     <div className="min-h-screen pt-24 pb-16 bg-dark-900">
@@ -305,7 +341,7 @@ const StudentDashboard = () => {
                 <div className="pb-3 border-b border-dark-700">
                   <p className="text-gray-400 text-xs uppercase font-semibold tracking-wider mb-1">Sport</p>
                   <p className="text-primary font-semibold text-lg">
-                    {Array.isArray(profile?.sport) ? profile.sport.join(', ') : (profile?.sport || 'N/A')}
+                    {Array.isArray(profile?.sports) ? profile.sports.join(', ') : (profile?.sports || 'N/A')}
                   </p>
                 </div>
                 <div className="pb-3 border-b border-dark-700">
@@ -316,7 +352,7 @@ const StudentDashboard = () => {
                 {/* Additional Details */}
                 <div className="pb-3 border-b border-dark-700">
                   <p className="text-gray-400 text-xs uppercase font-semibold tracking-wider mb-1">School Name</p>
-                  <p className="text-white text-sm">{profile?.schoolName || 'N/A'}</p>
+                  <p className="text-white text-sm">{profile?.school || 'N/A'}</p>
                 </div>
                 <div className="pb-3">
                   <p className="text-gray-400 text-xs uppercase font-semibold tracking-wider mb-1">AFI ID</p>
@@ -342,7 +378,7 @@ const StudentDashboard = () => {
           >
             {/* Payment Instructions Card */}
             <div className="bg-gradient-to-br from-dark-800 to-dark-900 border border-dark-700 hover:border-primary/40 rounded-2xl p-8 shadow-xl">
-              
+
               <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
                 <FiDollarSign className="text-primary" /> Payment Instructions
               </h2>
@@ -400,12 +436,12 @@ const StudentDashboard = () => {
         </div>
 
         {/* Payment History Section */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.2 }}
-        className="bg-gradient-to-br from-dark-800 to-dark-900 border border-dark-700 rounded-2xl p-8 shadow-xl hover:shadow-2xl transition-all duration-300"
-      >
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="bg-gradient-to-br from-dark-800 to-dark-900 border border-dark-700 rounded-2xl p-8 shadow-xl hover:shadow-2xl transition-all duration-300"
+        >
           <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
             <FiClock className="text-primary" />
             Fee Status & Payment History
@@ -427,7 +463,7 @@ const StudentDashboard = () => {
               variants={staggerContainerVariant}
               className="space-y-4"
             >
-              {payments.map((payment, idx) => (
+              {payments.map((payment) => (
                 <motion.div
                   key={payment._id}
                   variants={fadeUpVariant}
@@ -449,7 +485,7 @@ const StudentDashboard = () => {
 
                     {/* Middle - Status Badge */}
                     <div className="flex gap-2 items-center">
-                      {payment.status === 'approved' && (
+                      {payment.status === 'APPROVED' && (
                         <motion.div
                           initial={{ scale: 0.8 }}
                           animate={{ scale: 1 }}
@@ -459,55 +495,38 @@ const StudentDashboard = () => {
                           <span className="text-green-400 font-semibold text-sm">Paid</span>
                         </motion.div>
                       )}
-                      {payment.status === 'rejected' && (
+                      {payment.status === 'REJECTED' && (
                         <div className="flex items-center gap-2 px-4 py-2 bg-red-500/15 border border-red-500/40 rounded-lg">
                           <FiXCircle className="text-red-400" />
                           <span className="text-red-400 font-semibold text-sm">Rejected</span>
                         </div>
                       )}
-                      {payment.status === 'pending' && payment.screenshot && (
+                      {!payment.status === 'APPROVED' && payment.submittedAt && (
                         <div className="flex items-center gap-2 px-4 py-2 bg-primary/15 border border-primary/40 rounded-lg">
                           <FiClock className="text-primary" />
                           <span className="text-primary font-semibold text-sm">In Review</span>
                         </div>
-                       
+
                       )}
-                      {payment.status === 'pending' && !payment.screenshot && (
+                      {/* {payment.status === 'pending' && !payment.screenshot && (
                         <div className="flex items-center gap-2 px-4 py-2 bg-gray-500/15 border border-gray-500/40 rounded-lg">
                           <FiAlertCircle className="text-gray-400" />
                           <span className="text-gray-400 font-semibold text-sm">Awaiting Proof</span>
                         </div>
-                      )}
+                      )} */}
                     </div>
 
                     {/* Right Side - Actions */}
-                    <div className="flex gap-2">
-                      {payment.status === 'approved' && (
-                        <div className="text-sm text-green-400 font-semibold">
-                          ✓ {new Date(payment.verifiedAt).toLocaleDateString()}
-                        </div>
-                      )}
-                      {payment.status !== 'approved' && (
-                        <>
-                          {payment.screenshot && (
-                            <a
-                              href={payment.screenshot.startsWith('http') ? payment.screenshot : `https://sportshub-backend-mzth.onrender.com${payment.screenshot}`}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="px-4 py-2 text-sm rounded-lg bg-dark-700 hover:bg-dark-600 text-gray-300 border border-dark-600 transition-all flex items-center gap-2"
-                            >
-                              📸 View
-                            </a>
-                          )}
-                          <button
-                            onClick={() => handleUploadClick(payment._id)}
-                            className="px-4 py-2 text-sm rounded-lg bg-primary hover:brightness-110 text-black font-semibold transition-all flex items-center gap-2 shadow-lg shadow-primary/50"
-                          >
-                            <FiUploadCloud /> {payment.screenshot ? 'Update' : 'Upload'}
-                          </button>
-                        </>
-                      )}
-                    </div>
+                    <div className="flex gap-2 mt-6 pt-4 border-t border-dark-700">
+                  {!payment.status??
+                    <button
+                    onClick={()=>applytopaid(payment.id)}
+                    className="flex-1 btn-primary py-2 px-3 text-sm font-semibold shadow-none"
+                  >
+                    Apply to paid
+                  </button>
+                  }
+                </div>
                   </div>
                 </motion.div>
               ))}
@@ -515,144 +534,144 @@ const StudentDashboard = () => {
           )}
         </motion.div>
 
-      {/* Upload Modal */}
-      <AnimatePresence>
-        {uploadModal.isOpen && (
-          <>
-            {/* Backdrop */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setUploadModal({ isOpen: false, paymentId: null })}
-              className="fixed inset-0 bg-black/70 backdrop-blur-md z-40"
-            />
+        {/* Upload Modal */}
+        <AnimatePresence>
+          {uploadModal.isOpen && (
+            <>
+              {/* Backdrop */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => setUploadModal({ isOpen: false, paymentId: null })}
+                className="fixed inset-0 bg-black/70 backdrop-blur-md z-40"
+              />
 
-            {/* Modal */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-              className="fixed inset-4 sm:inset-8 top-auto max-w-sm mx-auto z-50 max-h-[calc(100vh-2rem)] overflow-y-auto"
-            >
-              <div className="bg-dark-900 p-4 rounded-2xl border-2 border-primary shadow-2xl">
-                {/* Header */}
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-2xl font-bold text-white">Upload Payment Proof</h2>
-                  <button
-                    onClick={() => setUploadModal({ isOpen: false, paymentId: null })}
-                    className="text-gray-400 hover:text-white transition-colors p-2 rounded-lg hover:bg-dark-700"
-                  >
-                    <FiX className="w-6 h-6" />
-                  </button>
-                </div>
+              {/* Modal */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+                className="fixed inset-4 sm:inset-8 top-auto max-w-sm mx-auto z-50 max-h-[calc(100vh-2rem)] overflow-y-auto"
+              >
+                <div className="bg-dark-900 p-4 rounded-2xl border-2 border-primary shadow-2xl">
+                  {/* Header */}
+                  <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-2xl font-bold text-white">Upload Payment Proof</h2>
+                    <button
+                      onClick={() => setUploadModal({ isOpen: false, paymentId: null })}
+                      className="text-gray-400 hover:text-white transition-colors p-2 rounded-lg hover:bg-dark-700"
+                    >
+                      <FiX className="w-6 h-6" />
+                    </button>
+                  </div>
 
-                {/* Form */}
-                <form onSubmit={submitUpload} className="space-y-3">
-                  {/* File Upload Area */}
-                  <div
-                    onDragEnter={handleDrag}
-                    onDragLeave={handleDrag}
-                    onDragOver={handleDrag}
-                    onDrop={handleDrop}
-                    className={`
+                  {/* Form */}
+                  <form onSubmit={submitUpload} className="space-y-3">
+                    {/* File Upload Area */}
+                    <div
+                      onDragEnter={handleDrag}
+                      onDragLeave={handleDrag}
+                      onDragOver={handleDrag}
+                      onDrop={handleDrop}
+                      className={`
                         relative border-3 border-dashed rounded-2xl p-5 text-center cursor-pointer
                         transition-all duration-300
                         ${dragActive
-                        ? 'border-primary bg-primary/20 scale-105'
-                        : 'border-primary/50 bg-primary/5 hover:border-primary hover:bg-primary/10'
-                      }
+                          ? 'border-primary bg-primary/20 scale-105'
+                          : 'border-primary/50 bg-primary/5 hover:border-primary hover:bg-primary/10'
+                        }
                       `}
-                  >
-                    <input
-                      type="file"
-                      id="file-upload"
-                      accept="image/*"
-                      onChange={handleFileChange}
-                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                      disabled={uploading}
-                    />
+                    >
+                      <input
+                        type="file"
+                        id="file-upload"
+                        accept="image/*"
+                        onChange={handleFileChange}
+                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                        disabled={uploading}
+                      />
 
-                    <div className="space-y-1">
-                      <div className="flex justify-center">
-                        <div className="bg-primary/30 p-2 rounded-full">
-                          <FiUploadCloud className="w-7 h-7 text-primary" />
+                      <div className="space-y-1">
+                        <div className="flex justify-center">
+                          <div className="bg-primary/30 p-2 rounded-full">
+                            <FiUploadCloud className="w-7 h-7 text-primary" />
+                          </div>
+                        </div>
+                        <div>
+                          <p className="text-white font-bold text-sm">
+                            {uploadFile ? uploadFile.name : 'Drag image or click to select'}
+                          </p>
+                          <p className="text-gray-300 text-xs mt-1">
+                            {uploadFile ? `${(uploadFile.size / 1024).toFixed(2)} KB` : 'JPG, PNG up to 5MB'}
+                          </p>
                         </div>
                       </div>
-                      <div>
-                        <p className="text-white font-bold text-sm">
-                          {uploadFile ? uploadFile.name : 'Drag image or click to select'}
-                        </p>
-                        <p className="text-gray-300 text-xs mt-1">
-                          {uploadFile ? `${(uploadFile.size / 1024).toFixed(2)} KB` : 'JPG, PNG up to 5MB'}
-                        </p>
-                      </div>
                     </div>
-                  </div>
 
-                  {/* File Preview */}
-                  {uploadFile && (
-                    <motion.div
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: 'auto' }}
-                      exit={{ opacity: 0, height: 0 }}
-                      className="rounded-xl overflow-hidden bg-dark-800 p-3 border border-primary/30"
-                    >
-                      <img
-                        src={URL.createObjectURL(uploadFile)}
-                        alt="Preview"
-                        className="w-full h-32 object-cover rounded-lg"
-                      />
-                    </motion.div>
-                  )}
+                    {/* File Preview */}
+                    {uploadFile && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        className="rounded-xl overflow-hidden bg-dark-800 p-3 border border-primary/30"
+                      >
+                        <img
+                          src={URL.createObjectURL(uploadFile)}
+                          alt="Preview"
+                          className="w-full h-32 object-cover rounded-lg"
+                        />
+                      </motion.div>
+                    )}
 
-                  {/* Info */}
-                  <div className="flex gap-2 bg-blue-500/15 border-2 border-blue-500/50 rounded-lg p-2">
-                    <FiAlertCircle className="w-4 h-4 text-blue-400 flex-shrink-0 mt-0.5" />
-                    <p className="text-xs text-blue-200 font-medium leading-tight">
-                      Upload screenshot showing payment amount and transaction ID from your UPI/PhonePe app
-                    </p>
-                  </div>
+                    {/* Info */}
+                    <div className="flex gap-2 bg-blue-500/15 border-2 border-blue-500/50 rounded-lg p-2">
+                      <FiAlertCircle className="w-4 h-4 text-blue-400 flex-shrink-0 mt-0.5" />
+                      <p className="text-xs text-blue-200 font-medium leading-tight">
+                        Upload screenshot showing payment amount and transaction ID from your UPI/PhonePe app
+                      </p>
+                    </div>
 
-                  {/* Buttons */}
-                  <div className="flex gap-2 pt-2 pb-1">
-                    <button
-                      type="button"
-                      onClick={() => setUploadModal({ isOpen: false, paymentId: null })}
-                      disabled={uploading}
-                      className="flex-1 px-3 py-2 bg-dark-700 text-gray-200 rounded-lg hover:bg-dark-600 transition-colors font-semibold disabled:opacity-50 text-xs border border-dark-600"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="submit"
-                      disabled={!uploadFile || uploading}
-                      className="flex-1 px-3 py-2 btn-primary rounded-lg font-semibold disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1 text-xs"
-                    >
-                      {uploading ? (
-                        <>
-                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                          Uploading...
-                        </>
-                      ) : (
-                        <>
-                          <FiUploadCloud className="w-4 h-4" />
-                          Upload Proof
-                        </>
-                      )}
-                    </button>
-                  </div>
-                </form>
-              </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
+                    {/* Buttons */}
+                    <div className="flex gap-2 pt-2 pb-1">
+                      <button
+                        type="button"
+                        onClick={() => setUploadModal({ isOpen: false, paymentId: null })}
+                        disabled={uploading}
+                        className="flex-1 px-3 py-2 bg-dark-700 text-gray-200 rounded-lg hover:bg-dark-600 transition-colors font-semibold disabled:opacity-50 text-xs border border-dark-600"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        disabled={!uploadFile || uploading}
+                        className="flex-1 px-3 py-2 btn-primary rounded-lg font-semibold disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1 text-xs"
+                      >
+                        {uploading ? (
+                          <>
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                            Uploading...
+                          </>
+                        ) : (
+                          <>
+                            <FiUploadCloud className="w-4 h-4" />
+                            Upload Proof
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>
 
       </div>
     </div>
-    
+
   );
 };
 

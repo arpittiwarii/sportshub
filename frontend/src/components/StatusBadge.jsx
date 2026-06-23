@@ -2,21 +2,21 @@ import { FiCheckCircle, FiClock, FiXCircle } from 'react-icons/fi';
 
 const StatusBadge = ({ status }) => {
   const statusConfig = {
-    approved: {
+    APPROVED: {
       icon: FiCheckCircle,
       bg: 'bg-accent-green/10',
       border: 'border-accent-green/30',
       text: 'text-accent-green',
       label: 'Approved'
     },
-    pending: {
+    PENDING: {
       icon: FiClock,
       bg: 'bg-primary/10',
       border: 'border-primary/30',
       text: 'text-primary',
       label: 'Pending'
     },
-    rejected: {
+    REJECTED: {
       icon: FiXCircle,
       bg: 'bg-accent-red/10',
       border: 'border-accent-red/30',
@@ -25,7 +25,7 @@ const StatusBadge = ({ status }) => {
     }
   };
 
-  const config = statusConfig[status] || statusConfig.pending;
+  const config = statusConfig[status] || statusConfig.PENDING;
   const Icon = config.icon;
 
   return (

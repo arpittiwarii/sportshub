@@ -1,0 +1,887 @@
+{
+    "info": {
+        "name": "SportsHub API",
+        "description": "Complete API collection for SportsHub backend\n\n**Environment Variables Required:**\n- `baseUrl`: Base URL of the API (e.g., http://localhost:8000/api)\n- `token`: JWT Bearer token from login response",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+        "_exporter_id": "sportshub_2026"
+    },
+    "item": [
+        {
+            "name": "Authentication",
+            "description": "User authentication endpoints (public)",
+            "item": [
+                {
+                    "name": "Register",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code === 201) {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    if (jsonData.data && jsonData.data.token) {",
+                                    "        pm.environment.set('token', jsonData.data.token);",
+                                    "    }",
+                                    "}"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"John Athlete\",\n  \"email\": \"john.athlete@example.com\",\n  \"password\": \"SecurePassword123!\",\n  \"age\": 22,\n  \"sports\": \"Cricket\",\n  \"contact\": \"9876543210\",\n  \"school\": \"Central School\",\n  \"afiId\": \"AFI12345\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/auth/register",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "register"
+                            ]
+                        },
+                        "description": "Register a new athlete account. All fields are required."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Login",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code === 201) {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    if (jsonData.data && jsonData.data.accessToken) {",
+                                    "        pm.environment.set('token', jsonData.data.accessToken);",
+                                    "    }",
+                                    "}"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"email\": \"admin@sportshub.com\",\n  \"password\": \"password123\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/auth/login",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "login"
+                            ]
+                        },
+                        "description": "Login with email and password. Returns JWT token which can be stored in the 'token' environment variable. Default admin credentials: admin@sportshub.com / password123"
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Athletes",
+            "description": "Athlete profile management and admin athlete operations",
+            "item": [
+                {
+                    "name": "Get All Athletes",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/athlete",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "athlete"
+                            ]
+                        },
+                        "description": "Get list of all athletes. Admin only endpoint. Returns array of athlete profiles."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Athlete by ID",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/athlete/1",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "athlete",
+                                "1"
+                            ]
+                        },
+                        "description": "Get a specific athlete profile by ID. Protected route. Users can view their own profile."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update Athlete Profile",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"John Athlete Updated\",\n  \"age\": 23,\n  \"sports\": \"Cricket\",\n  \"contact\": \"9876543210\",\n  \"school\": \"Central School\",\n  \"afiId\": \"AFI12345\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/athlete/1",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "athlete",
+                                "1"
+                            ]
+                        },
+                        "description": "Update athlete profile information. Protected route. Athletes can update their own profile."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update Athlete Profile Image",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [
+                                {
+                                    "key": "profileImage",
+                                    "type": "file",
+                                    "src": []
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/athlete/1/profile-image",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "athlete",
+                                "1",
+                                "profile-image"
+                            ]
+                        },
+                        "description": "Upload or update athlete profile image. Protected route. Athlete only. Accepts image files (JPG, PNG)."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Upload Student Documents",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [
+                                {
+                                    "key": "birthCertificate",
+                                    "type": "file",
+                                    "src": []
+                                },
+                                {
+                                    "key": "aadharCard",
+                                    "type": "file",
+                                    "src": []
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/athlete/1/documents",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "athlete",
+                                "1",
+                                "documents"
+                            ]
+                        },
+                        "description": "Upload athlete documents (Birth Certificate and Aadhar Card). Protected route. Athlete only. Files are uploaded to Cloudinary."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update Athlete Status",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"status\": \"APPROVED\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/athlete/1/status",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "athlete",
+                                "1",
+                                "status"
+                            ]
+                        },
+                        "description": "Update athlete approval status (PENDING, APPROVED, REJECT). Admin only endpoint. Used for approving or rejecting athlete registrations."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Delete Athlete",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/athlete/1",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "athlete",
+                                "1"
+                            ]
+                        },
+                        "description": "Delete an athlete profile. Admin only endpoint. Soft delete (paranoid)."
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Admin",
+            "description": "Admin-specific operations and profile management",
+            "item": [
+                {
+                    "name": "Get Admin Profile",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/admin/profile",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "admin",
+                                "profile"
+                            ]
+                        },
+                        "description": "Get current admin profile information. Admin only endpoint."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update Admin Profile",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [
+                                {
+                                    "key": "profileImage",
+                                    "type": "file",
+                                    "src": []
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/admin/profile",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "admin",
+                                "profile"
+                            ]
+                        },
+                        "description": "Update admin profile with new image. Admin only endpoint. Accepts image files (JPG, PNG)."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update Student Profile Image (Admin)",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [
+                                {
+                                    "key": "profileImage",
+                                    "type": "file",
+                                    "src": []
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/admin/students/1/profile-image",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "admin",
+                                "students",
+                                "1",
+                                "profile-image"
+                            ]
+                        },
+                        "description": "Admin can update a student's profile image on their behalf. Admin only endpoint."
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Payments",
+            "description": "Fee management and payment verification",
+            "item": [
+                {
+                    "name": "Get My Fees",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/payments/my-fees",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "payments",
+                                "my-fees"
+                            ]
+                        },
+                        "description": "Get list of fees for the current athlete. Protected route. Returns all fees with their current status (PENDING, APPROVED, REJECT)."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get All Fees",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/payments",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "payments"
+                            ]
+                        },
+                        "description": "Get all fees for all athletes. Admin only endpoint. Returns array of all fees with athlete information."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Generate Monthly Fees",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"amount\": 5000,\n  \"month\": \"June\",\n  \"year\": 2026\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/payments/generate",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "payments",
+                                "generate"
+                            ]
+                        },
+                        "description": "Generate monthly fees for all approved athletes. Admin only endpoint. Creates fee records for billing."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Upload Fee Proof",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [
+                                {
+                                    "key": "screenshot",
+                                    "type": "file",
+                                    "src": []
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/payments/1/upload",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "payments",
+                                "1",
+                                "upload"
+                            ]
+                        },
+                        "description": "Upload payment proof (screenshot of transaction). Athlete only endpoint. Accepts JPG/PNG files (max 5MB). File is uploaded to Cloudinary."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Verify Fee",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"status\": \"APPROVED\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/payments/1/verify",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "payments",
+                                "1",
+                                "verify"
+                            ]
+                        },
+                        "description": "Verify/approve fee payment. Admin only endpoint. Status can be APPROVED or REJECT."
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Blogs",
+            "description": "Blog management (public viewing, admin creation/editing)",
+            "item": [
+                {
+                    "name": "Get All Blogs",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/blogs",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "blogs"
+                            ]
+                        },
+                        "description": "Get list of all published blogs. Public endpoint. No authentication required."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create Blog",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"title\": \"Training Tips for Athletes\",\n  \"content\": \"Here are some effective training methods...\",\n  \"author\": \"Admin\",\n  \"description\": \"Learn the best practices for athletic training\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/blogs",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "blogs"
+                            ]
+                        },
+                        "description": "Create a new blog post. Admin only endpoint. Requires authentication."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update Blog",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"title\": \"Updated Training Tips\",\n  \"content\": \"Updated content with more details...\",\n  \"author\": \"Admin\",\n  \"description\": \"Enhanced training guide\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/blogs/1",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "blogs",
+                                "1"
+                            ]
+                        },
+                        "description": "Update an existing blog post. Admin only endpoint. Soft update (paranoid timestamps)."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Delete Blog",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/blogs/1",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "blogs",
+                                "1"
+                            ]
+                        },
+                        "description": "Delete a blog post. Admin only endpoint. Soft delete (paranoid)."
+                    },
+                    "response": []
+                }
+            ]
+        }
+    ],
+    "event": [
+        {
+            "listen": "prerequest",
+            "script": {
+                "type": "text/javascript",
+                "exec": [
+                    "// Pre-request script for all requests",
+                    "// You can add common headers or logic here"
+                ]
+            }
+        },
+        {
+            "listen": "test",
+            "script": {
+                "type": "text/javascript",
+                "exec": [
+                    "// Test script for all requests",
+                    "// Common test logic can be added here"
+                ]
+            }
+        }
+    ],
+    "variable": [
+        {
+            "key": "baseUrl",
+            "value": "http://localhost:8000/api",
+            "type": "string"
+        },
+        {
+            "key": "token",
+            "value": "",
+            "type": "string"
+        }
+    ]
+}

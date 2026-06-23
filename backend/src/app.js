@@ -7,6 +7,7 @@ require('./env')
 
 const { connectDB } = require('./config/db');
 const { routes } = require('./routes/index');
+require('./models/index')
 const errorHandler = require('./middleware/errorHandler');
 
 
@@ -25,7 +26,10 @@ app.use(express.json());
 // Set static folder for uploads
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
+
 app.use('/api', routes)
+
+
 // Centralized error handler (uploads, multer validation, etc.)
 app.use(errorHandler);
 

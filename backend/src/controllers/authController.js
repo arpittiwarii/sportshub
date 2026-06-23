@@ -1,9 +1,10 @@
-const { loginUser } = require('../service/login.service')
-const { registerUser } = require('../service/register.service')
+const { loginUser } = require('../services/login.service')
+const { registerUser } = require('../services/register.service')
 const { success } = require('../utils/apiResponse')
 
 const registerController = async (req, res, next) => {
   try {
+    console.log(req.body)
     const result = await registerUser(req.body);
     return success(res, result, 'Registration successfull', 201);
   } catch (err) {

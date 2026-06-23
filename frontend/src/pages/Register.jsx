@@ -10,15 +10,16 @@ const Register = () => {
     name: '',
     email: '',
     password: '',
-    age: '',
+    age: 1,
     sport: 'Shot Put',
     contact: '',
     afiId: '',
-    schoolName: ''
+    schoolName: '',
+    aadhar: ''
   });
-  
-  const [birthCertificateFile, setBirthCertificateFile] = useState(null);
-  const [aadharCardFile, setAadharCardFile] = useState(null);
+
+  // const [birthCertificateFile, setBirthCertificateFile] = useState(null);
+  // const [aadharCardFile, setAadharCardFile] = useState(null);
 
   const [status, setStatus] = useState({ type: '', message: '' });
   const [loading, setLoading] = useState(false);
@@ -31,31 +32,31 @@ const Register = () => {
     });
   };
 
-  const handleBirthCertificateFileChange = (e) => {
-    const f = e.target.files && e.target.files[0];
-    if (f) {
-      const allowed = ['application/pdf', 'image/jpeg', 'image/png'];
-      if (!allowed.includes(f.type)) {
-        toast.error('Birth Certificate must be PDF, JPG, or PNG.');
-        setBirthCertificateFile(null);
-        return;
-      }
-    }
-    setBirthCertificateFile(f || null);
-  };
+  // const handleBirthCertificateFileChange = (e) => {
+  //   const f = e.target.files && e.target.files[0];
+  //   if (f) {
+  //     const allowed = ['application/pdf', 'image/jpeg', 'image/png'];
+  //     if (!allowed.includes(f.type)) {
+  //       toast.error('Birth Certificate must be PDF, JPG, or PNG.');
+  //       setBirthCertificateFile(null);
+  //       return;
+  //     }
+  //   }
+  //   setBirthCertificateFile(f || null);
+  // };
 
-  const handleAadharCardFileChange = (e) => {
-    const f = e.target.files && e.target.files[0];
-    if (f) {
-      const allowed = ['application/pdf', 'image/jpeg', 'image/png'];
-      if (!allowed.includes(f.type)) {
-        toast.error('Aadhar Card must be PDF, JPG, or PNG.');
-        setAadharCardFile(null);
-        return;
-      }
-    }
-    setAadharCardFile(f || null);
-  };
+  // const handleAadharCardFileChange = (e) => {
+  //   const f = e.target.files && e.target.files[0];
+  //   if (f) {
+  //     const allowed = ['application/pdf', 'image/jpeg', 'image/png'];
+  //     if (!allowed.includes(f.type)) {
+  //       toast.error('Aadhar Card must be PDF, JPG, or PNG.');
+  //       setAadharCardFile(null);
+  //       return;
+  //     }
+  //   }
+  //   setAadharCardFile(f || null);
+  // };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -63,48 +64,42 @@ const Register = () => {
     setStatus({ type: '', message: '' });
 
     try {
-      if (!birthCertificateFile) {
-        toast.error('Birth Certificate file is required.');
-        return;
-      }
-      if (!aadharCardFile) {
-        toast.error('Aadhar Card file is required.');
-        return;
-      }
       if (!formData.afiId || !String(formData.afiId).trim()) {
         toast.error('AFI ID is required.');
+        setLoading(false);
         return;
       }
 
-      const payload = new FormData();
-      payload.append('name', formData.name);
-      payload.append('email', formData.email);
-      payload.append('password', formData.password);
-      payload.append('age', formData.age);
-      payload.append('sport', formData.sport);
-      payload.append('contact', formData.contact);
-      payload.append('schoolName', formData.schoolName);
-      payload.append('afiId', formData.afiId);
-      payload.append('aadharCard', aadharCardFile);
-      payload.append('birthCertificate', birthCertificateFile);
+      const payload = {
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
+        age: Number(formData.age),
+        sports: formData.sport,
+        contact: formData.contact,
+        school: formData.schoolName,
+        afiId: formData.afiId,
+        aadhar: formData.aadhar
+      };
 
-      await api.post('/athletes', payload, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
-
-      setStatus({ 
-        type: 'success', 
-        message: 'Registration successful! Your account is pending admin approval.'
-      });
-      toast.success('Registration complete! Please wait for admin approval.');
-      setFormData({ name: '', email: '', password: '', age: '', sport: 'Shot Put', contact: '', afiId: '', schoolName: '' });
-      setBirthCertificateFile(null);
-      setAadharCardFile(null);
-      setTimeout(() => navigate('/login'), 2000);
+      const res = await api.post('/auth/register', payload);
+      const responseData = res.data?.data;
+      if(res.data.success)
+      {
+        setStatus({
+          type: 'success',
+          message: 'OTP sent! Check your email for OTP.',
+        });
+      }
+      toast.success(`OTP successfully sent to ${formData.email}.`);
+      setFormData({ name: '', email: '', password: '', age: '', sport: '', contact: '', afiId: '', schoolName: '', aadhar:'' });
+      // setBirthCertificateFile(null);
+      // setAadharCardFile(null);
+      navigate('/otp', { state: { uid: responseData.uid, email: responseData.email } });
     } catch (error) {
-      setStatus({ 
-        type: 'error', 
-        message: error.response?.data?.message || 'Registration failed. Please try again.' 
+      setStatus({
+        type: 'error',
+        message: error.response?.data?.message || 'Registration failed. Please try again.'
       });
       toast.error(error.response?.data?.message || 'Registration failed.');
     } finally {
@@ -115,9 +110,9 @@ const Register = () => {
   return (
     <div className="min-h-screen pt-24 pb-16 bg-dark-900 relative">
       <div className="absolute top-0 right-0 w-1/3 h-full bg-primary/5 blur-3xl rounded-full"></div>
-      
+
       <div className="container mx-auto px-6 max-w-xl relative z-10">
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="text-center mb-10"
@@ -127,7 +122,7 @@ const Register = () => {
           <p className="text-gray-400">Register now. Once approved by the admin, you can log in to your student dashboard.</p>
         </motion.div>
 
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
@@ -144,9 +139,9 @@ const Register = () => {
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label className="block text-gray-300 font-medium mb-2" htmlFor="name">Full Name</label>
-              <input 
-                type="text" 
+              <label className="block text-gray-300 font-medium mb-2" htmlFor="name">Full Name*</label>
+              <input
+                type="text"
                 id="name"
                 name="name"
                 value={formData.name}
@@ -158,9 +153,9 @@ const Register = () => {
             </div>
 
             <div>
-              <label className="block text-gray-300 font-medium mb-2" htmlFor="email">Email Address</label>
-              <input 
-                type="email" 
+              <label className="block text-gray-300 font-medium mb-2" htmlFor="email">Email Address*</label>
+              <input
+                type="email"
                 id="email"
                 name="email"
                 value={formData.email}
@@ -172,9 +167,9 @@ const Register = () => {
             </div>
 
             <div>
-              <label className="block text-gray-300 font-medium mb-2" htmlFor="password">Password</label>
-              <input 
-                type="password" 
+              <label className="block text-gray-300 font-medium mb-2" htmlFor="password">Password*</label>
+              <input
+                type="password"
                 id="password"
                 name="password"
                 value={formData.password}
@@ -187,9 +182,9 @@ const Register = () => {
 
             <div className="grid grid-cols-2 gap-6">
               <div>
-                <label className="block text-gray-300 font-medium mb-2" htmlFor="age">Age</label>
-                <input 
-                  type="number" 
+                <label className="block text-gray-300 font-medium mb-2" htmlFor="age">Age*</label>
+                <input
+                  type="number"
                   id="age"
                   name="age"
                   value={formData.age}
@@ -240,46 +235,48 @@ const Register = () => {
             </div>
 
             <div>
-              <label className="block text-gray-300 font-medium mb-2" htmlFor="contact">Contact Number</label>
-              <input 
-                type="tel" 
+              <label className="block text-gray-300 font-medium mb-2" htmlFor="contact">Contact Number*</label>
+              <input
+                type="tel"
                 id="contact"
                 name="contact"
                 value={formData.contact}
                 onChange={handleChange}
                 required
                 className="w-full bg-dark-900 border border-dark-700 focus:border-primary focus:ring-1 focus:ring-primary outline-none text-white rounded-xl px-4 py-3 transition-colors"
-                placeholder="+1 (555) 000-0000"
+                placeholder="9989898989 "
               />
             </div>
 
             <div className="grid grid-cols-1 gap-6">
-              <div>
+              {/* <div>
                 <label className="block text-gray-300 font-medium mb-2" htmlFor="birthCertificate">
-                  Birth Certificate (PDF/JPG/PNG)
+                  Birth Certificate Registration Number :
                 </label>
                 <input
-                  type="file"
+                  type="text"
                   id="birthCertificate"
                   name="birthCertificate"
-                  accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"
-                  onChange={handleBirthCertificateFileChange}
-                  required
+                  // accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"
+                  // onChange={handleBirthCertificateFileChange}
+                  // required
                   className="w-full bg-dark-900 border border-dark-700 text-white rounded-xl px-4 py-3 transition-colors"
                 />
-              </div>
+              </div> */}
 
               <div>
                 <label className="block text-gray-300 font-medium mb-2" htmlFor="aadharCard">
-                  Aadhar Card (PDF/JPG/PNG)
+                  Aadhar Card Number :
                 </label>
                 <input
-                  type="file"
-                  id="aadharCard"
-                  name="aadharCard"
-                  accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"
-                  onChange={handleAadharCardFileChange}
-                  required
+                  type="text"
+                  id="aadhar"
+                  name="aadhar"
+                  value={formData.aadhar}
+                  onChange={handleChange}
+                  // accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"
+                  // onChange={handleAadharCardFileChange}
+                  // required
                   className="w-full bg-dark-900 border border-dark-700 text-white rounded-xl px-4 py-3 transition-colors"
                 />
               </div>
@@ -303,8 +300,8 @@ const Register = () => {
 
             <div>
               <label className="block text-gray-300 font-medium mb-2" htmlFor="schoolName">School / College Name</label>
-              <input 
-                type="text" 
+              <input
+                type="text"
                 id="schoolName"
                 name="schoolName"
                 value={formData.schoolName}
@@ -315,8 +312,8 @@ const Register = () => {
               />
             </div>
 
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               disabled={loading}
               className="w-full btn-primary mt-4 flex justify-center items-center"
             >

@@ -5,7 +5,8 @@ const node_type="development";
 
 //||import.meta.env.VITE_API_URL || 'https://sportshub-backend-mzth.onrender.com/api';
 
-const apiBaseURL = (node_type==='production')?'https://sportshub-backend-mzth.onrender.com/api':"http://localhost:8000/api";
+// const apiBaseURL = (node_type==='production')?'https://sportshub-backend-mzth.onrender.com/api':"http://localhost:8000/api";
+const apiBaseURL = "http://localhost:8000/api";
 const api = axios.create({
   baseURL: apiBaseURL
 });

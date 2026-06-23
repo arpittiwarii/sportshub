@@ -29,15 +29,15 @@ const Navbar = () => {
         <Link to="/home" className={`nav-link ${location.pathname === '/home' ? 'text-primary' : ''}`} onClick={() => setMobileMenuOpen(false)}>Home</Link>
         <Link to="/blogs" className={`nav-link ${location.pathname === '/blogs' ? 'text-primary' : ''}`} onClick={() => setMobileMenuOpen(false)}>Blogs</Link>
 
-        {role === 'admin' && (
+        {role === 'ADMIN' && (
           <>
             <Link to="/admin" className={`nav-link ${location.pathname === '/admin' ? 'text-primary' : ''}`} onClick={() => setMobileMenuOpen(false)}>Dashboard</Link>
             <Link to="/admin/payments" className={`nav-link ${location.pathname === '/admin/payments' ? 'text-primary' : ''}`} onClick={() => setMobileMenuOpen(false)}>Payments</Link>
-            
+
           </>
         )}
 
-        {role === 'athlete' && (
+        {role === 'ATHLETE' && (
           <Link to="/dashboard" className={`nav-link ${location.pathname === '/dashboard' ? 'text-primary' : ''}`} onClick={() => setMobileMenuOpen(false)}>Dashboard</Link>
         )}
       </>

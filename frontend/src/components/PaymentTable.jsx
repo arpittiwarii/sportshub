@@ -47,7 +47,7 @@ const PaymentTable = ({
           <tbody>
             {payments.map((payment, idx) => (
               <motion.tr
-                key={payment._id}
+                key={payment.id}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: idx * 0.05 }}
@@ -55,7 +55,7 @@ const PaymentTable = ({
               >
                 {isAdmin && (
                   <td className="px-6 py-4 text-sm text-gray-300 font-medium">
-                    {payment.athleteId?.name || 'Unknown'}
+                    {payment.user?.name || 'Unknown'}
                   </td>
                 )}
                 <td className="px-6 py-4 text-sm text-gray-300">
@@ -87,19 +87,19 @@ const PaymentTable = ({
                 )}
                 <td className="px-6 py-4 text-right">
                   <div className="flex items-center justify-end gap-2">
-                    {!isAdmin && (payment.status === 'pending' || payment.status === 'rejected') && (
+                    {!isAdmin && (payment.status === 'PENDING' || payment.status === 'REJECTED') && (
                       <button
-                        onClick={() => onUpload(payment._id)}
+                        onClick={() => onUpload(payment.id)}
                         className="flex items-center gap-2 px-3 py-1.5 bg-blue-500/10 text-blue-400 border border-blue-500/30 rounded-lg hover:bg-blue-500/20 transition-all duration-300 text-xs font-medium hover:scale-105"
                       >
                         <FiUploadCloud className="w-4 h-4" />
                         Upload
                       </button>
                     )}
-                    {isAdmin && payment.status === 'pending' && payment.screenshot && (
+                    {isAdmin && payment.status === 'PENDING' && payment.submittedAt && (
                       <>
                         <button
-                          onClick={() => onApprove(payment._id)}
+                          onClick={() => onApprove(payment.id)}
                           className="flex items-center gap-1 px-3 py-1.5 bg-green-500/10 text-green-400 border border-green-500/30 rounded-lg hover:bg-green-500/20 transition-all duration-300 text-xs font-medium hover:scale-105"
                           title="Approve payment"
                         >
@@ -107,7 +107,7 @@ const PaymentTable = ({
                           Approve
                         </button>
                         <button
-                          onClick={() => onReject(payment._id)}
+                          onClick={() => onReject(payment.id)}
                           className="flex items-center gap-1 px-3 py-1.5 bg-red-500/10 text-red-400 border border-red-500/30 rounded-lg hover:bg-red-500/20 transition-all duration-300 text-xs font-medium hover:scale-105"
                           title="Reject payment"
                         >
@@ -172,16 +172,16 @@ const PaymentTable = ({
             )}
 
             <div className="flex gap-2 mt-3 flex-wrap">
-              {!isAdmin && (payment.status === 'pending' || payment.status === 'rejected') && (
+              {!isAdmin && (payment.status === 'PENDING' || payment.status === 'REJECTED') && (
                 <button
-                  onClick={() => onUpload(payment._id)}
+                  onClick={() => onUpload(payment.id)}
                   className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-blue-500/10 text-blue-400 border border-blue-500/30 rounded-lg hover:bg-blue-500/20 transition-all duration-300 text-xs font-medium"
                 >
                   <FiUploadCloud className="w-4 h-4" />
                   Upload
                 </button>
               )}
-              {isAdmin && payment.status === 'pending' && payment.screenshot && (
+              {isAdmin && payment.status === 'PENDING' && payment.screenshot && (
                 <>
                   <button
                     onClick={() => onApprove(payment._id)}

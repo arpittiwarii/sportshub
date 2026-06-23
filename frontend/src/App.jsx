@@ -10,6 +10,7 @@ import AdminDashboard from './pages/AdminDashboard';
 import StudentDashboard from './pages/StudentDashboard';
 import EditRegistration from './pages/EditRegistration';
 import AdminPaymentPage from './pages/AdminPaymentPage';
+import OtpPage from './pages/OtpPage'
 import Blogs from './pages/Blogs';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -36,8 +37,8 @@ class ErrorBoundary extends React.Component {
           <div className="text-center">
             <h1 className="text-3xl font-bold mb-4">Something went wrong</h1>
             <p className="text-red-500 mb-4">{this.state.error?.message}</p>
-            <button 
-              onClick={() => window.location.reload()} 
+            <button
+              onClick={() => window.location.reload()}
               className="bg-primary px-6 py-2 rounded hover:opacity-90"
             >
               Reload Page
@@ -56,13 +57,14 @@ const PublicRoute = ({ children }) => {
   const token = localStorage.getItem('token');
   const userStr = localStorage.getItem('user');
   let role = null;
-  if(userStr) {
-    try { role = JSON.parse(userStr).role; } catch(e){}
+  if (userStr) {
+    try { role = JSON.parse(userStr).role; } catch (e) { }
   }
+  const normalizedRole = String(role || '').toUpperCase();
 
-  if (token && role) {
-    if (role === 'admin') return <Navigate to="/admin" replace />;
-    if (role === 'athlete') return <Navigate to="/dashboard" replace />;
+  if (token && normalizedRole) {
+    if (normalizedRole === 'ADMIN') return <Navigate to="/admin" replace />;
+    if (normalizedRole === 'ATHLETE') return <Navigate to="/dashboard" replace />;
   }
   return children;
 };
@@ -72,11 +74,12 @@ const AdminRoute = ({ children }) => {
   const token = localStorage.getItem('token');
   const userStr = localStorage.getItem('user');
   let role = null;
-  if(userStr) {
-    try { role = JSON.parse(userStr).role; } catch(e){}
+  if (userStr) {
+    try { role = JSON.parse(userStr).role; } catch (e) { }
   }
-  
-  if (!token || role !== 'admin') {
+  const normalizedRole = String(role || '').toUpperCase();
+
+  if (!token || normalizedRole !== 'ADMIN') {
     return <Navigate to="/login" replace />;
   }
   return children;
@@ -87,11 +90,12 @@ const StudentRoute = ({ children }) => {
   const token = localStorage.getItem('token');
   const userStr = localStorage.getItem('user');
   let role = null;
-  if(userStr) {
-    try { role = JSON.parse(userStr).role; } catch(e){}
+  if (userStr) {
+    try { role = JSON.parse(userStr).role; } catch (e) { }
   }
+  const normalizedRole = String(role || '').toUpperCase();
 
-  if (!token || role !== 'athlete') {
+  if (!token || normalizedRole !== 'ATHLETE') {
     return <Navigate to="/login" replace />;
   }
   return children;
@@ -109,47 +113,48 @@ function App() {
               <Route path="/" element={<PublicRoute><Home /></PublicRoute>} />
               <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
               <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
-              <Route 
-                path="/admin" 
+              <Route path="/otp" element={<OtpPage />} />
+              <Route
+                path="/admin"
                 element={
                   <AdminRoute>
                     <AdminDashboard />
                   </AdminRoute>
-                } 
+                }
               />
-              <Route 
-                path="/dashboard" 
+              <Route
+                path="/dashboard"
                 element={
                   <StudentRoute>
                     <StudentDashboard />
                   </StudentRoute>
-                } 
+                }
               />
-              <Route 
-                path="/home" 
+              <Route
+                path="/home"
                 element={
-                  
-                    <Home />
-                  
-                } 
+
+                  <Home />
+
+                }
               />
-              <Route 
-                path="/edit-registration" 
+              <Route
+                path="/edit-registration"
                 element={
                   <StudentRoute>
                     <EditRegistration />
                   </StudentRoute>
-                } 
+                }
               />
-              <Route 
-                path="/admin/payments" 
+              <Route
+                path="/admin/payments"
                 element={
                   <AdminRoute>
                     <AdminPaymentPage />
                   </AdminRoute>
-                } 
+                }
               />
-              
+
               <Route path="/blogs" element={<Blogs />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
