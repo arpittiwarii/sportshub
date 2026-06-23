@@ -9,10 +9,14 @@ const { connectDB } = require('./config/db');
 const { routes } = require('./routes/index');
 require('./models/index')
 const errorHandler = require('./middleware/errorHandler');
+const paymentReminderJob = require('./jobs/paymentReminder')
 
 
 const app = express();
 const PORT = process.env.PORT || 8000;
+
+//cron jobs schedule to send payment reminder
+paymentReminderJob();
 
 // Middleware
 const corsOptions = {

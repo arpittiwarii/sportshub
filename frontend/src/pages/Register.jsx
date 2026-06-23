@@ -84,14 +84,16 @@ const Register = () => {
 
       const res = await api.post('/auth/register', payload);
       const responseData = res.data?.data;
-      if(res.data.success)
+      console.log(res.data)
+      console.log(res.data?.data)
+      if(res?.data?.data?.success)
       {
         setStatus({
           type: 'success',
           message: 'OTP sent! Check your email for OTP.',
         });
+        toast.success(`OTP successfully sent to ${formData.email}.`);
       }
-      toast.success(`OTP successfully sent to ${formData.email}.`);
       setFormData({ name: '', email: '', password: '', age: '', sport: '', contact: '', afiId: '', schoolName: '', aadhar:'' });
       // setBirthCertificateFile(null);
       // setAadharCardFile(null);

@@ -1,5 +1,6 @@
 const { Fee } = require('../models/fee.model');
 const { User } = require('../models/user.model');
+require('../models/index')
 
 async function findAllWithAthlete() {
     return await Fee.findAll({
@@ -44,6 +45,19 @@ async function updateFee(id, updates) {
     return await Fee.findByPk(id);
 }
 
+async function findPendingPayments() {
+    return await Fee.findAll({
+        where: {
+            status: 'PENDING',
+            submittedAt: null
+        },
+        include: [{
+            model: User,
+            attributes: ['name', 'email', 'sports']
+        }]
+    })
+}
+
 module.exports = {
     findAllWithAthlete,
     findByUserId,
@@ -51,4 +65,5 @@ module.exports = {
     createFee,
     findById,
     updateFee,
+    findPendingPayments
 };

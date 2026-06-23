@@ -1,5 +1,5 @@
 const { Worker } = require("bullmq");
-const { sendWelcomeEmail, sendOtpEmail, sendApprovalConfirmedEmail, sendApprovalRejectedEmail, sendApprovalRequestEmail } = require("../utils/email.service.js");
+const { sendWelcomeEmail, sendOtpEmail, sendApprovalConfirmedEmail, sendApprovalRejectedEmail, sendApprovalRequestEmail, sendPaymentReminderEmail } = require("../utils/email.service.js");
 
 console.log("Worker started...");
 
@@ -31,6 +31,11 @@ new Worker(
             case "approval-request-email":
                 await sendApprovalRequestEmail(job.data)
                 break;
+            case "payment-reminder-email":
+                await sendPaymentReminderEmail(job.data)
+                break;
+            default:
+                console.log("no jobs found")
         }
     },
     {

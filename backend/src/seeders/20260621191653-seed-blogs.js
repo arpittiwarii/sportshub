@@ -7,7 +7,7 @@ module.exports = {
       {
         title: 'Getting Started with Node.js',
         content: 'This is a sample blog post about Node.js and Express.',
-        userId: 2,
+        userId: 1,
         createdAt: new Date(),
         updatedAt: new Date(),
         deletedAt: null
@@ -15,7 +15,7 @@ module.exports = {
       {
         title: 'Introduction to Sequelize',
         content: 'Sequelize is a promise-based ORM for Node.js applications.',
-        userId: 2,
+        userId: 1,
         createdAt: new Date(),
         updatedAt: new Date(),
         deletedAt: null
@@ -23,7 +23,7 @@ module.exports = {
       {
         title: 'REST API Best Practices',
         content: 'Learn how to structure and secure your REST APIs effectively.',
-        userId: 2,
+        userId: 1,
         createdAt: new Date(),
         updatedAt: new Date(),
         deletedAt: null

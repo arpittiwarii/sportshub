@@ -1,0 +1,68 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: sportshub
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: sportshub
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    environment:
+      CLOUDINARY_API_KEY: 126232486978541
+      CLOUDINARY_API_SECRET: aByXkqcXI9y4fAVs7OBzPqGSVsY
+      CLOUDINARY_CLOUD_NAME: ovdrfpf7
+      FRONTEND_URL=https: //indore-corporation-area-athletics-as.netlify.app
+      MONGODB_URI: "mongodb+srv://arpittiwari6912_db_user:Xt0aH1LvjdFFxHIy@sportshubcluster.wu2im9y.mongodb.net/?appName=SportsHubCluster"
+      NODE_TYPE: DEVELOPMENT
+      PORT: 8000
+      DB_HOST: localhost
+      DB_NAME: portshub
+      DB_USER: postgres
+      DB_PASSWORD: root
+      DB_DIALECT: postgres
+      DB_PORT: 5432
+      SALT_ROUND: 10
+      JWT_SECRET_KEY: supersecretjwtkey12345
+      JWT_EXPIRE_IN: 7d
+      EMAIL_USER: arpitcloud11@gmail.com
+      EMAIL_PASS: qopmrateglnjyalt
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+      - redis
+
+  worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    command: [ "node", "src/workers/email.worker.js" ]
+    environment:
+      NODE_ENV: production
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: sportshub
+      DB_USER: sportshub
+      DB_PASSWORD: sportshubpass
+      DB_DIALECT: postgres
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    depends_on:
+      - db
+      - redis

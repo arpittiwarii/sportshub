@@ -51,8 +51,7 @@ module.exports = {
 
       submittedAt: {
         type: Sequelize.DATE,
-        allowNull: false,
-        defaultValue: Sequelize.fn('NOW')
+        allowNull: true,
       },
 
       createdAt: {

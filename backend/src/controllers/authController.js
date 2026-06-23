@@ -4,8 +4,9 @@ const { success } = require('../utils/apiResponse')
 
 const registerController = async (req, res, next) => {
   try {
-    console.log(req.body)
+    // console.log(req.body)
     const result = await registerUser(req.body);
+    console.log(result)
     return success(res, result, 'Registration successfull', 201);
   } catch (err) {
     next(err);
