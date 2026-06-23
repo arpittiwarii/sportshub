@@ -21,13 +21,14 @@ const AdminDashboard = () => {
     setLoading(true);
     try {
       const [studentsRes, paymentsRes, adminProfileRes] = await Promise.all([
-        api.get('/athletes'),
+        api.get('/athlete'),
         api.get('/payments'),
         api.get('/admin/profile'),
       ]);
-      setStudents(studentsRes.data);
-      setPayments(paymentsRes.data);
-      setAdminProfile(adminProfileRes.data);
+      setStudents(studentsRes.data?.data || studentsRes.data);
+      setPayments(paymentsRes.data?.data || paymentsRes.data);
+      setAdminProfile(adminProfileRes.data?.data || adminProfileRes.data);
+
     } catch (error) {
       if (error.response?.status === 401) {
         handleLogout();
@@ -51,7 +52,7 @@ const AdminDashboard = () => {
 
   const updateStudentStatus = async (id, status) => {
     try {
-      await api.put(`/athletes/${id}/status`, { status });
+      await api.put(`/athlete/${id}/status`, { status });
       toast.success(`Student ${status} successfully!`);
       fetchData();
     } catch (error) {
@@ -62,7 +63,7 @@ const AdminDashboard = () => {
   const deleteStudent = async (id) => {
     if (window.confirm('Delete this registration?')) {
       try {
-        await api.delete(`/athletes/${id}`);
+        await api.delete(`/athlete/${id}`);
         toast.success(`Student deleted successfully!`);
         fetchData();
       } catch (error) {
@@ -72,19 +73,19 @@ const AdminDashboard = () => {
   };
 
   const handleApproveStudent = async (id) => {
-    await updateStudentStatus(id, 'approved');
+    await updateStudentStatus(id, 'APPROVED');
   };
 
   const handleRejectStudent = async (id) => {
-    await updateStudentStatus(id, 'rejected');
+    await updateStudentStatus(id, 'REJECTED');
   };
 
   const handleApprovePayment = async (id) => {
-    await verifyPayment(id, 'approved');
+    await verifyPayment(id, 'APPROVED');
   };
 
   const handleRejectPayment = async (id) => {
-    await verifyPayment(id, 'rejected');
+    await verifyPayment(id, 'REJECTED');
   };
 
   const verifyPayment = async (id, status) => {
@@ -100,6 +101,7 @@ const AdminDashboard = () => {
   const generatePayments = async (e) => {
     e.preventDefault();
     try {
+      console.log(generateForm)
       const res = await api.post('/payments/generate', generateForm);
       toast.success(res.data.message);
       fetchData();
@@ -107,7 +109,7 @@ const AdminDashboard = () => {
       toast.error('Failed to generate payments.');
     }
   };
-  
+
   const uploadAdminProfileImage = async (e) => {
     e.preventDefault();
     if (!adminProfileImageFile) {
@@ -124,7 +126,7 @@ const AdminDashboard = () => {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
 
-      setAdminProfile(res.data);
+      setAdminProfile(res.data?.data || res.data);
       setAdminProfileImageFile(null);
       toast.success('Admin profile image updated!');
     } catch (error) {
@@ -134,12 +136,12 @@ const AdminDashboard = () => {
     }
   };
 
-  const pendingStudents = students.filter(s => s.status === 'pending');
-  const approvedStudents = students.filter(s => s.status === 'approved');
+  const pendingStudents = students.filter(s => s.status === 'PENDING');
+  const approvedStudents = students.filter(s => s.status === 'APPROVED');
 
   // Defaulters: Payments that are pending or rejected
-  const actionRequiredPayments = payments.filter(p => p.status === 'pending' && p.screenshot); // Need admin review
-  const unpaidPayments = payments.filter(p => ['pending', 'rejected'].includes(p.status) && !p.screenshot);
+  const actionRequiredPayments = payments.filter(p => p.status === 'PENDING' && p.submittedAt); // Need admin review
+  const unpaidPayments = payments.filter(p => ['PENDING', 'REJECTED'].includes(p.status) && !p.submittedAt);
 
   const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
@@ -194,7 +196,7 @@ const AdminDashboard = () => {
               </div>
               <div>
                 <p className="text-white font-bold text-lg">{adminProfile?.name || 'Admin'}</p>
-                <p className="text-gray-400 text-sm">{adminProfile?.email || ''}</p>
+                <p className="text-gray-400 text-sm">{adminProfile?.email || 'admin@sportshub.com'}</p>
               </div>
             </div>
 
@@ -345,7 +347,7 @@ const AdminDashboard = () => {
                     </div>
                     <span className="px-3 py-1 bg-primary/15 text-primary text-xs rounded-full border border-primary/30 font-semibold whitespace-nowrap flex-shrink-0">Pending</span>
                   </div>
-                  
+
                   {/* Complete Student Information */}
                   <div className="space-y-3 text-sm bg-dark-900/50 rounded-lg p-4 mb-4">
                     {/* Personal Details */}
@@ -362,7 +364,7 @@ const AdminDashboard = () => {
                     <div>
                       <p className="text-gray-500 font-semibold text-xs uppercase mb-1">Sport</p>
                       <p className="text-primary font-bold">
-                        {Array.isArray(student.sport) ? student.sport.join(', ') : (student.sport || 'N/A')}
+                        {Array.isArray(student.sports) ? student.sports.join(', ') : (student.sports || 'N/A')}
                       </p>
                     </div>
                     <div>
@@ -373,7 +375,7 @@ const AdminDashboard = () => {
                     {/* Additional Details */}
                     <div>
                       <p className="text-gray-500 font-semibold text-xs uppercase mb-1">School Name</p>
-                      <p className="text-gray-300 text-xs sm:text-sm">{student.schoolName || 'N/A'}</p>
+                      <p className="text-gray-300 text-xs sm:text-sm">{student.school || 'N/A'}</p>
                     </div>
                     <div>
                       <p className="text-gray-500 font-semibold text-xs uppercase mb-1">AFI ID</p>
@@ -383,13 +385,13 @@ const AdminDashboard = () => {
                 </div>
                 <div className="flex gap-2 mt-6 pt-4 border-t border-dark-700">
                   <button
-                    onClick={() => handleApproveStudent(student._id)}
+                    onClick={() => handleApproveStudent(student.id)}
                     className="flex-1 btn-primary py-2 px-3 text-sm font-semibold shadow-none"
                   >
                     Approve
                   </button>
                   <button
-                    onClick={() => handleRejectStudent(student._id)}
+                    onClick={() => handleRejectStudent(student.id)}
                     className="flex-1 btn-secondary text-red-400 border-red-400/30 hover:bg-red-400/10 py-2 px-3 text-sm font-semibold"
                   >
                     Reject
@@ -440,7 +442,7 @@ const AdminDashboard = () => {
                       <FiCheckCircle size={14} /> Approved
                     </span>
                   </div>
-                  
+
                   {/* Complete Student Information */}
                   <div className="space-y-3 text-sm bg-dark-900/50 rounded-lg p-4">
                     {/* Personal Details */}
@@ -457,7 +459,7 @@ const AdminDashboard = () => {
                     <div>
                       <p className="text-gray-500 font-semibold text-xs uppercase mb-1">Sport</p>
                       <p className="text-primary font-bold">
-                        {Array.isArray(student.sport) ? student.sport.join(', ') : (student.sport || 'N/A')}
+                        {Array.isArray(student.sports) ? student.sports.join(', ') : (student.sports || 'N/A')}
                       </p>
                     </div>
                     <div>
@@ -468,7 +470,7 @@ const AdminDashboard = () => {
                     {/* Additional Details */}
                     <div>
                       <p className="text-gray-500 font-semibold text-xs uppercase mb-1">School Name</p>
-                      <p className="text-gray-300 text-xs sm:text-sm">{student.schoolName || 'N/A'}</p>
+                      <p className="text-gray-300 text-xs sm:text-sm">{student.school || 'N/A'}</p>
                     </div>
                     <div>
                       <p className="text-gray-500 font-semibold text-xs uppercase mb-1">AFI ID</p>
@@ -518,31 +520,31 @@ const AdminDashboard = () => {
                       </h3>
                       <p className="text-gray-400 text-xs">{payment.month} {payment.year}</p>
                     </div>
-                    <span className="text-xl font-bold text-primary whitespace-nowrap">₹{payment.amount}</span>
+                    <span className="text-xl font-bold text-primary whitespace-nowrap">₹{payment?.amount}</span>
                   </div>
 
                   {/* Student Details Card */}
                   <div className="space-y-2 text-sm bg-dark-900/50 rounded-lg p-4 mb-4">
                     <div>
                       <p className="text-gray-500 font-semibold text-xs uppercase mb-1">Email</p>
-                      <p className="text-gray-300 break-all text-xs">{payment.studentId?.email || 'N/A'}</p>
+                      <p className="text-gray-300 break-all text-xs">{payment?.user?.email || 'N/A'}</p>
                     </div>
                     <div>
                       <p className="text-gray-500 font-semibold text-xs uppercase mb-1">Contact</p>
-                      <p className="text-white font-medium text-xs">{payment.studentId?.contact || 'N/A'}</p>
+                      <p className="text-white font-medium text-xs">{payment?.user?.contact || 'N/A'}</p>
                     </div>
                     <div>
                       <p className="text-gray-500 font-semibold text-xs uppercase mb-1">Sport</p>
                       <p className="text-primary font-bold text-xs">
-                        {Array.isArray(payment.studentId?.sport)
-                          ? payment.studentId.sport.join(', ')
-                          : (payment.studentId?.sport || 'N/A')}
+                        {Array.isArray(payment?.user?.sports)
+                          ? payment?.user?.sports.join(', ')
+                          : (payment?.user?.sports || 'N/A')}
                       </p>
                     </div>
                   </div>
 
                   {/* Payment Screenshot */}
-                  {payment.screenshot && (
+                  {/* {payment.screenshot && (
                     <a
                       href={payment.screenshot.startsWith('http') ? payment.screenshot : `https://sportshub-backend-mzth.onrender.com${payment.screenshot}`}
                       target="_blank"
@@ -555,18 +557,18 @@ const AdminDashboard = () => {
                         className="w-full h-full object-cover"
                       />
                     </a>
-                  )}
+                  )} */}
                 </div>
 
                 <div className="flex gap-2 pt-4 border-t border-dark-700">
                   <button
-                    onClick={() => handleApprovePayment(payment._id)}
+                    onClick={() => handleApprovePayment(payment.id)}
                     className="flex-1 btn-primary py-2 px-3 text-sm font-semibold shadow-none"
                   >
                     Approve
                   </button>
                   <button
-                    onClick={() => handleRejectPayment(payment._id)}
+                    onClick={() => handleRejectPayment(payment.id)}
                     className="flex-1 btn-secondary text-red-400 border-red-400/30 hover:bg-red-400/10 py-2 px-3 text-sm font-semibold"
                   >
                     Reject
@@ -591,7 +593,7 @@ const AdminDashboard = () => {
               </div>
             ) : unpaidPayments.map((payment, idx) => (
               <motion.div
-                key={payment._id}
+                key={payment.id}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: idx * 0.1 }}
@@ -601,7 +603,7 @@ const AdminDashboard = () => {
                 <div className="mb-4">
                   <div className="flex justify-between items-start mb-2 gap-2">
                     <h3 className="text-lg font-bold text-white group-hover:text-red-400 transition-colors flex-1">
-                      {payment.athleteId?.name || 'Unknown'}
+                      {payment.user?.name || 'Unknown'}
                     </h3>
                     <span className="text-xl font-bold text-red-400 whitespace-nowrap">₹{payment.amount}</span>
                   </div>
@@ -612,23 +614,23 @@ const AdminDashboard = () => {
                 <div className="space-y-2 text-sm bg-dark-900/50 rounded-lg p-4 mb-4">
                   <div>
                     <p className="text-gray-500 font-semibold text-xs uppercase mb-1">Email</p>
-                    <p className="text-gray-300 break-all text-xs">{payment.athleteId?.email || 'N/A'}</p>
+                    <p className="text-gray-300 break-all text-xs">{payment.user?.email || 'N/A'}</p>
                   </div>
                   <div>
                     <p className="text-gray-500 font-semibold text-xs uppercase mb-1">Contact</p>
-                    <p className="text-white font-medium text-xs">{payment.athleteId?.contact || 'N/A'}</p>
+                    <p className="text-white font-medium text-xs">{payment.user?.contact || 'N/A'}</p>
                   </div>
                   <div>
                     <p className="text-gray-500 font-semibold text-xs uppercase mb-1">Sport</p>
                     <p className="text-primary font-bold text-xs">
-                      {Array.isArray(payment.athleteId?.sport)
-                        ? payment.athleteId.sport.join(', ')
-                        : (payment.athleteId?.sport || 'N/A')}
+                      {Array.isArray(payment.user?.sports)
+                        ? payment.user.sports.join(', ')
+                        : (payment.user?.sports || 'N/A')}
                     </p>
                   </div>
                   <div>
                     <p className="text-gray-500 font-semibold text-xs uppercase mb-1">Age</p>
-                    <p className="text-white font-medium text-xs">{payment.athleteId?.age || 'N/A'} years</p>
+                    <p className="text-white font-medium text-xs">{payment.user?.age || 'N/A'} years</p>
                   </div>
                 </div>
 
@@ -696,7 +698,7 @@ const AdminDashboard = () => {
           </motion.div>
         )}
 
-        
+
 
       </div>
     </div>

@@ -1,21 +1,17 @@
 const { User } = require('./user.model')
 const { Blog } = require('./blog.model')
-const { Payment } = require('./payment.model')
+const { Fee } = require('./fee.model')
 
-User.hasOne(Blog, {
-    foreignKey: 'userId',
-    onDelete: 'CASCADE',
+User.hasMany(Blog, {
+    foreignKey: 'userId'
 })
 Blog.belongsTo(User, {
-    foreignKey: 'userId',
-    onDelete: 'CASCADE',
+    foreignKey: 'userId'
 })
 
-User.hasOne(Payment, {
-    foreignKey: 'userId',
-    onDelete: 'CASCADE'
+User.hasMany(Fee, {
+    foreignKey: 'userId'
 })
-Payment.belongsTo(User, {
-    foreignKey: 'userId',
-    onDelete: 'CASCADE'
+Fee.belongsTo(User, {
+    foreignKey: 'userId'
 })

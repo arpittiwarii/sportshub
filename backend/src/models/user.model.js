@@ -1,3 +1,4 @@
+const { verify } = require('node:crypto');
 const { sequelize } = require('../config/db')
 const { DataTypes } = require('sequelize')
 
@@ -17,7 +18,7 @@ const User = sequelize.define("users",
             allowNull: false,
             unique: true,
             validate: {
-                formate: "email"
+                isEmail: true
             }
         },
         password: {
@@ -26,7 +27,7 @@ const User = sequelize.define("users",
         },
         role: {
             type: DataTypes.ENUM("ATHLETE", "ADMIN", "COACH"),
-            defaulValue: "ATHLETE"
+            defaultValue: "ATHLETE"
         },
         age: {
             type: DataTypes.INTEGER,
@@ -57,12 +58,19 @@ const User = sequelize.define("users",
         status: {
             type: DataTypes.ENUM("PENDING", "APPROVED", "REJECT"),
             defaultValue: "PENDING"
+        },
+        verify: {
+            type: DataTypes.BOOLEAN,
+            defaultValue: false
         }
     },
     {
+        freezeTableName: true,
+        timestamps: true,
+        paranoid: true,
         defaultScope: {
             attributes: {
-                exclude: ["password"],
+                exclude: ['password'],
             },
         },
         scopes: {
@@ -70,11 +78,6 @@ const User = sequelize.define("users",
                 attributes: {},
             },
         },
-    },
-    {
-        freezeTableName: true,
-        timestamps: true,
-        paranoid: true
     }
 )
 

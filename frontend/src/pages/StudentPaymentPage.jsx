@@ -16,15 +16,15 @@ const StudentPaymentPage = () => {
   const navigate = useNavigate();
 
   const userStr = localStorage.getItem('user');
-  const userId = userStr ? JSON.parse(userStr)._id : null;
+  const userId = userStr ? JSON.parse(userStr).id : null;
   const userName = userStr ? JSON.parse(userStr).name : 'Student';
 
   // Fetch payments
   const fetchPayments = async () => {
     setLoading(true);
     try {
-      const response = await api.get('/payments/my-payments');
-      setPayments(response.data);
+      const response = await api.get('/payments/my-fees');
+      setPayments(response.data?.data || response.data);
     } catch (error) {
       console.error('Error fetching payments:', error);
       if (error.response?.status === 401) {

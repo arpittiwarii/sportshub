@@ -21,7 +21,7 @@ const AdminPaymentPage = () => {
 
   // Redirect if not admin
   useEffect(() => {
-    if (userRole !== 'admin') {
+    if (userRole !== 'ADMIN') {
       navigate('/');
       toast.error('Access denied');
     }
@@ -32,8 +32,9 @@ const AdminPaymentPage = () => {
     setLoading(true);
     try {
       const response = await api.get('/payments');
-      setAllPayments(response.data);
-      applyFilter('all', response.data);
+      const allPayments = response.data?.data || response.data;
+      setAllPayments(allPayments);
+      applyFilter('all', allPayments);
     } catch (error) {
       console.error('Error fetching payments:', error);
       if (error.response?.status === 401) {
@@ -56,7 +57,7 @@ const AdminPaymentPage = () => {
 
     let filtered = [...payments];
     if (filter !== 'all') {
-      filtered = filtered.filter(p => p.status === filter);
+      filtered = filtered.filter(p => p.status === filter.toUpperCase());
     }
 
     setFilteredPayments(filtered);
@@ -116,11 +117,11 @@ const AdminPaymentPage = () => {
   // Calculate statistics
   const stats = {
     total: allPayments.length,
-    pending: allPayments.filter(p => p.status === 'pending').length,
-    approved: allPayments.filter(p => p.status === 'approved').length,
-    rejected: allPayments.filter(p => p.status === 'rejected').length,
+    pending: allPayments.filter(p => p.status === 'PENDING').length,
+    approved: allPayments.filter(p => p.status === 'APPROVED').length,
+    rejected: allPayments.filter(p => p.status === 'REJECTED').length,
     withScreenshot: allPayments.filter(p => p.screenshot).length,
-    needsReview: allPayments.filter(p => p.status === 'pending' && p.screenshot).length
+    needsReview: allPayments.filter(p => p.status === 'PENDING' && p.submittedAt).length
   };
 
   return (

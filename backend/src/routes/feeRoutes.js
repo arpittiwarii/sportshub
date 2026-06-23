@@ -1,19 +1,22 @@
 const express = require('express');
 const router = express.Router();
+const createFeeSchema = require('../schemas/fees.schema')
+const { validate } = require('../middleware/validate')
 const multer = require('multer');
 const {
-  getAllPayments,
-  getMyPayments,
-  generateMonthlyPayments,
-  uploadPaymentProof,
-  verifyPayment
-} = require('../controllers/paymentController');
+  getAllFees,
+  getMyFees,
+  generateMonthlyFees,
+  uploadFeeProof,
+  verifyFee
+} = require('../controllers/feeController');
 const { protect, restrictTo } = require('../middleware/authMiddleware');
 
 // Multer Storage Configuration (memory -> upload to Cloudinary)
 const storage = multer.memoryStorage();
 
 const ALLOWED_MIME_TYPES = new Set(['image/jpeg', 'image/png']);
+
 const upload = multer({
   storage,
   limits: {
@@ -27,12 +30,13 @@ const upload = multer({
 });
 
 // Routes for Athlete
-router.get('/my-payments', protect, getMyPayments);
-router.put('/:id/upload', protect, restrictTo('athlete'), upload.single('screenshot'), uploadPaymentProof);
+router.get('/my-fees', protect, getMyFees);
+// router.put('/:id/upload', protect, restrictTo('athlete'), upload.single('screenshot'), uploadFeeProof);
+router.put('/:id/approve', protect, restrictTo('athlete'), uploadFeeProof);
 
 // Routes for Admin
-router.get('/', protect, restrictTo('admin'), getAllPayments);
-router.post('/generate', protect, restrictTo('admin'), generateMonthlyPayments);
-router.put('/:id/verify', protect, restrictTo('admin'), verifyPayment);
+router.get('/', protect, restrictTo('admin'), getAllFees);
+router.post('/generate', protect, restrictTo('admin'), validate(createFeeSchema), generateMonthlyFees);
+router.put('/:id/verify', protect, restrictTo('admin'), verifyFee);
 
 module.exports = router;

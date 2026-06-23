@@ -1,68 +1,51 @@
-const Blog = require('../models/blog.model');
+const blogService = require('../services/blog.service');
+const { success } = require('../utils/apiResponse');
 
 // @desc   Get all blogs
 // @route  GET /api/blogs
 // @access Public
-const getBlogs = async (req, res) => {
+const getBlogs = async (req, res, next) => {
   try {
-    const blogs = await Blog.find().sort({ createdAt: -1 });
-    res.status(200).json(blogs);
+    const blogs = await blogService.getBlogs();
+    return success(res, blogs, 'Fetched blogs', 200);
   } catch (error) {
-    res.status(500).json({ message: 'Server error', error: error.message });
+    next(error);
   }
 };
 
 // @desc   Create a blog post (admin only)
 // @route  POST /api/blogs
 // @access Private (admin)
-const createBlog = async (req, res) => {
+const createBlog = async (req, res, next) => {
   try {
-    const { title, content } = req.body;
-
-    if (!title || !content) {
-      return res.status(400).json({ message: 'title and content are required.' });
-    }
-
-    const blog = await Blog.create({ title, content });
-    res.status(201).json(blog);
+    const created = await blogService.create(req.body);
+    return success(res, created, 'Blog created', 201);
   } catch (error) {
-    res.status(500).json({ message: 'Server error', error: error.message });
+    next(error);
   }
 };
 
 // @desc   Update a blog post (admin only)
 // @route  PUT /api/blogs/:id
 // @access Private (admin)
-const updateBlog = async (req, res) => {
+const updateBlog = async (req, res, next) => {
   try {
-    const { title, content } = req.body;
-    if (!title || !content) {
-      return res.status(400).json({ message: 'title and content are required.' });
-    }
-
-    const blog = await Blog.findById(req.params.id);
-    if (!blog) return res.status(404).json({ message: 'Blog not found.' });
-
-    blog.title = title;
-    blog.content = content;
-    await blog.save();
-
-    res.status(200).json(blog);
+    const updated = await blogService.update(req.params.id, req.body);
+    return success(res, updated, 'Blog updated', 200);
   } catch (error) {
-    res.status(500).json({ message: 'Server error', error: error.message });
+    next(error);
   }
 };
 
 // @desc   Delete a blog post (admin only)
 // @route  DELETE /api/blogs/:id
 // @access Private (admin)
-const deleteBlog = async (req, res) => {
+const deleteBlog = async (req, res, next) => {
   try {
-    const blog = await Blog.findByIdAndDelete(req.params.id);
-    if (!blog) return res.status(404).json({ message: 'Blog not found.' });
-    res.status(200).json({ message: 'Blog deleted successfully.' });
+    const result = await blogService.remove(req.params.id);
+    return success(res, result, 'Blog deleted', 200);
   } catch (error) {
-    res.status(500).json({ message: 'Server error', error: error.message });
+    next(error);
   }
 };
 

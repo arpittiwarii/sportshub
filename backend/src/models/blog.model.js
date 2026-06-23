@@ -13,17 +13,18 @@ const Blog = sequelize.define("blogs",
             allowNull: false,
         },
         content: {
-            type: DataTypes.STRING,
+            type: DataTypes.TEXT,
             allowNull: false,
         },
         userId: {
             type: DataTypes.INTEGER,
-            reference: {
+            references: {
                 model: 'users',
-                key: "id"
+                key: 'id'
             },
             allowNull: false,
-            onDelete: 'CASCADE'
+            onDelete: 'SET NULL',
+            onUpdate: 'CASCADE'
         }
     }, {
     freezeTableName: true,
