@@ -101,8 +101,10 @@ const AdminDashboard = () => {
   const generatePayments = async (e) => {
     e.preventDefault();
     try {
-      console.log(generateForm)
-      const res = await api.post('/payments/generate', generateForm);
+      // console.log(adminProfile)
+      // console.log(generateForm)
+      // generateForm({userId:adminProfile.id})
+      const res = await api.post(`/payments/generate`, generateForm);
       toast.success(res.data.message);
       fetchData();
     } catch (error) {
@@ -323,7 +325,7 @@ const AdminDashboard = () => {
               </div>
             ) : pendingStudents.map((student, idx) => (
               <motion.div
-                key={student._id}
+                key={student.id}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: idx * 0.1 }}
@@ -416,7 +418,7 @@ const AdminDashboard = () => {
               </div>
             ) : approvedStudents.map((student, idx) => (
               <motion.div
-                key={student._id}
+                key={student.id}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: idx * 0.1 }}
@@ -505,7 +507,7 @@ const AdminDashboard = () => {
               </div>
             ) : actionRequiredPayments.map((payment, idx) => (
               <motion.div
-                key={payment._id}
+                key={payment.id}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: idx * 0.1 }}

@@ -17,8 +17,8 @@ const { sequelize } = require('../config/db.js')
 // @access  Public
 async function registerUser({ name, email, password, age, sports, contact, school, afiId, aadhar }) {
     try {
-        await sequelize.transaction(async (t) => {
-            console.log(afiId, aadhar)
+        return await sequelize.transaction(async (t) => {
+            // console.log(afiId, aadhar)
             // const aadharCardFile = req.files?.aadharCard?.[0];
             // const birthCertificateFile = req.files?.birthCertificate?.[0];
 
@@ -99,8 +99,8 @@ async function registerUser({ name, email, password, age, sports, contact, schoo
                 status: user.status,
                 uid: otpResult.uid,
             };
-        })
 
+        })
 
     } catch (error) {
         if (error && error.isOperational) {

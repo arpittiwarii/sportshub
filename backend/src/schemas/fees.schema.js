@@ -1,6 +1,6 @@
 const createFeeSchema = {
     type: "object",
-    required: ["userId", "amount", "month", "year"],
+    required: ["amount", "month", "year"],
     additionalProperties: false,
 
     properties: {

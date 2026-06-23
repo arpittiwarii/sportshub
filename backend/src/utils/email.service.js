@@ -11,11 +11,12 @@ const {
     welcomeEmailTemplate,
     approvalConfirmedTemplate,
     approvalRejectedTemplate,
-    approvalRequestTemplate
+    approvalRequestTemplate,
+    paymentReminderTemplate
 } = require("./emailTemplates");
 
 
-console.log(process.env.EMAIL_USER, process.env.EMAIL_PASS)
+// console.log(process.env.EMAIL_USER, process.env.EMAIL_PASS)
 
 const transporter = nodemailer.createTransport({
     service: "gmail",
@@ -33,7 +34,20 @@ transporter.verify((error, success) => {
         console.log("SMTP Ready");
     }
 });
-// 
+// payment Reminder Email
+
+const sendPaymentReminderEmail = async ({ email, name, amount, duedate }) => {
+    console.log(email, name, amount, duedate)
+    await transporter.sendMail({
+        from: `"Library App" <${process.env.EMAIL_USER}>`,
+        to: email,
+        subject: "Payment Reminder Email",
+        html: `
+            ${paymentReminderTemplate(name, email, amount, duedate)}
+        `
+    });
+    return true
+};
 
 
 // welcome email
@@ -57,7 +71,7 @@ const sendOtpEmail = async ({ email, name, otp }) => {
     await transporter.sendMail({
         from: `"Library App" <${process.env.EMAIL_USER}>`,
         to: email,
-        subject: "Welcome to Library App 🎉",
+        subject: "OTP verification Email",
         html: `
             ${otpEmailTemplate(name, otp)}
         `
@@ -72,7 +86,7 @@ const sendApprovalConfirmedEmail = async ({ email, name, role }) => {
     await transporter.sendMail({
         from: `"Library App" <${process.env.EMAIL_USER}>`,
         to: email,
-        subject: "Welcome to Library App 🎉",
+        subject: "Account Approval approves by admin 🎉",
         html: `
             ${approvalConfirmedTemplate(name, role)}
         `
@@ -87,7 +101,7 @@ const sendApprovalRejectedEmail = async ({ email, name, role, reason }) => {
     await transporter.sendMail({
         from: `"Library App" <${process.env.EMAIL_USER}>`,
         to: email,
-        subject: "Welcome to Library App 🎉",
+        subject: "Account Approval Rejects by admin becuase of wrong documentation",
         html: `
             ${approvalRejectedTemplate(name, role, reason)}
         `
@@ -102,7 +116,7 @@ const sendApprovalRequestEmail = async ({ email, name, role }) => {
     await transporter.sendMail({
         from: `"Library App" <${process.env.EMAIL_USER}>`,
         to: email,
-        subject: "Welcome to Library App 🎉",
+        subject: "Account in under Review, wait for admin approval",
         html: `
             ${approvalRequestTemplate(name, role)}
         `
@@ -115,5 +129,6 @@ module.exports = {
     sendApprovalRejectedEmail,
     sendApprovalRequestEmail,
     sendWelcomeEmail,
-    sendOtpEmail
+    sendOtpEmail,
+    sendPaymentReminderEmail
 }

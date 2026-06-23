@@ -41,6 +41,30 @@ const getEmailTemplate = (title, content) => `
     </html>
 `;
 
+const paymentReminderTemplate = (name, amount, dueDate) =>
+    getEmailTemplate(
+        "Payment Reminder 💳",
+        `
+        <p>Hi <strong>${name}</strong>,</p>
+
+        <p>This is a reminder that your payment is still pending.</p>
+
+        <div style="
+            background:#fff7ed;
+            border-left:5px solid #f59e0b;
+            padding:15px;
+            margin:20px 0;
+        ">
+            <p><strong>Amount Due:</strong> ₹${amount}</p>
+            <p><strong>Due Date:</strong> ${dueDate}</p>
+        </div>
+
+        <p>Please log in to your SportsHub account and complete the payment at your earliest convenience.</p>
+
+        <p>If payment has already been made, please disregard this email.</p>
+        `
+    );
+
 const otpEmailTemplate = (name, otp) =>
     getEmailTemplate(
         "Verify Your Account 🔐",
@@ -163,5 +187,6 @@ module.exports = {
     welcomeEmailTemplate,
     approvalConfirmedTemplate,
     approvalRejectedTemplate,
-    approvalRequestTemplate
+    approvalRequestTemplate,
+    paymentReminderTemplate
 };
