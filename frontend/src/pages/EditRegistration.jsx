@@ -7,6 +7,7 @@ import { toast } from 'react-toastify';
 
 const EditRegistration = () => {
   const allowedSports = [
+    'Select',
     'Shot Put',
     'Long Jump',
     'High Jump',
@@ -24,7 +25,6 @@ const EditRegistration = () => {
   const [docs, setDocs] = useState({
     birthCertificate: null,
     aadharCard: null,
-    afiId: '',
   });
   const [uploadingDocs, setUploadingDocs] = useState(false);
   const navigate = useNavigate();
@@ -98,10 +98,6 @@ const EditRegistration = () => {
     } else {
       setDocs((prev) => ({ ...prev, [name]: null }));
     }
-  };
-
-  const handleAfiIdChange = (e) => {
-    setDocs((prev) => ({ ...prev, afiId: e.target.value }));
   };
 
   const handleSportToggle = (sportValue, checked) => {
@@ -226,23 +222,23 @@ const EditRegistration = () => {
                 </div>
 
                 <div>
-                  <label className="block text-gray-300 font-medium mb-2" htmlFor="sport">Sport</label>
-                  <div className="grid grid-cols-2 gap-3">
-                    {allowedSports.map((s) => (
-                      <label
-                        key={s}
-                        className="flex items-center gap-2 bg-dark-900/30 border border-dark-700 rounded-xl px-3 py-2 cursor-pointer hover:border-primary/40 transition-colors"
-                      >
-                        <input
-                          type="checkbox"
-                          checked={Array.isArray(formData.sport) ? formData.sport.includes(s) : false}
-                          onChange={(e) => handleSportToggle(s, e.target.checked)}
-                          className="accent-primary"
-                        />
-                        <span className="text-sm text-white/90">{s}</span>
-                      </label>
-                    ))}
-                  </div>
+                  <label className="block text-gray-300 font-medium mb-2" htmlFor="sports">Select Sport </label>
+
+                  <select
+                    name="sports"
+                    id="sports-select"
+                    className="col-span-2 bg-dark-900/30 border border-dark-700 rounded-xl px-3 py-2 text-white/90 cursor-pointer hover:border-primary/40 transition-colors appearance-none focus:outline-none focus:border-primary"
+                    onChange={handleChange}
+                  >
+                    {
+                      allowedSports.map((s) => (
+                        <option key={s} value={s} className="bg-dark-900 text-white">
+                          {s}
+                        </option>
+                      ))
+                    }
+                  </select>
+
                 </div>
               </div>
 
@@ -256,6 +252,39 @@ const EditRegistration = () => {
                   onChange={handleChange}
                   required
                   className="w-full bg-dark-900 border border-dark-700 focus:border-primary focus:ring-1 focus:ring-primary outline-none text-white rounded-xl px-4 py-3 transition-colors"
+                />
+              </div>
+
+              <div>
+                <label className="block text-gray-300 font-medium mb-2" htmlFor="afiId">
+                  AFI ID
+                </label>
+                <input
+                  type="text"
+                  id="afiId"
+                  name="afiId"
+                  value={formData.afiId}
+                  onChange={handleChange}
+                  required
+                  disabled={uploadingDocs}
+                  className="w-full bg-dark-900 border border-dark-700 text-white rounded-xl px-4 py-3"
+                  placeholder="Enter your AFI ID"
+                />
+              </div>
+              <div>
+                <label className="block text-gray-300 font-medium mb-2" htmlFor="school">
+                  School Name
+                </label>
+                <input
+                  type="text"
+                  id="school"
+                  name="school"
+                  value={formData.school}
+                  onChange={handleChange}
+                  required
+                  disabled={uploadingDocs}
+                  className="w-full bg-dark-900 border border-dark-700 text-white rounded-xl px-4 py-3"
+                  placeholder="Enter your School Name"
                 />
               </div>
 
@@ -289,7 +318,8 @@ const EditRegistration = () => {
                 </button>
               </div>
             </form>
-
+            <br />
+            <span className="text-primary font-bold tracking-wider uppercase text-sm mb-2 block">UPLOAD DOCUMENTS NOT WORKING</span>
             <div className="mt-8 pt-6 border-t border-dark-700">
               <h2 className="text-xl font-bold text-white mb-4">Upload Documents</h2>
               <form onSubmit={handleUploadDocuments} className="space-y-4">
@@ -344,22 +374,6 @@ const EditRegistration = () => {
                     )}
                   </div>
 
-                  <div>
-                    <label className="block text-gray-300 font-medium mb-2" htmlFor="afiId">
-                      AFI ID
-                    </label>
-                    <input
-                      type="text"
-                      id="afiId"
-                      name="afiId"
-                      value={docs.afiId}
-                      onChange={handleAfiIdChange}
-                      required
-                      disabled={uploadingDocs}
-                      className="w-full bg-dark-900 border border-dark-700 text-white rounded-xl px-4 py-3"
-                      placeholder="Enter your AFI ID"
-                    />
-                  </div>
                 </div>
 
                 <button

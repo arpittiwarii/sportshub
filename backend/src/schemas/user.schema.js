@@ -1,3 +1,5 @@
+const { additionalProperties, properties } = require("./fees.schema");
+
 const registerSchema = {
     type: "object",
 
@@ -83,4 +85,56 @@ const loginSchema = {
     additionalProperties: false
 };
 
-module.exports = { loginSchema, registerSchema }
+const updateSchema = {
+    type: "object",
+    additionalProperties: false,
+    properties: {
+        name: {
+            type: "string",
+            minLength: 2
+        },
+
+        email: {
+            type: "string",
+            format: "email"
+        },
+
+        password: {
+            type: "string",
+            minLength: 6
+        },
+
+        role: {
+            type: "string",
+            enum: ["ATHLETE", "ADMIN", "COACH"]
+        },
+
+        age: {
+            type: "integer",
+            minimum: 1
+        },
+
+        sports: {
+            type: "string"
+        },
+
+        contact: {
+            type: "string",
+            pattern: "^[0-9]{10}$"
+        },
+
+        afiId: {
+            type: "string"
+        },
+
+        aadhar: {
+            type: "string"
+        },
+
+        school: {
+            type: "string"
+        }
+    }
+}
+
+module.exports = { loginSchema, registerSchema, updateSchema }

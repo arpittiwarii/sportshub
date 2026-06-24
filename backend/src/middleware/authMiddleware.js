@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const { User } = require('../models/user.model');
+const { findUserById } = require('../repositories/User.repository')
 
 const protect = async (req, res, next) => {
   let token;
@@ -13,7 +13,7 @@ const protect = async (req, res, next) => {
       const secret = process.env.JWT_SECRET || process.env.JWT_SECRET_KEY;
       console.log(process.env.JWT_SECRET_KEY)
       const decoded = jwt.verify(token, secret);
-      const user = await User.findByPk(decoded.id, {
+      const user = await User.findUserById(decoded.id, {
         attributes: { exclude: ['password'] },
       });
       if (!user) {

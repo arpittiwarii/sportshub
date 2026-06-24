@@ -6,7 +6,7 @@ const { findPendingPayments } = require('../repositories/Fee.repository');
 
 
 const paymentReminderJob = () => {
-    const task = cron.schedule('*/1 * * * *', async () => {
+    const task = cron.schedule('0 9 * * *', async () => {
         try {
             const pendingPayments = await findPendingPayments()
             // console.log(pendingPayments)

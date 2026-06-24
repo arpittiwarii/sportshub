@@ -134,9 +134,9 @@ const StudentDashboard = () => {
     // if (!uploadFile) return toast.warning('Please select a file to upload');
 
     // setUploading(true);
-    console.log(userId, paymentId)
+    // console.log(userId, paymentId)
     const formData = {
-      userId:userId
+      userId: userId
     }
     // formData.append({submitedAt:new Date()})
 
@@ -501,7 +501,7 @@ const StudentDashboard = () => {
                           <span className="text-red-400 font-semibold text-sm">Rejected</span>
                         </div>
                       )}
-                      {!payment.status === 'APPROVED' && payment.submittedAt && (
+                      {payment.status === "PENDING" && payment.submittedAt && (
                         <div className="flex items-center gap-2 px-4 py-2 bg-primary/15 border border-primary/40 rounded-lg">
                           <FiClock className="text-primary" />
                           <span className="text-primary font-semibold text-sm">In Review</span>
@@ -518,15 +518,15 @@ const StudentDashboard = () => {
 
                     {/* Right Side - Actions */}
                     <div className="flex gap-2 mt-6 pt-4 border-t border-dark-700">
-                  {!payment.status??
-                    <button
-                    onClick={()=>applytopaid(payment.id)}
-                    className="flex-1 btn-primary py-2 px-3 text-sm font-semibold shadow-none"
-                  >
-                    Apply to paid
-                  </button>
-                  }
-                </div>
+                      {(payment.submittedAt === null) &&
+                        <button
+                          onClick={() => applytopaid(payment.id)}
+                          className="flex-1 btn-primary py-2 px-3 text-sm font-semibold shadow-none"
+                        >
+                          Apply to paid
+                        </button>
+                      }
+                    </div>
                   </div>
                 </motion.div>
               ))}

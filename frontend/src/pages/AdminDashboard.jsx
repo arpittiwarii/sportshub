@@ -25,9 +25,9 @@ const AdminDashboard = () => {
         api.get('/payments'),
         api.get('/admin/profile'),
       ]);
-      setStudents(studentsRes.data?.data || studentsRes.data);
-      setPayments(paymentsRes.data?.data || paymentsRes.data);
-      setAdminProfile(adminProfileRes.data?.data || adminProfileRes.data);
+      setStudents((studentsRes.data?.data || studentsRes.data) ?? []);
+      setPayments((paymentsRes.data?.data || paymentsRes.data) ?? []);
+      setAdminProfile((adminProfileRes.data?.data || adminProfileRes.data) ?? []);
 
     } catch (error) {
       if (error.response?.status === 401) {

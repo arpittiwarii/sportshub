@@ -86,15 +86,14 @@ const Register = () => {
       const responseData = res.data?.data;
       console.log(res.data)
       console.log(res.data?.data)
-      if(res?.data?.data?.success)
-      {
+      if (res?.data?.data?.success) {
         setStatus({
           type: 'success',
           message: 'OTP sent! Check your email for OTP.',
         });
         toast.success(`OTP successfully sent to ${formData.email}.`);
       }
-      setFormData({ name: '', email: '', password: '', age: '', sport: '', contact: '', afiId: '', schoolName: '', aadhar:'' });
+      setFormData({ name: '', email: '', password: '', age: '', sport: '', contact: '', afiId: '', schoolName: '', aadhar: '' });
       // setBirthCertificateFile(null);
       // setAadharCardFile(null);
       navigate('/otp', { state: { uid: responseData.uid, email: responseData.email } });
@@ -182,6 +181,21 @@ const Register = () => {
               />
             </div>
 
+            <div>
+              <label className="block text-gray-300 font-medium mb-2" htmlFor="confirmpassword">Confirm Password*</label>
+              <input
+                type="password"
+                id="cofirmpassword"
+                name="confirmpassword"
+                value={formData.confirmpassword}
+                onBlur={(e)=>{if(e.target.value !== formData.password) toast("Confirm Password must be same as password")}}
+                onChange={handleChange}
+                required
+                className="w-full bg-dark-900 border border-dark-700 focus:border-primary focus:ring-1 focus:ring-primary outline-none text-white rounded-xl px-4 py-3 transition-colors"
+                placeholder="••••••••"
+              />
+            </div>
+
             <div className="grid grid-cols-2 gap-6">
               <div>
                 <label className="block text-gray-300 font-medium mb-2" htmlFor="age">Age*</label>
@@ -200,39 +214,36 @@ const Register = () => {
               </div>
 
               <div>
-                <label className="block text-gray-300 font-medium mb-2" htmlFor="sport">Sport (Select one)</label>
-                <div className="grid grid-cols-2 gap-3">
-                  {[
-                    'Shot Put',
-                    'Long Jump',
-                    'High Jump',
-                    'Running 100m',
-                    'Running 400m',
-                    'Running 800m',
-                    'Running 1600m',
-                    'Other',
-                  ].map((s) => (
-                    <label
-                      key={s}
-                      className="flex items-center gap-2 bg-dark-900/30 border border-dark-700 rounded-xl px-3 py-2 cursor-pointer hover:border-primary/40 transition-colors"
+                <label className="block text-gray-300 font-medium mb-2" htmlFor="sports">Select Sport</label>
+                <div className="flex flex-col gap-2">
+                  {/* The Label remains separate from the loop */}
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <select
+                      name="sports"
+                      id="sports-select"
+                      onChange={handleChange}
+                      className="col-span-2 bg-dark-900/30 border border-dark-700 rounded-xl px-3 py-2 text-white/90 cursor-pointer hover:border-primary/40 transition-colors appearance-none focus:outline-none focus:border-primary"
                     >
-                      <input
-                        type="checkbox"
-                        checked={formData.sport === s}
-                        onChange={(e) => {
-                          const checked = e.target.checked;
-                          setFormData((prev) => {
-                            if (checked) return { ...prev, sport: s };
-                            if (prev.sport === s) return { ...prev, sport: 'Other' };
-                            return prev;
-                          });
-                        }}
-                        className="accent-primary"
-                      />
-                      <span className="text-sm text-white/90">{s}</span>
-                    </label>
-                  ))}
+                      {[
+                        'Select',
+                        'Shot Put',
+                        'Long Jump',
+                        'High Jump',
+                        'Running 100m',
+                        'Running 400m',
+                        'Running 800m',
+                        'Running 1600m',
+                        'Other',
+                      ].map((s) => (
+                        <option key={s} value={s} className="bg-dark-900 text-white">
+                          {s}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
+
               </div>
             </div>
 
@@ -327,7 +338,7 @@ const Register = () => {
           </form>
         </motion.div>
       </div>
-    </div>
+    </div >
   );
 };
 
