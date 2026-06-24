@@ -12,3 +12,5 @@ build/
 frontend/dist
 backend/uploads/*
 !backend/uploads/.gitkeep
+docker.compoose.yaml
+

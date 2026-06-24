@@ -12,12 +12,14 @@ const { upload } = require('../middleware/studentDocsUpload');
 const { uploadStudentDocumentsController } = require('../controllers/studentDocumentController');
 const { upload: profileImageUpload } = require('../middleware/profileImageUpload');
 const { updateAthleteProfileImageController } = require('../controllers/athleteProfileController');
+const { updateSchema } = require("../schemas/user.schema")
+const { validate } = require('../middleware/validate')
 
 
 
 // Protected routes for Athlete & Admin to view/update profile
 router.get('/:id', protect, getAthleteById);
-router.put('/:id', protect, updateAthlete);
+router.put('/:id', protect, validate(updateSchema), updateAthlete);
 
 // Athlete self profile image
 router.put(

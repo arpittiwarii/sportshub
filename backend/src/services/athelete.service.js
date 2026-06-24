@@ -36,7 +36,7 @@ const getAthleteByIdService = async (id) => {
     }
 };
 
-const updateAthleteService = async (id, { name, age, sports, contact, school }) => {
+const updateAthleteService = async (id, { name, age, sports, contact, school, afiId }) => {
     try {
         const athlete = await findUserById(id, { attributes: { exclude: ['password'] } });
         if (!athlete || athlete.role !== 'ATHLETE') {
@@ -48,6 +48,7 @@ const updateAthleteService = async (id, { name, age, sports, contact, school }) 
         if (age) updates.age = age;
         if (contact) updates.contact = contact;
         if (school) updates.school = school;
+        if (afiId) updates.afiId = afiId;
 
         if (sports) {
             let sportValue = sports;
