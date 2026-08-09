@@ -12,12 +12,12 @@ function generateOTP() {
         .padStart(4, '0');
 }
 
-const sendOtp = async ({ uid, otp, email, name }) => {
+const sendOtp = async ({ uid, otp, email, name, session }) => {
     if (!otp || !uid || !email || !name) {
         throw new AppError('OTP could not be generated', 503);
     }
 
-    const otpResult = await createOtpRepository(otp, uid);
+    const otpResult = await createOtpRepository(otp, uid, session ? { session } : {});
     if (!otpResult) {
         throw new DatabaseError('OTP was not created in database');
     }
@@ -42,10 +42,9 @@ const sendOtp = async ({ uid, otp, email, name }) => {
     return otpResult;
 };
 
-const createOtpService = async ({ userId, email, name }) => {
-    const newOtp = await generateOTP();
-    console.log(newOtp)
-    const responseOtp = await sendOtp({ uid: userId, otp: newOtp, email, name });
+const createOtpService = async ({ userId, email, name, session }) => {
+    const newOtp = generateOTP();
+    const responseOtp = await sendOtp({ uid: userId, otp: newOtp, email, name, session });
     return { uid: responseOtp.UId };
 };
 
@@ -55,7 +54,7 @@ const verifyOtpService = async ({ uid, otp }) => {
         throw new ValidationError('Invalid OTP. Please enter the code sent to your email.');
     }
 
-    await match.destroy();
+    await match.softDelete();
     await updateUserById(uid, { verify: true });
 
     return { message: 'OTP verified successfully. Your account Under Admin Review.' };

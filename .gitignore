@@ -1,6 +1,10 @@
 node_modules/
 .env
-.env.local
+.env.*
+!.env.example
+**/.env
+**/.env.*
+!**/.env.example
 .DS_Store
 dist/
 build/
@@ -13,4 +17,10 @@ frontend/dist
 backend/uploads/*
 !backend/uploads/.gitkeep
 docker.compoose.yaml
+migrations/
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
 

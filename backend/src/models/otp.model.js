@@ -1,25 +1,24 @@
-const { DataTypes } = require('sequelize')
-const { sequelize } = require('../config/db')
+const mongoose = require('mongoose');
+const { baseSchemaOptions, withSoftDelete } = require('./model.utils');
 
-const OTP = sequelize.define('otps', {
-    id: {
-        type: DataTypes.INTEGER,
-        primaryKey: true,
-        autoIncrement: true
+const otpSchema = new mongoose.Schema(
+    {
+        UId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'users',
+            default: null,
+        },
+        otp: {
+            type: String,
+            trim: true,
+            required: true,
+        },
     },
+    baseSchemaOptions()
+);
 
-    UId: {
-        type: DataTypes.INTEGER,
-        allowNull: true,
-    },
+withSoftDelete(otpSchema);
 
-    otp: {
-        type: DataTypes.STRING,
-    },
-}, {
-    freezeTableName: true,
-    timestamps: true,
-    paranoid: true
-});
+const OTP = mongoose.models.otps || mongoose.model('otps', otpSchema);
 
-module.exports = { OTP }
+module.exports = { OTP };

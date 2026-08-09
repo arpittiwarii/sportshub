@@ -1,84 +1,104 @@
-const { verify } = require('node:crypto');
-const { sequelize } = require('../config/db')
-const { DataTypes } = require('sequelize')
+const mongoose = require('mongoose');
+const { baseSchemaOptions, withSoftDelete, normalizeRole, normalizeStatus } = require('./model.utils');
 
-const User = sequelize.define("users",
+const userSchema = new mongoose.Schema(
     {
-        id: {
-            type: DataTypes.INTEGER,
-            autoIncrement: true,
-            primaryKey: true,
-        },
         name: {
-            type: DataTypes.STRING,
-            allowNull: false,
+            type: String,
+            required: true,
+            trim: true,
         },
         email: {
-            type: DataTypes.STRING,
-            allowNull: false,
-            unique: true,
-            validate: {
-                isEmail: true
-            }
+            type: String,
+            required: true,
+            trim: true,
+            lowercase: true,
         },
         password: {
-            type: DataTypes.STRING,
-            allowNull: false
+            type: String,
+            required: true,
+            select: false,
         },
         role: {
-            type: DataTypes.ENUM("ATHLETE", "ADMIN", "COACH"),
-            defaultValue: "ATHLETE"
+            type: String,
+            enum: ['ATHLETE', 'ADMIN', 'COACH'],
+            default: 'ATHLETE',
+            set: normalizeRole,
         },
         age: {
-            type: DataTypes.INTEGER,
-            allowNull: false
+            type: Number,
+            required: true,
+            min: 1,
         },
         sports: {
-            type: DataTypes.STRING,
-            allowNull: false,
+            type: String,
+            required: true,
+            trim: true,
         },
         contact: {
-            type: DataTypes.STRING,
-            allowNull: false,
-            unique: true
+            type: String,
+            required: true,
+            trim: true,
         },
         afiId: {
-            type: DataTypes.STRING,
-            allowNull: true,
+            type: String,
+            trim: true,
+            default: null,
         },
         aadhar: {
-            type: DataTypes.STRING
+            type: String,
+            trim: true,
+            default: null,
         },
         school: {
-            type: DataTypes.STRING,
+            type: String,
+            trim: true,
+            default: null,
         },
         profile: {
-            type: DataTypes.STRING
+            type: String,
+            default: null,
+        },
+        aadharCard: {
+            type: String,
+            default: null,
+        },
+        birthCertificate: {
+            type: String,
+            default: null,
         },
         status: {
-            type: DataTypes.ENUM("PENDING", "APPROVED", "REJECT"),
-            defaultValue: "PENDING"
+            type: String,
+            enum: ['PENDING', 'APPROVED', 'REJECTED'],
+            default: 'PENDING',
+            set: normalizeStatus,
         },
         verify: {
-            type: DataTypes.BOOLEAN,
-            defaultValue: false
+            type: Boolean,
+            default: false,
         }
     },
-    {
-        freezeTableName: true,
-        timestamps: true,
-        paranoid: true,
-        defaultScope: {
-            attributes: {
-                exclude: ['password'],
-            },
-        },
-        scopes: {
-            withPassword: {
-                attributes: {},
-            },
-        },
-    }
-)
+    baseSchemaOptions()
+);
 
-module.exports = { User }
+withSoftDelete(userSchema);
+
+userSchema.index(
+    { email: 1 },
+    {
+        unique: true,
+        partialFilterExpression: { deletedAt: null },
+    }
+);
+
+userSchema.index(
+    { contact: 1 },
+    {
+        unique: true,
+        partialFilterExpression: { deletedAt: null },
+    }
+);
+
+const User = mongoose.models.users || mongoose.model('users', userSchema);
+
+module.exports = { User };

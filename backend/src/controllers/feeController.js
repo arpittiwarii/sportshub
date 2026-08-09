@@ -47,8 +47,7 @@ const generateMonthlyFees = async (req, res, next) => {
 // @access  Private (Athlete)
 const uploadFeeProof = async (req, res, next) => {
   try {
-    const { userId } = req.body
-    const updated = await feeService.uploadFeeProof(req.params.id, userId);
+    const updated = await feeService.uploadFeeProof(req.params.id, req.user.id);
     return success(res, updated, 'Fee proof uploaded', 200);
   } catch (error) {
     next(error);

@@ -53,8 +53,9 @@ async function uploadStudentDocuments(athleteId, userId, files, afiId) {
         }
 
         // Fetch athlete
-        const athlete = await findUserById(athleteId, { attributes: { exclude: ['password'] } });
-        if (!athlete || athlete.role !== 'ATHLETE') {
+        const athlete = await findUserById(athleteId);
+        const role = String(athlete?.role || '').toUpperCase();
+        if (!athlete || role !== 'ATHLETE') {
             throw new ValidationError('Athlete not found.');
         }
 

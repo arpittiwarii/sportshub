@@ -1,60 +1,68 @@
-const { DataTypes } = require('sequelize')
-const { sequelize } = require('../config/db')
+const mongoose = require('mongoose');
+const { baseSchemaOptions, withSoftDelete, normalizeStatus } = require('./model.utils');
 
-const Fee = sequelize.define('fees', {
-    id: {
-        type: DataTypes.INTEGER,
-        primaryKey: true,
-        autoIncrement: true
-    },
-
-    userId: {
-        type: DataTypes.INTEGER,
-        allowNull: true,
-        references: {
-            model: 'users',
-            key: 'id'
+const feeSchema = new mongoose.Schema(
+    {
+        userId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'users',
+            default: null,
         },
-        onDelete: 'SET NULL',
-        onUpdate: 'CASCADE'
-    },
-
-    amount: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-        defaultValue: 0,
-        validate: {
-            min: 0
+        amount: {
+            type: Number,
+            required: true,
+            default: 0,
+            min: 0,
+        },
+        month: {
+            type: String,
+            trim: true,
+            default: null,
+        },
+        year: {
+            type: Number,
+            default: null,
+        },
+        screenshot: {
+            type: String,
+            default: null,
+        },
+        transactionId: {
+            type: String,
+            trim: true,
+            default: null,
+        },
+        status: {
+            type: String,
+            enum: ['PENDING', 'APPROVED', 'REJECTED'],
+            default: 'PENDING',
+            set: normalizeStatus,
+        },
+        submittedAt: {
+            type: Date,
+            default: null,
+        },
+        verifiedAt: {
+            type: Date,
+            default: null,
         }
     },
-    month: {
-        type: DataTypes.STRING
-    },
-    year: {
-        type: DataTypes.INTEGER,
-    },
-    screenshot: {
-        type: DataTypes.STRING
-    },
+    baseSchemaOptions()
+);
 
+withSoftDelete(feeSchema);
 
-    status: {
-        type: DataTypes.ENUM(
-            'PENDING',
-            'APPROVED',
-            'REJECT'
-        ),
-        defaultValue: 'PENDING'
-    },
-
-    submittedAt: {
-        type: DataTypes.DATE,
-        defaultValue: null
+feeSchema.index(
+    { userId: 1, month: 1, year: 1 },
+    {
+        unique: true,
+        partialFilterExpression: {
+            userId: { $type: 'objectId' },
+            deletedAt: null,
+        },
     }
-}, {
-    freezeTableName: true,
-    timestamps: true,
-    paranoid: true
-});
+);
 
-module.exports = { Fee }
+const Fee = mongoose.models.fees || mongoose.model('fees', feeSchema);
+
+module.exports = { Fee };

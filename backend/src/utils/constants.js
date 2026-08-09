@@ -33,7 +33,7 @@ const ATHLETE_STATUS = {
 const FEE_STATUS = {
     PENDING: 'PENDING',
     APPROVED: 'APPROVED',
-    REJECTED: 'REJECT',
+    REJECTED: 'REJECTED',
 };
 
 // Cloudinary folder paths
@@ -51,18 +51,6 @@ const FILE_UPLOAD = {
     ALLOWED_DOCUMENT_TYPES: new Set(['image/jpeg', 'image/png', 'application/pdf']),
 };
 
-// Default admin credentials
-const DEFAULT_ADMIN = {
-    email: 'admin@sportshub.com',
-    password: 'password123',
-    name: 'Super Admin',
-    role: 'ADMIN',
-    age: 21,
-    sports: 'Shot Put',
-    status: 'APPROVED',
-    contact: '8765432198',
-};
-
 module.exports = {
     ALLOWED_SPORTS,
     USER_ROLES,
@@ -70,5 +58,4 @@ module.exports = {
     FEE_STATUS,
     CLOUDINARY_FOLDERS,
     FILE_UPLOAD,
-    DEFAULT_ADMIN,
 };

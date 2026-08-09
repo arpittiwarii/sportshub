@@ -1,17 +1,27 @@
 const JWT = require('jsonwebtoken');
-console.log(process.env.JWT_SECRET_KEY, process.env.JWT_EXPIRE_IN)
+const { config } = require('../env');
+
 const generateToken = (user) => {
+    const secret = config.auth.jwtSecret;
+    const expiresIn = config.auth.jwtExpiresIn;
+
+    if (!secret) {
+        throw new Error('JWT_SECRET is not configured');
+    }
+
     const payload = {
         id: user.id,
         name: user.name,
         role: user.role,
-        email: user.email
+        email: user.email,
     };
-    const token = JWT.sign(payload, process.env.JWT_SECRET_KEY, {
-        expiresIn: process.env.JWT_EXPIRE_IN
+
+    const token = JWT.sign(payload, secret, {
+        expiresIn,
+        issuer: 'sportshub',
     });
 
-    return { token, expiresIn: process.env.JWT_EXPIRE_IN };
+    return { token, expiresIn };
 };
 
 module.exports = { generateToken };

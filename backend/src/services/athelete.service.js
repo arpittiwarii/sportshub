@@ -1,4 +1,4 @@
-const { DatabaseError } = require('sequelize');
+const { DatabaseError } = require('../Error/DataBaseError');
 const {
     findAllAthletes,
     findUserById,
@@ -25,8 +25,9 @@ const getAllAthletesService = async () => {
 
 const getAthleteByIdService = async (id) => {
     try {
-        const athlete = await findUserById(id, { attributes: { exclude: ['password'] } });
-        if (!athlete || athlete.role !== 'ATHLETE') {
+        const athlete = await findUserById(id);
+        const role = String(athlete?.role || '').toUpperCase();
+        if (!athlete || role !== 'ATHLETE') {
             throw new ValidationError('Athlete not found');
         }
         return athlete;
@@ -38,8 +39,9 @@ const getAthleteByIdService = async (id) => {
 
 const updateAthleteService = async (id, { name, age, sports, contact, school, afiId }) => {
     try {
-        const athlete = await findUserById(id, { attributes: { exclude: ['password'] } });
-        if (!athlete || athlete.role !== 'ATHLETE') {
+        const athlete = await findUserById(id);
+        const role = String(athlete?.role || '').toUpperCase();
+        if (!athlete || role !== 'ATHLETE') {
             throw new ValidationError('Athlete not found');
         }
 
@@ -95,8 +97,9 @@ const updateAthleteStatusService = async (id, { status }) => {
             throw new ValidationError('Invalid status');
         }
 
-        const athlete = await findUserById(id, { attributes: { exclude: ['password'] } });
-        if (!athlete || athlete.role !== 'ATHLETE') {
+        const athlete = await findUserById(id);
+        const role = String(athlete?.role || '').toUpperCase();
+        if (!athlete || role !== 'ATHLETE') {
             throw new Authentication('Athlete not found');
         }
 

@@ -17,9 +17,10 @@ const { CLOUDINARY_FOLDERS } = require('../utils/constants');
  */
 async function getAdminProfile(adminId) {
     try {
-        const admin = await findUserById(adminId, { attributes: { exclude: ['password'] } });
+        const admin = await findUserById(adminId);
+        const role = String(admin?.role || '').toUpperCase();
 
-        if (!admin || admin.role !== 'ADMIN') {
+        if (!admin || role !== 'ADMIN') {
             throw new ValidationError('Admin not found');
         }
 
@@ -45,8 +46,9 @@ async function updateAdminProfileImage(adminId, fileBuffer, updates = {}) {
         }
 
         // Fetch admin
-        const admin = await findUserById(adminId, { attributes: { exclude: ['password'] } });
-        if (!admin || admin.role !== 'ADMIN') {
+        const admin = await findUserById(adminId);
+        const role = String(admin?.role || '').toUpperCase();
+        if (!admin || role !== 'ADMIN') {
             throw new ValidationError('Admin not found.');
         }
 
@@ -92,8 +94,9 @@ async function updateStudentProfileImage(studentId, fileBuffer) {
         }
 
         // Fetch student
-        const student = await findUserById(studentId, { attributes: { exclude: ['password'] } });
-        if (!student || student.role !== 'ATHLETE') {
+        const student = await findUserById(studentId);
+        const role = String(student?.role || '').toUpperCase();
+        if (!student || role !== 'ATHLETE') {
             throw new ValidationError('Student not found.');
         }
 

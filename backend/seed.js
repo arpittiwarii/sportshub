@@ -1,41 +1,38 @@
-const mongoose = require('mongoose');
-require('dotenv').config();
-const User = require('./models/User');
+const bcrypt = require('bcryptjs');
+const { config } = require('./src/env');
+const { connectDB, mongoose } = require('./src/config/db');
+const { User } = require('./src/models/user.model');
 
 const seedAdmin = async () => {
   try {
-    // Connect to database
-    await mongoose.connect(process.env.MONGODB_URI);
+    await connectDB();
     console.log('Connected to MongoDB');
 
-    // Check if admin already exists
-    const adminExists = await User.findOne({ email: 'admin@sportshub.com' });
-    
+    const email = 'admin@sportshub.com';
+    const adminExists = await User.findOne({ email });
+
     if (adminExists) {
-      console.log('✓ Admin already exists');
-      console.log('Demo Admin Credentials:');
-      console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-      console.log('Email: admin@sportshub.com');
-      console.log('Password: password123');
-      console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+      console.log('Admin already exists');
     } else {
-      // Create admin user
-      const admin = await User.create({
+      await User.create({
         name: 'Super Admin',
-        email: 'admin@sportshub.com',
-        password: 'password123',
-        role: 'admin',
-        status: 'approved'
+        email,
+        password: await bcrypt.hash('password123', config.auth.passwordSaltRounds),
+        role: 'ADMIN',
+        age: 21,
+        sports: 'Shot Put',
+        status: 'APPROVED',
+        contact: '7771007505',
       });
 
-      console.log('✓ Admin user created successfully!');
-      console.log('Demo Admin Credentials:');
-      console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-      console.log('Email: admin@sportshub.com');
-      console.log('Password: password123');
-      console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+      console.log('Admin user created successfully');
     }
 
+    console.log('Demo Admin Credentials:');
+    console.log('Email: admin@sportshub.com');
+    console.log('Password: password123');
+
+    await mongoose.connection.close();
     process.exit(0);
   } catch (error) {
     console.error('Error seeding admin:', error.message);

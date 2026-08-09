@@ -1,36 +1,28 @@
-const { DataTypes, Model } = require('sequelize')
-const { sequelize } = require('../config/db')
+const mongoose = require('mongoose');
+const { baseSchemaOptions, withSoftDelete } = require('./model.utils');
 
-const Blog = sequelize.define("blogs",
+const blogSchema = new mongoose.Schema(
     {
-        id: {
-            type: DataTypes.INTEGER,
-            autoIncrement: true,
-            primaryKey: true,
-        },
         title: {
-            type: DataTypes.STRING,
-            allowNull: false,
+            type: String,
+            required: true,
+            trim: true,
         },
         content: {
-            type: DataTypes.TEXT,
-            allowNull: false,
+            type: String,
+            required: true,
         },
         userId: {
-            type: DataTypes.INTEGER,
-            references: {
-                model: 'users',
-                key: 'id'
-            },
-            allowNull: false,
-            onDelete: 'SET NULL',
-            onUpdate: 'CASCADE'
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'users',
+            required: true,
         }
-    }, {
-    freezeTableName: true,
-    timestamps: true,
-    paranoid: true,
-}
-)
+    },
+    baseSchemaOptions()
+);
 
-module.exports = { Blog }
+withSoftDelete(blogSchema);
+
+const Blog = mongoose.models.blogs || mongoose.model('blogs', blogSchema);
+
+module.exports = { Blog };

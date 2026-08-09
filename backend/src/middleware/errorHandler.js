@@ -1,43 +1,42 @@
+const { config } = require('../env');
+
 function errorHandler(err, req, res, next) {
+    const isProduction = config.nodeEnv === 'production';
 
-    console.error(err);
-
-    if (err.isOperational) {
-
-        return res
-            .status(err.statusCode)
-            .json({
-                code: err.code,
-                message: err.message
-            });
+    if (err?.name === 'MulterError') {
+        return res.status(400).json({
+            code: 'UPLOAD_ERROR',
+            message: err.code === 'LIMIT_FILE_SIZE' ? 'Uploaded file is too large.' : 'Invalid upload payload.'
+        });
     }
 
-    return res
-        .status(500)
-        .json({
-            code: "INTERNAL_ERROR",
+    if (err?.isOperational) {
+        return res.status(err.statusCode || 400).json({
+            code: err.code || 'VALIDATION_ERROR',
             message: err.message
         });
+    }
+
+    if (err?.message && /invalid|unsupported|too large|not allowed/i.test(err.message)) {
+        return res.status(400).json({
+            code: 'VALIDATION_ERROR',
+            message: err.message
+        });
+    }
+
+    if (!isProduction) {
+        console.error(err);
+        return res.status(500).json({
+            code: 'INTERNAL_ERROR',
+            message: err.message || 'An unexpected error occurred.'
+        });
+    }
+
+    console.error('Unhandled application error', { path: req.originalUrl, method: req.method });
+    return res.status(500).json({
+        code: 'INTERNAL_ERROR',
+        message: 'An unexpected error occurred.'
+    });
 }
 
 module.exports = errorHandler;
-
-
-//something to implement later 
-
-
-// (err, req, res, next) => {
-//   // eslint-disable-next-line no-console
-//   console.error('API Error:', err);
-
-//   if (err instanceof multer.MulterError) {
-//     return res.status(400).json({ message: err.message });
-//   }
-
-//   // FileFilter/file validation errors typically come as plain Error objects.
-//   if (err?.message && err.message.toLowerCase().includes('invalid')) {
-//     return res.status(400).json({ message: err.message });
-//   }
-
-//   return res.status(err.statusCode || 500).json({ message: err.message || 'Server error' });
-// } 

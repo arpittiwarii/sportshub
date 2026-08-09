@@ -1,14 +1,8 @@
 import axios from 'axios';
-const node_type="development";
-// Use environment variable for API URL, fallback to localhost for development
 
-
-//||import.meta.env.VITE_API_URL || 'https://sportshub-backend-mzth.onrender.com/api';
-
-// const apiBaseURL = (node_type==='production')?'https://sportshub-backend-mzth.onrender.com/api':"http://localhost:8000/api";
-const apiBaseURL = "http://localhost:8000/api";
+const apiBaseURL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
 const api = axios.create({
-  baseURL: apiBaseURL
+  baseURL: apiBaseURL,
 });
 
 // Intercept requests to add token

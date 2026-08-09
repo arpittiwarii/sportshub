@@ -5,8 +5,8 @@ const createFeeSchema = {
 
     properties: {
         userId: {
-            type: "integer",
-            minimum: 1
+            type: "string",
+            minLength: 1
         },
 
         amount: {
@@ -46,7 +46,8 @@ const createFeeSchema = {
             enum: [
                 "PENDING",
                 "APPROVED",
-                "REJECT"
+                "REJECT",
+                "REJECTED"
             ]
         }
     }

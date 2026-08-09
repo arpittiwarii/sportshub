@@ -47,7 +47,7 @@ const uploadFeeProof = async (feeId, userId) => {
         const fee = await findById(feeId);
         console.log(fee)
         if (!fee) throw new ValidationError('Fee record not found');
-        if (fee.userId !== userId) throw new ValidationError('Not authorized to update this record');
+        if (fee.userId?.toString() !== userId?.toString()) throw new ValidationError('Not authorized to update this record');
 
         // const folder = `sports-hub/fees/${fee.id.toString()}`;
         // const result = await uploadBufferToCloudinary(fileBuffer, { folder, publicId: 'screenshot' });
@@ -62,7 +62,7 @@ const uploadFeeProof = async (feeId, userId) => {
 
 const verifyFee = async (feeId, status) => {
     try {
-        const valid = ['PENDING', 'APPROVED', 'REJECT'];
+        const valid = ['PENDING', 'APPROVED', 'REJECT', 'REJECTED'];
         const upper = String(status).toUpperCase();
         if (!valid.includes(upper)) throw new ValidationError('Invalid status');
         const fee = await findById(feeId);

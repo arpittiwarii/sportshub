@@ -1,10 +1,18 @@
-const { OTP } = require("../models/otp.model")
+const mongoose = require('mongoose');
+const { OTP } = require("../models/otp.model");
 
-const createOtpRepository = async (newotp, uid) => {
-    return await OTP.create({ otp: newotp, UId: uid })
+function isValidId(id) {
+    return mongoose.Types.ObjectId.isValid(id);
 }
+
+const createOtpRepository = async (newotp, uid, options = {}) => {
+    const [otp] = await OTP.create([{ otp: newotp, UId: uid }], options);
+    return otp;
+};
+
 const getOtpRepository = async (uid, otp) => {
-    return await OTP.findOne({ where: { UId: uid, otp: otp } })
-}
+    if (!isValidId(uid)) return null;
+    return await OTP.findOne({ UId: uid, otp });
+};
 
-module.exports = { createOtpRepository, getOtpRepository }
+module.exports = { createOtpRepository, getOtpRepository };

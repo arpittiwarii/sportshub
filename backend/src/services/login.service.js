@@ -1,4 +1,4 @@
-const { findUserByEmail, createUser, countAdminUsers } = require('../repositories/User.repository');
+const { findUserByEmail } = require('../repositories/User.repository');
 const { NotFoundError } = require('../Error/NotFoundError');
 const { Authentication } = require('../Error/AuthenticationError');
 const { ValidationError } = require('../Error/ValidationError');
@@ -6,62 +6,63 @@ const { generateToken } = require('./token.service');
 const { InternalServerError } = require('../Error/InternalServerError');
 const bcrypt = require('bcryptjs');
 
+const validatePasswordStrength = (password) => {
+    if (!password || password.length < 8) {
+        return false;
+    }
+
+    return /[A-Za-z]/.test(password) && /\d/.test(password);
+};
+
 // @desc    Auth user & get token
 // @route   POST /api/auth/login
 // @access  Public
 const loginUser = async ({ email, password }) => {
     try {
-        // Seed default admin if missing
-        const adminCount = await countAdminUsers();
-        console.log(adminCount)
-        if (!adminCount || adminCount <= 0) {
-            const user = await createUser({
-                email: 'admin@sportshub.com',
-                password: await bcrypt.hash('password123', Number(process.env.SALT_ROUND)),
-                role: 'ADMIN',
-                age: 21,
-                sports: 'Shot Put',
-                status: 'APPROVED',
-                contact: "8765432198",
-                name: 'Super Admin'
-            });
+        if (!email || !password) {
+            throw new ValidationError('Email and password are required.');
         }
 
-
-        // User doesn't exist
-        const user = await findUserByEmail(email);
+        const normalizedEmail = String(email).trim().toLowerCase();
+        const user = await findUserByEmail(normalizedEmail);
         if (!user) {
-            throw new NotFoundError('Email not found. Please check and try again.');
+            throw new NotFoundError('Invalid email or password.');
         }
+
+        const normalizedRole = String(user.role || '').toUpperCase();
+        const normalizedStatus = String(user.status || '').toUpperCase();
 
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
-            throw new Authentication('Wrong password. Please try again.');
+            throw new Authentication('Invalid email or password.');
         }
 
-        // Check approval for athletes
-        if (user.role === 'ATHLETE') {
-            if (user.status === 'PENDING') {
+        if (normalizedRole === 'ATHLETE') {
+            if (normalizedStatus === 'PENDING') {
                 throw new ValidationError('Account is pending admin approval. Please wait for approval.');
             }
-            if (user.status === 'REJECTED') {
+            if (normalizedStatus === 'REJECTED') {
                 throw new ValidationError('Your account has been rejected. Please contact admin.');
             }
         }
-        const token = await generateToken(user);
-        if (!token)
-            throw new InternalServerError('token not generated')
 
-        return ({
+        const token = generateToken({
+            id: user.id,
+            name: user.name,
+            role: normalizedRole,
+            email: user.email,
+        });
+
+        return {
             ...token,
             user: {
                 id: user.id,
                 name: user.name,
                 email: user.email,
-                role: user.role,
-                status: user.status,
-            }
-        });
+                role: normalizedRole,
+                status: normalizedStatus,
+            },
+        };
     } catch (error) {
         if (error && error.isOperational) {
             throw error;
@@ -71,4 +72,4 @@ const loginUser = async ({ email, password }) => {
     }
 };
 
-module.exports = { loginUser };
+module.exports = { loginUser, validatePasswordStrength };

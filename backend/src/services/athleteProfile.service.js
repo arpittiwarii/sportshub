@@ -8,7 +8,6 @@ const { findUserById, updateUserById } = require('../repositories/User.repositor
 const { ValidationError } = require('../Error/ValidationError');
 const { InternalServerError } = require('../Error/InternalServerError');
 const { CLOUDINARY_FOLDERS } = require('../utils/constants');
-const { sequelize } = require('../config/db');
 
 /**
  * Update athlete profile image
@@ -21,38 +20,37 @@ const { sequelize } = require('../config/db');
  */
 async function updateAthleteProfileImage(athleteId, userId, fileBuffer) {
     try {
-        await sequelize.transaction(async (t) => {
-            // Authorization check - athlete can only update their own profile
-            if (userId.toString() !== athleteId.toString()) {
-                throw new ValidationError('Not authorized to update this profile image.');
-            }
+        // Authorization check - athlete can only update their own profile
+        if (userId.toString() !== athleteId.toString()) {
+            throw new ValidationError('Not authorized to update this profile image.');
+        }
 
-            // Fetch athlete
-            const athlete = await findUserById(athleteId, { attributes: { exclude: ['password'] } });
-            if (!athlete || athlete.role !== 'ATHLETE') {
-                throw new ValidationError('Athlete not found.');
-            }
+        // Fetch athlete
+        const athlete = await findUserById(athleteId);
+        const role = String(athlete?.role || '').toUpperCase();
+        if (!athlete || role !== 'ATHLETE') {
+            throw new ValidationError('Athlete not found.');
+        }
 
-            if (!fileBuffer) {
-                throw new ValidationError('Profile image file is required.');
-            }
+        if (!fileBuffer) {
+            throw new ValidationError('Profile image file is required.');
+        }
 
-            // Upload to Cloudinary
-            const folder = CLOUDINARY_FOLDERS.STUDENT_PROFILES(athleteId.toString());
-            const result = await uploadBufferToCloudinary(fileBuffer, {
-                folder,
-                publicId: 'profileImage',
-            });
+        // Upload to Cloudinary
+        const folder = CLOUDINARY_FOLDERS.STUDENT_PROFILES(athleteId.toString());
+        const result = await uploadBufferToCloudinary(fileBuffer, {
+            folder,
+            publicId: 'profileImage',
+        });
 
-            // Update athlete in database via repository
-            const updated = await updateUserById(athleteId, { profile: result.secure_url });
+        // Update athlete in database via repository
+        const updated = await updateUserById(athleteId, { profile: result.secure_url });
 
-            if (!updated) {
-                throw new InternalServerError('Failed to update athlete profile');
-            }
+        if (!updated) {
+            throw new InternalServerError('Failed to update athlete profile');
+        }
 
-            return updated;
-        })
+        return updated;
     } catch (error) {
         if (error instanceof ValidationError) throw error;
         throw new InternalServerError(`Server error: ${error.message}`);

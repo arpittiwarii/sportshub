@@ -1,48 +1,71 @@
-const { User } = require('../models/user.model')
+const mongoose = require('mongoose');
+const { User } = require('../models/user.model');
+
+function isValidId(id) {
+    return mongoose.Types.ObjectId.isValid(id);
+}
+
+function withPassword(query, options = {}) {
+    if (options.includePassword) {
+        return query.select('+password');
+    }
+    return query;
+}
 
 async function findUserByEmail(email) {
-    return await User.scope('withPassword').findOne({ where: { email } })
+    return await User.findOne({ email: String(email).toLowerCase() }).select('+password');
 }
 
 async function findAllAthletes() {
-    return await User.findAll({
-        where: { role: 'ATHLETE' },
-        order: [['createdAt', 'DESC']],
-    })
+    return await User.find({ role: 'ATHLETE' }).sort({ createdAt: -1 });
 }
 
-async function createUser(data) {
-    const user = await User.create(data)
+async function createUser(data, options = {}) {
+    const [user] = await User.create([data], options);
     return user;
 }
 
 async function findUserById(id, options = {}) {
-    return await User.findByPk(id, options)
+    if (!isValidId(id)) return null;
+    let query = User.findById(id);
+    query = withPassword(query, options);
+    return await query;
 }
 
-async function updateUserById(id, updates) {
-    const user = await User.findByPk(id)
-    if (!user) return null
-    await user.update(updates)
-    return await user.reload()
+async function updateUserById(id, updates, options = {}) {
+    if (!isValidId(id)) return null;
+
+    let query = User.findOneAndUpdate(
+        { _id: id, deletedAt: null },
+        updates,
+        {
+            new: true,
+            runValidators: true,
+            ...options,
+        }
+    );
+
+    query = withPassword(query, options);
+    return await query;
 }
 
-async function deleteUserById(id) {
-    const user = await User.findByPk(id)
-    if (!user) return null
-    await user.destroy()
-    return true
+async function deleteUserById(id, options = {}) {
+    if (!isValidId(id)) return null;
+    const user = await User.findOne({ _id: id, deletedAt: null });
+    if (!user) return null;
+    await user.softDelete(options);
+    return true;
 }
 
 async function countAdminUsers() {
-    return await User.count({ where: { role: 'ADMIN' } })
+    return await User.countDocuments({ role: 'ADMIN' });
 }
 
 async function findApprovedAthletes() {
-    return await User.findAll({
-        where: { role: 'ATHLETE', status: 'APPROVED' },
-        attributes: { exclude: ['password'] }
-    })
+    return await User.find({
+        role: 'ATHLETE',
+        status: 'APPROVED',
+    });
 }
 
 module.exports = {
@@ -54,4 +77,4 @@ module.exports = {
     deleteUserById,
     countAdminUsers,
     findApprovedAthletes,
-}
+};

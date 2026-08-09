@@ -16,8 +16,8 @@ const createBlogSchema = {
         },
 
         userId: {
-            type: "integer",
-            minimum: 1
+            type: "string",
+            minLength: 1
         }
     }
 };

@@ -25,6 +25,7 @@ const AdminDashboard = () => {
         api.get('/payments'),
         api.get('/admin/profile'),
       ]);
+      // console.log(paymentsRes)
       setStudents((studentsRes.data?.data || studentsRes.data) ?? []);
       setPayments((paymentsRes.data?.data || paymentsRes.data) ?? []);
       setAdminProfile((adminProfileRes.data?.data || adminProfileRes.data) ?? []);
@@ -138,8 +139,11 @@ const AdminDashboard = () => {
     }
   };
 
-  const pendingStudents = students.filter(s => s.status === 'PENDING');
-  const approvedStudents = students.filter(s => s.status === 'APPROVED');
+const pendingStudents = (Array.isArray(students) ? students : [])
+  .filter(s => s.status === 'PENDING');
+
+const approvedStudents = (Array.isArray(students) ? students : [])
+  .filter(s => s.status === 'APPROVED');
 
   // Defaulters: Payments that are pending or rejected
   const actionRequiredPayments = payments.filter(p => p.status === 'PENDING' && p.submittedAt); // Need admin review
@@ -607,7 +611,7 @@ const AdminDashboard = () => {
                     <h3 className="text-lg font-bold text-white group-hover:text-red-400 transition-colors flex-1">
                       {payment.user?.name || 'Unknown'}
                     </h3>
-                    <span className="text-xl font-bold text-red-400 whitespace-nowrap">₹{payment.amount}</span>
+                    <span className="text-xl font-bold text-red-400 whitespace-nowrap">₹100{payment.amount}</span>
                   </div>
                   <p className="text-gray-400 text-sm">{payment.month} {payment.year}</p>
                 </div>
@@ -684,7 +688,7 @@ const AdminDashboard = () => {
                     <input
                       type="number"
                       value={generateForm.amount}
-                      onChange={e => setGenerateForm({ ...generateForm, amount: e.target.value })}
+                      onChange={e => setGenerateForm(Number({ ...generateForm, amount: e.target.value }))}
                       className="w-full bg-dark-900 border border-dark-700 hover:border-primary/50 focus:border-primary outline-none text-white rounded-lg px-4 py-3 transition-colors"
                     />
                   </div>

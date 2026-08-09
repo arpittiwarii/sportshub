@@ -7,7 +7,7 @@ const {
   deleteAthlete,
   updateAthleteStatus
 } = require('../controllers/athleteController');
-const { protect, restrictTo } = require('../middleware/authMiddleware');
+const { protect, restrictTo, requireOwnershipOrAdmin } = require('../middleware/authMiddleware');
 const { upload } = require('../middleware/studentDocsUpload');
 const { uploadStudentDocumentsController } = require('../controllers/studentDocumentController');
 const { upload: profileImageUpload } = require('../middleware/profileImageUpload');
@@ -15,17 +15,16 @@ const { updateAthleteProfileImageController } = require('../controllers/athleteP
 const { updateSchema } = require("../schemas/user.schema")
 const { validate } = require('../middleware/validate')
 
-
-
 // Protected routes for Athlete & Admin to view/update profile
-router.get('/:id', protect, getAthleteById);
-router.put('/:id', protect, validate(updateSchema), updateAthlete);
+router.get('/:id', protect, requireOwnershipOrAdmin('id'), getAthleteById);
+router.put('/:id', protect, requireOwnershipOrAdmin('id'), validate(updateSchema), updateAthlete);
 
 // Athlete self profile image
 router.put(
   '/:id/profile-image',
   protect,
   restrictTo('ATHLETE'),
+  requireOwnershipOrAdmin('id'),
   profileImageUpload.single('profileImage'),
   updateAthleteProfileImageController
 );
@@ -35,6 +34,7 @@ router.put(
   '/:id/documents',
   protect,
   restrictTo('ATHLETE'),
+  requireOwnershipOrAdmin('id'),
   upload.fields([
     { name: 'birthCertificate', maxCount: 1 },
     { name: 'aadharCard', maxCount: 1 },
@@ -45,6 +45,5 @@ router.put(
 // Protected routes for Admin only
 router.get('/', protect, restrictTo('ADMIN'), getAllAthletes);
 router.delete('/:id', protect, restrictTo('ADMIN'), deleteAthlete);
-// router.put('/:id/status', protect, restrictTo('admin'), updateAthleteStatus);
-router.put('/:id/status', updateAthleteStatus);
+router.put('/:id/status', protect, restrictTo('ADMIN'), updateAthleteStatus);
 module.exports = router;

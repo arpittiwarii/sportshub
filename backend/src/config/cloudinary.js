@@ -1,20 +1,20 @@
 const cloudinary = require('cloudinary').v2;
+const { config } = require('../env');
 
-const required = ['CLOUDINARY_CLOUD_NAME', 'CLOUDINARY_API_KEY', 'CLOUDINARY_API_SECRET'];
-const missing = required.filter((k) => !process.env[k]);
+cloudinary.config({
+  cloud_name: config.storage.cloudinary.cloudName,
+  api_key: config.storage.cloudinary.apiKey,
+  api_secret: config.storage.cloudinary.apiSecret,
+});
 
-if (missing.length) {
-  // Warn instead of crashing so the server can still run without uploads configured.
-  // Upload endpoints will fail with a clear Cloudinary error when invoked.
-  // eslint-disable-next-line no-console
-  console.warn(`Cloudinary env vars missing: ${missing.join(', ')}`);
-} else {
-  cloudinary.config({
-    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-    api_key: process.env.CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET,
-  });
-}
+const verifyCloudinaryConnection = async () => {
+  if (!config.storage.cloudinary.cloudName || !config.storage.cloudinary.apiKey || !config.storage.cloudinary.apiSecret) {
+    throw new Error('Cloudinary configuration is incomplete. Check CLOUDINARY_* values.');
+  }
 
-module.exports = cloudinary;
+  await cloudinary.api.ping();
+  return true;
+};
+
+module.exports = { cloudinary, verifyCloudinaryConnection };
 
