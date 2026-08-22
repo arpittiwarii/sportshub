@@ -27,7 +27,7 @@ export default function HeroSection({
   backgroundGradient = 'from-dark-900 via-transparent to-transparent'
 }) {
   return (
-    <section className="relative min-h-screen flex items-center pt-20">
+    <section className="theme-hero relative min-h-screen flex items-center pt-20">
       <div className="absolute inset-0 z-0">
         {backgroundImage && (
           <>

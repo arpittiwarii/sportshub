@@ -34,7 +34,7 @@ const sendPaymentReminderEmail = async ({ email, name, amount, duedate }) => {
         to: email,
         subject: 'Payment Reminder Email',
         html: `
-            ${paymentReminderTemplate(name, email, amount, duedate)}
+            ${paymentReminderTemplate(name, amount, duedate)}
         `,
     });
     return true;

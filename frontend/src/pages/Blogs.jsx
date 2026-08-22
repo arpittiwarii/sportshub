@@ -50,7 +50,7 @@ const Blogs = () => {
     fetchUser()
 
     fetchBlogs();
-  }, [blogs]);
+  }, []);
 
   if (loading) {
     return <div className="min-h-screen pt-24 bg-dark-900 text-center text-gray-400">Loading blogs...</div>;

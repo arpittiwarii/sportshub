@@ -1,6 +1,7 @@
 const { findAllWithAthlete, findByUserId, findOneByUserMonthYear, createFee, findById, updateFee } = require('../repositories/Fee.repository');
 const { findApprovedAthletes } = require('../repositories/User.repository');
 const { uploadBufferToCloudinary } = require('./cloudinaryUpload');
+const { CLOUDINARY_FOLDERS } = require('../utils/constants');
 const { DatabaseError } = require('../Error/DataBaseError');
 const { InternalServerError } = require('../Error/InternalServerError');
 const { ValidationError } = require('../Error/ValidationError');
@@ -10,7 +11,6 @@ const getAllFees = async () => {
 
         return await findAllWithAthlete();
     } catch (error) {
-        console.log(error)
         throw new InternalServerError(error.message);
     }
 };
@@ -42,17 +42,27 @@ const generateMonthlyFees = async ({ month, year, amount }) => {
     }
 };
 
-const uploadFeeProof = async (feeId, userId) => {
+const uploadFeeProof = async (feeId, userId, file, transactionId) => {
     try {
+        if (!file || !file.buffer) throw new ValidationError('Payment screenshot is required.');
+
         const fee = await findById(feeId);
-        console.log(fee)
         if (!fee) throw new ValidationError('Fee record not found');
         if (fee.userId?.toString() !== userId?.toString()) throw new ValidationError('Not authorized to update this record');
 
-        // const folder = `sports-hub/fees/${fee.id.toString()}`;
-        // const result = await uploadBufferToCloudinary(fileBuffer, { folder, publicId: 'screenshot' });
+        const folder = CLOUDINARY_FOLDERS.FEES(fee.id.toString());
+        const result = await uploadBufferToCloudinary(file.buffer, { folder, publicId: 'screenshot' });
 
-        const updated = await updateFee(feeId, { screenshot: null, status: 'PENDING', submittedAt: new Date() });
+        const updates = {
+            screenshot: result.secure_url,
+            status: 'PENDING',
+            submittedAt: new Date(),
+        };
+
+        const trimmedTxn = transactionId ? String(transactionId).trim() : '';
+        if (trimmedTxn) updates.transactionId = trimmedTxn;
+
+        const updated = await updateFee(feeId, updates);
         return updated;
     } catch (error) {
         if (error instanceof ValidationError) throw error;

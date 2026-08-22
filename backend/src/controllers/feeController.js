@@ -1,6 +1,3 @@
-const { Fee } = require('../models/fee.model');
-const { User } = require('../models/user.model');
-const { uploadBufferToCloudinary } = require('../services/cloudinaryUpload');
 const feeService = require('../services/fee.service');
 const { success } = require('../utils/apiResponse');
 
@@ -35,7 +32,6 @@ const getMyFees = async (req, res, next) => {
 const generateMonthlyFees = async (req, res, next) => {
   try {
     const result = await feeService.generateMonthlyFees(req.body);
-    console.log(result)
     return success(res, result, 'Generate fees completed', 200);
   } catch (error) {
     next(error);
@@ -43,11 +39,16 @@ const generateMonthlyFees = async (req, res, next) => {
 };
 
 // @desc    Upload Fee proof
-// @route   PUT /api/fees/:id/upload
+// @route   PUT /api/payments/:id/upload
 // @access  Private (Athlete)
 const uploadFeeProof = async (req, res, next) => {
   try {
-    const updated = await feeService.uploadFeeProof(req.params.id, req.user.id);
+    const updated = await feeService.uploadFeeProof(
+      req.params.id,
+      req.user.id,
+      req.file,
+      req.body.transactionId
+    );
     return success(res, updated, 'Fee proof uploaded', 200);
   } catch (error) {
     next(error);

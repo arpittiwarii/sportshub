@@ -12,7 +12,7 @@ const createOtpRepository = async (newotp, uid, options = {}) => {
 
 const getOtpRepository = async (uid, otp) => {
     if (!isValidId(uid)) return null;
-    return await OTP.findOne({ UId: uid, otp });
+    return await OTP.findOne({ UId: uid, otp: String(otp) });
 };
 
 module.exports = { createOtpRepository, getOtpRepository };

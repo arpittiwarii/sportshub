@@ -1,5 +1,4 @@
 const cron = require('node-cron')
-const { sendPaymentReminderEmail } = require('../utils/email.service')
 const { emailQueue } = require('../queues/email.queue');
 const { findPendingPayments } = require('../repositories/Fee.repository');
 
@@ -9,14 +8,20 @@ const paymentReminderJob = () => {
     const task = cron.schedule('0 9 * * *', async () => {
         try {
             const pendingPayments = await findPendingPayments()
-            // console.log(pendingPayments)
-            if (pendingPayments.lenth >= 0) {
+            if (Array.isArray(pendingPayments) && pendingPayments.length > 0) {
                 for (const payment of pendingPayments) {
+                    const email = payment?.user?.email;
+                    if (!email) continue;
+
                     await emailQueue.add(
                         'payment-reminder-email',
                         {
-                            email: payment?.user?.email,
-                            name: payment?.user?.name
+                            email,
+                            name: payment?.user?.name,
+                            amount: payment?.amount,
+                            duedate: payment?.month && payment?.year
+                                ? `${payment.month} ${payment.year}`
+                                : 'at your earliest convenience',
                         },
                         {
                             attempts: 3,
@@ -30,8 +35,10 @@ const paymentReminderJob = () => {
                 }
             }
         } catch (err) {
-            console.log(err)
+            console.error('Payment reminder job failed', err?.message)
         }
+    }, {
+        timezone: 'Asia/Kolkata',
     })
     return task
 }

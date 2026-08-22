@@ -1,13 +1,15 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { FiMenu, FiX } from 'react-icons/fi';
+import { FiMenu, FiMoon, FiSun, FiX } from 'react-icons/fi';
 import { motion } from 'framer-motion';
 import logo from "../assets/logo.jpg";
+import { useTheme } from '../context/theme-context';
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
+  const { theme, toggleTheme } = useTheme();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -46,7 +48,7 @@ const Navbar = () => {
 
   return (
     <header
-      className={`fixed top-0 w-full z-50 transition-all duration-300 ${isScrolled ? 'bg-dark-900/90 backdrop-blur-md border-b border-white/10 py-3' : 'bg-transparent py-5'
+      className={`app-navbar fixed top-0 w-full z-50 transition-all duration-300 bg-dark-900/90 backdrop-blur-md border-b border-white/10 py-3 shadow-lg bg-dark-900/75 backdrop-blur-sm py-5'
         }`}
     >
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 flex justify-between items-center">
@@ -81,6 +83,15 @@ const Navbar = () => {
               </Link>
             </div>
           )}
+          <button
+            type="button"
+            onClick={toggleTheme}
+            className="theme-toggle"
+            aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+            title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+          >
+            {theme === 'dark' ? <FiSun /> : <FiMoon />}
+          </button>
         </nav>
         <motion.div
           initial={false}
@@ -123,6 +134,17 @@ const Navbar = () => {
                 </button>
               </div>
             )}
+            <button
+              type="button"
+              onClick={() => {
+                toggleTheme();
+                setMobileMenuOpen(false);
+              }}
+              className="theme-toggle theme-toggle-mobile"
+            >
+              {theme === 'dark' ? <FiSun /> : <FiMoon />}
+              Use {theme === 'dark' ? 'light' : 'dark'} mode
+            </button>
           </div>
         </motion.div>
 

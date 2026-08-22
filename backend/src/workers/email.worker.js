@@ -1,4 +1,5 @@
 const { Worker } = require("bullmq");
+const { config } = require("../env");
 const { sendWelcomeEmail, sendOtpEmail, sendApprovalConfirmedEmail, sendApprovalRejectedEmail, sendApprovalRequestEmail, sendPaymentReminderEmail } = require("../utils/email.service.js");
 
 console.log("Worker started...");
@@ -39,9 +40,11 @@ new Worker(
         }
     },
     {
-        connection: {
-            host: "127.0.0.1",
-            port: 6379
-        }
+        connection: config.redis.url
+            ? { connectionString: config.redis.url }
+            : {
+                host: config.redis.host,
+                port: config.redis.port,
+            },
     }
 );

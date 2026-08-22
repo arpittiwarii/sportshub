@@ -17,6 +17,7 @@ export default {
           900: "#0B0B0B",     // Main background
           800: "#1A1A1A",     // Section/card background
           700: "#2A2A2A",     // Borders
+          600: "#3B3B3B",     // Muted controls
         },
         secondary: "#1d4ed8", // Deep blue (kept for compatibility)
         light: "#FFFFFF"      // Primary text

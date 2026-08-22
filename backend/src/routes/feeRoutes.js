@@ -31,8 +31,7 @@ const upload = multer({
 
 // Routes for Athlete
 router.get('/my-fees', protect, getMyFees);
-// router.put('/:id/upload', protect, restrictTo('athlete'), upload.single('screenshot'), uploadFeeProof);
-router.put('/:id/approve', protect, restrictTo('athlete'), uploadFeeProof);
+router.put('/:id/upload', protect, restrictTo('athlete'), upload.single('screenshot'), uploadFeeProof);
 
 // Routes for Admin
 router.get('/', protect, restrictTo('admin'), getAllFees);

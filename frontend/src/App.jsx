@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Home from './pages/Home';
@@ -14,6 +14,7 @@ import OtpPage from './pages/OtpPage'
 import Blogs from './pages/Blogs';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { useTheme } from './context/theme-context';
 
 // Error Boundary
 class ErrorBoundary extends React.Component {
@@ -102,11 +103,13 @@ const StudentRoute = ({ children }) => {
 };
 
 function App() {
+  const { theme } = useTheme();
+
   return (
     <ErrorBoundary>
       <Router>
         <div className="flex flex-col min-h-screen bg-dark-900 text-light font-sans">
-          <ToastContainer theme="dark" />
+          <ToastContainer theme={theme} />
           <Navbar />
           <main className="flex-grow">
             <Routes>

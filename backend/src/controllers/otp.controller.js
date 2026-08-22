@@ -1,9 +1,9 @@
-const { createOtpService, verifyOtpService } = require('../services/otp.service.js');
+const { resendOtpService, verifyOtpService } = require('../services/otp.service.js');
 const { success } = require('../utils/apiResponse.js');
 
 const createOtpController = async (req, res, next) => {
     try {
-        const result = await createOtpService(req.body);
+        const result = await resendOtpService(req.body);
         return success(res, result, 'OTP sent', 201);
     } catch (err) {
         next(err);

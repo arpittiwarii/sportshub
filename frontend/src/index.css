@@ -14,6 +14,99 @@
   }
 }
 
+/* Existing screens use the dark palette directly. These overrides provide a
+   complete light surface without duplicating every component's class list. */
+@layer components {
+  .theme-toggle {
+    @apply inline-flex items-center justify-center w-10 h-10 rounded-full border border-white/15 text-white hover:bg-white/10 transition-colors;
+  }
+
+  .theme-toggle-mobile {
+    @apply w-full h-auto gap-2 rounded-lg border-dark-700 px-4 py-3 text-sm font-semibold;
+  }
+}
+
+.theme-light body,
+.theme-light #root {
+  background: #f5efe3;
+  color: #1f2a38;
+}
+
+.theme-light .bg-dark-900 { background-color: #f5efe3 !important; }
+.theme-light .bg-dark-800 { background-color: #fffdf8 !important; }
+.theme-light .bg-dark-700 { background-color: #e6ddcc !important; }
+.theme-light .bg-dark-600 { background-color: #d5c8b3 !important; }
+.theme-light .bg-dark-900\/90 { background-color: rgb(255 253 248 / 0.94) !important; }
+.theme-light .bg-dark-900\/75 { background-color: rgb(255 253 248 / 0.86) !important; }
+.theme-light .bg-dark-900\/50 { background-color: rgb(245 239 227 / 0.78) !important; }
+.theme-light .bg-dark-900\/30 { background-color: rgb(245 239 227 / 0.58) !important; }
+.theme-light .bg-dark-800\/80 { background-color: rgb(255 253 248 / 0.9) !important; }
+.theme-light .bg-dark-800\/50 { background-color: rgb(255 253 248 / 0.72) !important; }
+.theme-light .bg-dark-800\/30 { background-color: rgb(255 253 248 / 0.54) !important; }
+.theme-light .hover\:bg-dark-900:hover { background-color: #eee5d7 !important; }
+.theme-light .hover\:bg-dark-800:hover { background-color: #faf5ed !important; }
+.theme-light .hover\:bg-dark-700:hover { background-color: #e6ddcc !important; }
+.theme-light .hover\:bg-dark-600:hover { background-color: #d5c8b3 !important; }
+
+.theme-light .bg-primary { background-color: #163a52 !important; }
+.theme-light .bg-primary\/5 { background-color: rgb(154 108 17 / 0.06) !important; }
+.theme-light .bg-primary\/10 { background-color: rgb(154 108 17 / 0.1) !important; }
+.theme-light .bg-primary\/15 { background-color: rgb(154 108 17 / 0.15) !important; }
+.theme-light .bg-primary\/20 { background-color: rgb(154 108 17 / 0.2) !important; }
+.theme-light .bg-primary\/30 { background-color: rgb(154 108 17 / 0.3) !important; }
+.theme-light .hover\:bg-primary:hover { background-color: #0e2c40 !important; }
+.theme-light .text-primary { color: #9a6c11 !important; }
+.theme-light .text-primary\/90 { color: rgb(154 108 17 / 0.9) !important; }
+.theme-light .text-white { color: #1f2a38 !important; }
+.theme-light .text-gray-200 { color: #3c4754 !important; }
+.theme-light .text-gray-300 { color: #4d5965 !important; }
+.theme-light .text-gray-400 { color: #66717b !important; }
+.theme-light .text-gray-500 { color: #7b858d !important; }
+.theme-light .hover\:text-white:hover { color: #1f2a38 !important; }
+.theme-light .hover\:text-black:hover { color: #ffffff !important; }
+.theme-light .bg-primary.text-black { color: #ffffff !important; }
+.theme-light .bg-primary .text-white,
+.theme-light .bg-primary .text-white\/80 { color: #ffffff !important; }
+
+.theme-light .border-dark-600 { border-color: #d5c8b3 !important; }
+.theme-light .border-dark-700 { border-color: #ded4c1 !important; }
+.theme-light .border-dark-800 { border-color: #eee7dc !important; }
+.theme-light .border-white\/10 { border-color: rgb(31 42 56 / 0.1) !important; }
+.theme-light .border-white { border-color: #ded4c1 !important; }
+.theme-light .border-primary { border-color: #9a6c11 !important; }
+.theme-light .border-primary\/20 { border-color: rgb(154 108 17 / 0.2) !important; }
+.theme-light .border-primary\/30 { border-color: rgb(154 108 17 / 0.3) !important; }
+.theme-light .border-primary\/40 { border-color: rgb(154 108 17 / 0.4) !important; }
+.theme-light .border-primary\/50 { border-color: rgb(154 108 17 / 0.5) !important; }
+
+.theme-light .from-dark-900 { --tw-gradient-from: #f5efe3 var(--tw-gradient-from-position) !important; --tw-gradient-to: rgb(245 239 227 / 0) var(--tw-gradient-to-position) !important; }
+.theme-light .via-dark-900 { --tw-gradient-stops: var(--tw-gradient-from), #f5efe3 var(--tw-gradient-via-position), var(--tw-gradient-to) !important; }
+.theme-light .to-dark-900 { --tw-gradient-to: #f5efe3 var(--tw-gradient-to-position) !important; }
+.theme-light .from-dark-800 { --tw-gradient-from: #fffdf8 var(--tw-gradient-from-position) !important; --tw-gradient-to: rgb(255 253 248 / 0) var(--tw-gradient-to-position) !important; }
+.theme-light .to-dark-800 { --tw-gradient-to: #fffdf8 var(--tw-gradient-to-position) !important; }
+
+.theme-light .shadow-primary\/5 { --tw-shadow-color: rgb(22 58 82 / 0.05) !important; }
+.theme-light .shadow-primary\/10 { --tw-shadow-color: rgb(22 58 82 / 0.1) !important; }
+.theme-light .shadow-primary\/20 { --tw-shadow-color: rgb(22 58 82 / 0.2) !important; }
+.theme-light .shadow-primary\/30 { --tw-shadow-color: rgb(22 58 82 / 0.3) !important; }
+.theme-light .shadow-primary\/50 { --tw-shadow-color: rgb(22 58 82 / 0.32) !important; }
+
+.theme-light .glass-panel { background-color: rgb(255 253 248 / 0.86); border-color: rgb(31 42 56 / 0.1); }
+.theme-light .nav-link { color: #66717b; }
+.theme-light .nav-link:hover { color: #9a6c11; }
+.theme-light .app-navbar .text-white { color: #1f2a38 !important; }
+.theme-light .app-navbar .text-gray-400 { color: #66717b !important; }
+.theme-light .app-navbar .theme-toggle { border-color: #ded4c1; color: #163a52; }
+.theme-light .app-navbar .theme-toggle:hover { background-color: #f0e7d7; }
+.theme-light .theme-hero .text-white { color: #ffffff !important; }
+.theme-light .theme-hero .text-gray-400 { color: rgb(255 255 255 / 0.84) !important; }
+.theme-light .theme-hero .bg-dark-900\/75 { background-color: rgb(11 11 11 / 0.58) !important; }
+.theme-light .theme-hero .from-dark-900 { --tw-gradient-from: rgb(11 11 11 / 0.68) var(--tw-gradient-from-position) !important; }
+
+.theme-light ::-webkit-scrollbar-track { background: #eee5d7; }
+.theme-light ::-webkit-scrollbar-thumb { background: #af9b79; }
+.theme-light ::-webkit-scrollbar-thumb:hover { background: #8d7449; }
+
 @layer components {
   .btn-primary {
     @apply bg-primary hover:brightness-110 text-black font-bold py-3 px-8 rounded-full transition-all duration-300 transform hover:scale-105 shadow-lg shadow-primary/50 uppercase tracking-wider;

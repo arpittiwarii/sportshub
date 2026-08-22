@@ -1,5 +1,5 @@
 const { PassThrough } = require('stream');
-const cloudinary = require('../config/cloudinary');
+const { cloudinary } = require('../config/cloudinary');
 
 // Upload an in-memory buffer to Cloudinary and return the result.
 const uploadBufferToCloudinary = (buffer, { folder, publicId }) =>

@@ -3,7 +3,7 @@ const { DatabaseError } = require('../Error/DataBaseError');
 const { ValidationError } = require('../Error/ValidationError');
 const { AppError } = require('../Error/AppError');
 const { getOtpRepository, createOtpRepository } = require('../repositories/Otp.repository');
-const { updateUserById } = require('../repositories/User.repository');
+const { findUserById, updateUserById } = require('../repositories/User.repository');
 const { emailQueue } = require('../queues/email.queue');
 
 function generateOTP() {
@@ -48,6 +48,20 @@ const createOtpService = async ({ userId, email, name, session }) => {
     return { uid: responseOtp.UId };
 };
 
+// Public resend endpoint: the caller only supplies a user id. Recipient
+// details are resolved from the database, never taken from the request body,
+// so this endpoint cannot be used to send mail to arbitrary addresses.
+const resendOtpService = async ({ uid }) => {
+    const user = await findUserById(uid);
+    if (!user) {
+        throw new ValidationError('Unable to resend OTP for the provided account.');
+    }
+    if (user.verify) {
+        throw new ValidationError('This account is already verified.');
+    }
+    return createOtpService({ userId: user.id, email: user.email, name: user.name });
+};
+
 const verifyOtpService = async ({ uid, otp }) => {
     const match = await getOtpRepository(uid, otp);
     if (!match) {
@@ -60,4 +74,4 @@ const verifyOtpService = async ({ uid, otp }) => {
     return { message: 'OTP verified successfully. Your account Under Admin Review.' };
 };
 
-module.exports = { createOtpService, verifyOtpService };
+module.exports = { createOtpService, resendOtpService, verifyOtpService };
