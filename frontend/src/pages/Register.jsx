@@ -5,12 +5,14 @@ import { FiCheckCircle, FiAlertCircle } from 'react-icons/fi';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import AlertBox from '../components/AlertBox';
+import PasswordInput from '../components/PasswordInput';
 
 const Register = () => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     password: '',
+    confirmpassword: '',
     age: 1,
     sport: 'Shot Put',
     contact: '',
@@ -71,6 +73,12 @@ const Register = () => {
         return;
       }
 
+      if (formData.password !== formData.confirmpassword) {
+        toast.error('Passwords do not match.');
+        setLoading(false);
+        return;
+      }
+
       const payload = {
         name: formData.name,
         email: formData.email,
@@ -94,7 +102,7 @@ const Register = () => {
         });
         toast.success(`OTP successfully sent to ${formData.email}.`);
       }
-      setFormData({ name: '', email: '', password: '', age: '', sport: '', contact: '', afiId: '', schoolName: '', aadhar: '' });
+      setFormData({ name: '', email: '', password: '', confirmpassword: '', age: '', sport: '', contact: '', afiId: '', schoolName: '', aadhar: '' });
       // setBirthCertificateFile(null);
       // setAadharCardFile(null);
       navigate('/otp', { state: { uid: responseData.uid, email: responseData.email } });
@@ -171,28 +179,31 @@ const Register = () => {
 
             <div>
               <label className="block text-content-muted font-medium mb-2" htmlFor="password">Password*</label>
-              <input
-                type="password"
+              <PasswordInput
                 id="password"
                 name="password"
                 value={formData.password}
                 onChange={handleChange}
                 required
+                autoComplete="new-password"
                 className="w-full bg-surface-2 border border-border focus:border-primary focus:ring-1 focus:ring-primary outline-none text-content rounded-xl px-4 py-3 transition-colors"
                 placeholder="••••••••"
               />
+              <p className="text-content-muted text-xs mt-1">
+                At least 8 characters, including a letter and a number.
+              </p>
             </div>
 
             <div>
               <label className="block text-content-muted font-medium mb-2" htmlFor="confirmpassword">Confirm Password*</label>
-              <input
-                type="password"
-                id="cofirmpassword"
+              <PasswordInput
+                id="confirmpassword"
                 name="confirmpassword"
                 value={formData.confirmpassword}
                 onBlur={(e)=>{if(e.target.value !== formData.password) toast("Confirm Password must be same as password")}}
                 onChange={handleChange}
                 required
+                autoComplete="new-password"
                 className="w-full bg-surface-2 border border-border focus:border-primary focus:ring-1 focus:ring-primary outline-none text-content rounded-xl px-4 py-3 transition-colors"
                 placeholder="••••••••"
               />

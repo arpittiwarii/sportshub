@@ -6,14 +6,6 @@ const { generateToken } = require('./token.service');
 const { InternalServerError } = require('../Error/InternalServerError');
 const bcrypt = require('bcryptjs');
 
-const validatePasswordStrength = (password) => {
-    if (!password || password.length < 8) {
-        return false;
-    }
-
-    return /[A-Za-z]/.test(password) && /\d/.test(password);
-};
-
 // @desc    Auth user & get token
 // @route   POST /api/auth/login
 // @access  Public
@@ -72,4 +64,4 @@ const loginUser = async ({ email, password }) => {
     }
 };
 
-module.exports = { loginUser, validatePasswordStrength };
+module.exports = { loginUser };

@@ -78,7 +78,8 @@ const EditRegistration = () => {
       // profile also carries id/email/role/status/timestamps, which the API
       // (correctly) rejects — so we never forward them.
       const editable = ['name', 'age', 'sports', 'contact', 'school', 'afiId'];
-      const source = { ...formData, sports: formData.sports ?? formData.sport };
+      const selectedSport = formData.sport && formData.sport !== 'Select' ? formData.sport : undefined;
+      const source = { ...formData, sports: selectedSport };
       const payload = {};
       for (const key of editable) {
         const value = source[key];
@@ -111,18 +112,6 @@ const EditRegistration = () => {
     } else {
       setDocs((prev) => ({ ...prev, [name]: null }));
     }
-  };
-
-  const handleSportToggle = (sportValue, checked) => {
-    setFormData((prev) => {
-      if (!prev) return prev;
-      const current = Array.isArray(prev.sport) ? prev.sport : [];
-      if (checked) {
-        return { ...prev, sport: [...new Set([...current, sportValue])] };
-      }
-      const next = current.filter((s) => s !== sportValue);
-      return { ...prev, sport: next.length ? next : ['Other'] };
-    });
   };
 
   const handleUploadDocuments = async (e) => {
@@ -241,8 +230,9 @@ const EditRegistration = () => {
                   <label className="block text-content-muted font-medium mb-2" htmlFor="sports">Select Sport </label>
 
                   <select
-                    name="sports"
+                    name="sport"
                     id="sports-select"
+                    value={formData.sport || 'Select'}
                     className="col-span-2 bg-surface-2 border border-border rounded-xl px-3 py-2 text-content cursor-pointer hover:border-primary/40 transition-colors appearance-none focus:outline-none focus:border-primary"
                     onChange={handleChange}
                   >

@@ -36,6 +36,14 @@ const FEE_STATUS = {
     REJECTED: 'REJECTED',
 };
 
+// What a one-time password was issued for. Codes are scoped to a purpose so a
+// password-reset code can never be replayed against the email-verification
+// endpoint (or vice versa), and issuing one does not invalidate the other.
+const OTP_PURPOSE = {
+    EMAIL_VERIFICATION: 'EMAIL_VERIFICATION',
+    PASSWORD_RESET: 'PASSWORD_RESET',
+};
+
 // Cloudinary folder paths
 const CLOUDINARY_FOLDERS = {
     STUDENT_PROFILES: (studentId) => `sports-hub/students/${studentId}/profiles`,
@@ -56,6 +64,7 @@ module.exports = {
     USER_ROLES,
     ATHLETE_STATUS,
     FEE_STATUS,
+    OTP_PURPOSE,
     CLOUDINARY_FOLDERS,
     FILE_UPLOAD,
 };

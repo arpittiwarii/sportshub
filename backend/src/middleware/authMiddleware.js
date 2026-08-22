@@ -33,6 +33,18 @@ const protect = async (req, res, next) => {
       return res.status(401).json({ message: 'Invalid or expired session' });
     }
 
+    // Tokens are stateless, so a password reset cannot revoke them directly.
+    // Any token minted before the last password change is treated as dead,
+    // which logs out sessions an attacker may already hold. `iat` is in
+    // seconds; floor the stored timestamp the same way to avoid rejecting a
+    // token issued in the same second as the change.
+    if (user.passwordChangedAt) {
+      const changedAtSeconds = Math.floor(new Date(user.passwordChangedAt).getTime() / 1000);
+      if (typeof decoded.iat === 'number' && decoded.iat < changedAtSeconds) {
+        return res.status(401).json({ message: 'Password was changed. Please log in again.' });
+      }
+    }
+
     req.user = {
       id: user.id,
       name: user.name,

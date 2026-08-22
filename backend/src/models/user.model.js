@@ -76,6 +76,13 @@ const userSchema = new mongoose.Schema(
         verify: {
             type: Boolean,
             default: false,
+        },
+        // Set whenever the password changes. `protect` rejects any JWT issued
+        // before this instant, so a password reset logs out existing sessions.
+        // null (legacy accounts) means "no reset yet" and skips the check.
+        passwordChangedAt: {
+            type: Date,
+            default: null,
         }
     },
     baseSchemaOptions()

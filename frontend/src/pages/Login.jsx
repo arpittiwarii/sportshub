@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { FiLock, FiAlertCircle } from 'react-icons/fi';
 import { motion } from 'framer-motion';
 import { toast } from 'react-toastify';
 import AlertBox from '../components/AlertBox';
+import PasswordInput from '../components/PasswordInput';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -90,13 +91,22 @@ const Login = () => {
               />
             </div>
             <div>
-              <label className="block text-content-muted text-sm font-medium mb-1" htmlFor="password">Password</label>
-              <input
-                type="password"
+              <div className="flex items-center justify-between mb-1">
+                <label className="block text-content-muted text-sm font-medium" htmlFor="password">Password</label>
+                <Link
+                  to="/forgot-password"
+                  className="text-sm text-primary hover:underline"
+                >
+                  Forgot password?
+                </Link>
+              </div>
+              <PasswordInput
                 id="password"
+                name="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                autoComplete="current-password"
                 className="w-full bg-surface-2 border border-border focus:border-primary outline-none text-content rounded-lg px-4 py-2"
               />
             </div>

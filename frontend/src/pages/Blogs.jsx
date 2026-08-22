@@ -70,7 +70,7 @@ const Blogs = () => {
         const updatedBlog = res.data?.data || res.data;
         toast.success('Blog updated successfully!');
         setForm(emptyForm);
-        setBlogs((prev) => prev.map((b) => (b._id === updatedBlog._id ? updatedBlog : b)));
+        setBlogs((prev) => prev.map((b) => (b.id === updatedBlog.id ? updatedBlog : b)));
       } else {
 
         const res = await api.post('/blogs', { title, content });
@@ -100,7 +100,7 @@ const Blogs = () => {
     try {
       await api.delete(`/blogs/${id}`);
       toast.success('Blog deleted successfully.');
-      setBlogs((prev) => prev.filter((b) => b._id !== id));
+      setBlogs((prev) => prev.filter((b) => b.id !== id));
       if (form.id === id) setForm(emptyForm);
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to delete blog.');
@@ -199,7 +199,7 @@ const Blogs = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {blogs.map((blog) => (
                   <motion.div
-                    key={blog._id}
+                    key={blog.id}
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.25 }}

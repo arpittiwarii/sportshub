@@ -122,17 +122,30 @@ const StudentDashboard = () => {
     }
   };
 
-  const applytopaid = async (paymentId) => {
-    const formData = {
-      userId: userId
-    }
+  const submitUpload = async (e) => {
+    e.preventDefault();
 
+    if (!uploadFile) {
+      toast.warning('Please select an image.');
+      return;
+    }
+    if (!uploadModal.paymentId) return;
+
+    setUploading(true);
     try {
-      await api.put(`/payments/${paymentId}/approve`, formData);
-      toast.success('✓ payment approval sent to admin successfully!');
+      const payload = new FormData();
+      payload.append('screenshot', uploadFile);
+
+      await api.put(`/payments/${uploadModal.paymentId}/upload`, payload, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+
+      toast.success('✓ Payment proof uploaded successfully!');
+      setUploadModal({ isOpen: false, paymentId: null });
+      setUploadFile(null);
       fetchDashboardData();
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to send approval.');
+      toast.error(error.response?.data?.message || 'Failed to upload payment proof.');
     } finally {
       setUploading(false);
     }
@@ -264,9 +277,9 @@ const StudentDashboard = () => {
               </h2>
 
               <div className="flex items-center justify-center mb-6">
-                {profile?.profileImage ? (
+                {profile?.profile ? (
                   <img
-                    src={profile.profileImage}
+                    src={profile.profile}
                     alt="Profile"
                     className="w-24 h-24 rounded-full object-cover bg-surface-2 border border-border"
                   />
@@ -462,10 +475,10 @@ const StudentDashboard = () => {
                     <div className="flex gap-2">
                       {(payment.submittedAt === null || payment.submittedAt === undefined) &&
                         <button
-                          onClick={() => applytopaid(payment.id)}
-                          className="btn-primary py-2 px-4 text-sm shadow-none"
+                          onClick={() => setUploadModal({ isOpen: true, paymentId: payment.id })}
+                          className="btn-primary py-2 px-4 text-sm shadow-none flex items-center gap-2"
                         >
-                          Apply to paid
+                          <FiUploadCloud className="w-4 h-4" /> Upload Proof
                         </button>
                       }
                     </div>

@@ -4,6 +4,8 @@ const { logger } = require('../utils/logger');
 const {
     sendWelcomeEmail,
     sendOtpEmail,
+    sendPasswordResetOtpEmail,
+    sendPasswordChangedEmail,
     sendApprovalConfirmedEmail,
     sendApprovalRejectedEmail,
     sendApprovalRequestEmail,
@@ -13,6 +15,8 @@ const {
 const handlers = {
     'welcome-email': sendWelcomeEmail,
     'otp-email': sendOtpEmail,
+    'password-reset-otp-email': sendPasswordResetOtpEmail,
+    'password-changed-email': sendPasswordChangedEmail,
     'approval-confirm-email': sendApprovalConfirmedEmail,
     'approval-reject-email': sendApprovalRejectedEmail,
     'approval-request-email': sendApprovalRequestEmail,

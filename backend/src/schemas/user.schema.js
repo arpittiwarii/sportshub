@@ -1,4 +1,4 @@
-// Password policy mirrors validatePasswordStrength() in register.service.js:
+// Password policy mirrors validatePasswordStrength() in utils/password.util.js:
 // at least 8 characters, containing both a letter and a digit.
 const passwordRule = {
     type: "string",
@@ -88,6 +88,47 @@ const loginSchema = {
     additionalProperties: false
 };
 
+// Step 1 of the reset flow. Only an email is accepted — nothing about the
+// account is returned, so there is nothing else to supply.
+const forgotPasswordSchema = {
+    type: "object",
+
+    required: ["email"],
+
+    properties: {
+        email: {
+            type: "string",
+            format: "email"
+        }
+    },
+
+    additionalProperties: false
+};
+
+// Step 2 of the reset flow: the emailed 6-digit code plus the new password.
+// Identifying by email (not a user id) keeps the account id out of the client.
+const resetPasswordSchema = {
+    type: "object",
+
+    required: ["email", "otp", "password"],
+
+    properties: {
+        email: {
+            type: "string",
+            format: "email"
+        },
+
+        otp: {
+            type: "string",
+            pattern: "^[0-9]{6}$"
+        },
+
+        password: passwordRule
+    },
+
+    additionalProperties: false
+};
+
 // Self-service profile update (PUT /athlete/:id). Only the fields the athlete
 // service actually persists are accepted; role/email/password/status are
 // deliberately excluded so a user can never escalate or hijack their account
@@ -126,4 +167,4 @@ const updateSchema = {
     }
 }
 
-module.exports = { loginSchema, registerSchema, updateSchema }
+module.exports = { loginSchema, registerSchema, updateSchema, forgotPasswordSchema, resetPasswordSchema }

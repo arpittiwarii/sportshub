@@ -4,6 +4,8 @@ const { logger } = require('./logger');
 
 const {
     otpEmailTemplate,
+    passwordResetOtpTemplate,
+    passwordChangedTemplate,
     welcomeEmailTemplate,
     approvalConfirmedTemplate,
     approvalRejectedTemplate,
@@ -68,6 +70,30 @@ const sendOtpEmail = async ({ email, name, otp }) => {
     return true;
 };
 
+const sendPasswordResetOtpEmail = async ({ email, name, otp }) => {
+    await transporter.sendMail({
+        from: `"SportsHub" <${config.email.from}>`,
+        to: email,
+        subject: 'Your SportsHub password reset code',
+        html: `
+            ${passwordResetOtpTemplate(name, otp)}
+        `,
+    });
+    return true;
+};
+
+const sendPasswordChangedEmail = async ({ email, name }) => {
+    await transporter.sendMail({
+        from: `"SportsHub" <${config.email.from}>`,
+        to: email,
+        subject: 'Your SportsHub password was changed',
+        html: `
+            ${passwordChangedTemplate(name)}
+        `,
+    });
+    return true;
+};
+
 const sendApprovalConfirmedEmail = async ({ email, name, role }) => {
     await transporter.sendMail({
         from: `"SportsHub" <${config.email.from}>`,
@@ -110,5 +136,7 @@ module.exports = {
     sendApprovalRequestEmail,
     sendWelcomeEmail,
     sendOtpEmail,
+    sendPasswordResetOtpEmail,
+    sendPasswordChangedEmail,
     sendPaymentReminderEmail,
 };

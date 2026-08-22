@@ -77,7 +77,7 @@ const AdminPaymentPage = () => {
     if (window.confirm('Are you sure you want to approve this payment?')) {
       setProcessingId(paymentId);
       try {
-        await api.put(`/payments/${paymentId}/verify`, { status: 'approved' });
+        await api.put(`/payments/${paymentId}/verify`, { status: 'APPROVED' });
         toast.success('✓ Payment approved successfully!');
         fetchPayments();
       } catch (error) {
@@ -93,7 +93,7 @@ const AdminPaymentPage = () => {
     if (window.confirm('Are you sure you want to reject this payment?')) {
       setProcessingId(paymentId);
       try {
-        await api.put(`/payments/${paymentId}/verify`, { status: 'rejected' });
+        await api.put(`/payments/${paymentId}/verify`, { status: 'REJECTED' });
         toast.success('✓ Payment rejected');
         fetchPayments();
       } catch (error) {

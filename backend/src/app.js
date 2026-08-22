@@ -67,6 +67,29 @@ const otpLimiter = rateLimit({
   message: { code: 'OTP_RATE_LIMIT_EXCEEDED', message: 'Too many OTP requests, please try again later.' },
 });
 
+// Requesting a reset sends an email, so it is capped tightly to stop this being
+// used as a mail bomb against a third party.
+const forgotPasswordLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: isProduction ? 5 : 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  store: makeRedisStore('rl:forgot-pw:'),
+  message: { code: 'PASSWORD_RESET_RATE_LIMIT_EXCEEDED', message: 'Too many password reset requests, please try again later.' },
+});
+
+// Submitting a code is already bounded per-code by MAX_OTP_ATTEMPTS, so this
+// limiter only exists to stop an attacker cycling fresh codes; it can afford to
+// be a little looser than the request side to allow for honest typos.
+const resetPasswordLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: isProduction ? 10 : 40,
+  standardHeaders: true,
+  legacyHeaders: false,
+  store: makeRedisStore('rl:reset-pw:'),
+  message: { code: 'PASSWORD_RESET_RATE_LIMIT_EXCEEDED', message: 'Too many password reset attempts, please try again later.' },
+});
+
 // Trust the first proxy hop (Render / Nginx / a load balancer) so client IPs —
 // which the rate limiters key on — are read from X-Forwarded-For instead of
 // collapsing to the proxy's address.
@@ -121,6 +144,8 @@ app.get('/health', (req, res) => {
 
 app.use('/api/auth/login', authLimiter);
 app.use('/api/auth/register', authLimiter);
+app.use('/api/auth/forgot-password', forgotPasswordLimiter);
+app.use('/api/auth/reset-password', resetPasswordLimiter);
 app.use('/api/otps', otpLimiter);
 app.use('/api', defaultLimiter, routes);
 

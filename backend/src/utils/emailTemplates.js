@@ -182,8 +182,67 @@ const approvalRequestTemplate = (name, role) =>
     );
 
 
+const passwordResetOtpTemplate = (name, otp) =>
+    getEmailTemplate(
+        "Reset Your Password 🔑",
+        `
+        <p>Hi <strong>${name}</strong>,</p>
+        <p>We received a request to reset your SportsHub password. Use the code below to continue.</p>
+
+        <div style="
+            background:#eff6ff;
+            border:2px dashed #2563eb;
+            padding:20px;
+            text-align:center;
+            margin:20px 0;
+            font-size:32px;
+            font-weight:bold;
+            letter-spacing:4px;
+            color:#2563eb;
+        ">
+            ${otp}
+        </div>
+
+        <p>This code is valid for 10 minutes and can be used once.</p>
+
+        <div style="
+            background:#fef2f2;
+            border-left:5px solid #ef4444;
+            padding:15px;
+            margin:20px 0;
+        ">
+            If you did not request a password reset, you can safely ignore this
+            email — your password has not been changed. Never share this code
+            with anyone.
+        </div>
+        `
+    );
+
+const passwordChangedTemplate = (name) =>
+    getEmailTemplate(
+        "Your Password Was Changed 🔒",
+        `
+        <p>Hi <strong>${name}</strong>,</p>
+
+        <p>Your SportsHub password was just changed successfully. You have been signed out on all devices and can now log in with your new password.</p>
+
+        <div style="
+            background:#fef2f2;
+            border-left:5px solid #ef4444;
+            padding:15px;
+            margin:20px 0;
+        ">
+            If you did not make this change, reset your password immediately and
+            contact our support team.
+        </div>
+        `
+    );
+
+
 module.exports = {
     otpEmailTemplate,
+    passwordResetOtpTemplate,
+    passwordChangedTemplate,
     welcomeEmailTemplate,
     approvalConfirmedTemplate,
     approvalRejectedTemplate,

@@ -23,4 +23,4 @@ migrations/
 *.crt
 *.p12
 *.pfx
-
+seed.js

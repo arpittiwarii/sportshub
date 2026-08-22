@@ -5,6 +5,7 @@ const { AppError } = require('../Error/AppError');
 const { findActiveOtpByUser, createOtpRepository, incrementOtpAttempts } = require('../repositories/Otp.repository');
 const { findUserById, updateUserById } = require('../repositories/User.repository');
 const { emailQueue } = require('../queues/email.queue');
+const { OTP_PURPOSE } = require('../utils/constants');
 
 // Maximum wrong guesses allowed against a single active OTP before it is
 // burned and the user must request a fresh code.
@@ -21,7 +22,12 @@ const sendOtp = async ({ uid, otp, email, name, session }) => {
         throw new AppError('OTP could not be generated', 503);
     }
 
-    const otpResult = await createOtpRepository(otp, uid, session ? { session } : {});
+    const otpResult = await createOtpRepository(
+        otp,
+        uid,
+        session ? { session } : {},
+        OTP_PURPOSE.EMAIL_VERIFICATION
+    );
     if (!otpResult) {
         throw new DatabaseError('OTP was not created in database');
     }
@@ -67,7 +73,7 @@ const resendOtpService = async ({ uid }) => {
 };
 
 const verifyOtpService = async ({ uid, otp }) => {
-    const record = await findActiveOtpByUser(uid);
+    const record = await findActiveOtpByUser(uid, OTP_PURPOSE.EMAIL_VERIFICATION);
     if (!record) {
         throw new ValidationError('This OTP has expired or was not found. Please request a new code.');
     }
@@ -88,4 +94,12 @@ const verifyOtpService = async ({ uid, otp }) => {
     return { message: 'OTP verified successfully. Your account Under Admin Review.' };
 };
 
-module.exports = { createOtpService, resendOtpService, verifyOtpService };
+module.exports = {
+    createOtpService,
+    resendOtpService,
+    verifyOtpService,
+    // Shared with the password-reset flow so both OTP kinds use one generator
+    // and one attempt cap.
+    generateOTP,
+    MAX_OTP_ATTEMPTS,
+};

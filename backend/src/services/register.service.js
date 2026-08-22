@@ -5,18 +5,11 @@ const { config } = require('../env');
 
 const { findUserByEmail, createUser } = require('../repositories/User.repository');
 const { ALLOWED_SPORTS } = require('../utils/constants');
+const { validatePasswordStrength, PASSWORD_POLICY_MESSAGE } = require('../utils/password.util');
 const { createOtpService } = require('./otp.service.js');
 const { emailQueue } = require('../queues/email.queue');
 const { mongoose } = require('../config/db.js');
 const { isReplicaSetReady } = require('../models/model.utils');
-
-const validatePasswordStrength = (password) => {
-    if (!password || password.length < 8) {
-        return false;
-    }
-
-    return /[A-Za-z]/.test(password) && /\d/.test(password);
-};
 
 // @desc    Register a new athlete
 // @route   POST /api/athletes
@@ -28,7 +21,7 @@ async function registerUser({ name, email, password, age, sports, contact, schoo
         }
 
         if (!validatePasswordStrength(password)) {
-            throw new ValidationError('Password must be at least 8 characters and include letters and numbers.');
+            throw new ValidationError(PASSWORD_POLICY_MESSAGE);
         }
 
         if (!ALLOWED_SPORTS.includes(sports)) {
