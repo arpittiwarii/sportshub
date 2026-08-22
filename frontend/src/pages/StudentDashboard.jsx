@@ -1,13 +1,14 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
-import { FiLogOut, FiUser, FiUploadCloud, FiCheckCircle, FiClock, FiEdit2, FiDollarSign, FiAlertCircle, FiX } from 'react-icons/fi';
+import { FiLogOut, FiUser, FiUploadCloud, FiCheckCircle, FiClock, FiEdit2, FiDollarSign, FiAlertCircle, FiEye, FiX } from 'react-icons/fi';
 import { toast } from 'react-toastify';
 import { motion as Motion, AnimatePresence } from 'framer-motion';
 /* eslint-disable no-unused-vars */
 import DashboardCard from '../components/DashboardCard';
 import StatusBadge from '../components/StatusBadge';
 import AlertBox from '../components/AlertBox';
+import ScreenshotModal from '../components/ScreenshotModal';
 
 // Animation variants
 const fadeUpVariant = {
@@ -32,6 +33,7 @@ const StudentDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [uploadFile, setUploadFile] = useState(null);
   const [uploadModal, setUploadModal] = useState({ isOpen: false, paymentId: null });
+  const [screenshotModal, setScreenshotModal] = useState({ isOpen: false, imageUrl: null, caption: null });
   const [dragActive, setDragActive] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [profileImageFile, setProfileImageFile] = useState(null);
@@ -140,7 +142,11 @@ const StudentDashboard = () => {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
 
-      toast.success('✓ Payment proof uploaded successfully!');
+      toast.success(
+        uploadModal.isResubmit
+          ? '✓ New payment proof submitted — it is back in review!'
+          : '✓ Payment proof uploaded successfully!'
+      );
       setUploadModal({ isOpen: false, paymentId: null });
       setUploadFile(null);
       fetchDashboardData();
@@ -198,7 +204,7 @@ const StudentDashboard = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen pt-24 bg-bg flex items-center justify-center">
+      <div className="min-h-screen page-shell bg-bg flex items-center justify-center">
         <Motion.div
           animate={{ rotate: 360 }}
           transition={{ duration: 2, repeat: Infinity }}
@@ -211,7 +217,7 @@ const StudentDashboard = () => {
   const profileLabel = 'text-content-muted text-xs uppercase font-semibold tracking-wider mb-1';
 
   return (
-    <div className="min-h-screen pt-24 pb-16 bg-bg">
+    <div className="min-h-screen page-shell pb-16 bg-bg">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-6xl space-y-12">
         {/* Header */}
         <motion.div
@@ -271,7 +277,7 @@ const StudentDashboard = () => {
             className="lg:col-span-1 space-y-6"
           >
             {/* Profile Info Card */}
-            <div className="card p-6 sticky top-24">
+            <div className="card p-6 sticky-under-nav">
               <h2 className="text-xl font-bold text-content mb-6 flex items-center gap-2">
                 <FiUser className="text-primary" /> Complete Profile
               </h2>
@@ -460,6 +466,12 @@ const StudentDashboard = () => {
                         <div>
                           <h3 className="text-lg font-bold text-content">{payment.month} {payment.year}</h3>
                           <p className="text-2xl font-display font-bold text-primary tabular-nums">₹{payment.amount}</p>
+                          {payment.submittedAt && (
+                            <p className="text-content-subtle text-xs mt-1">
+                              Proof submitted {new Date(payment.submittedAt).toLocaleDateString()}
+                              {payment.status !== 'APPROVED' && ' — you can re-submit until it is approved'}
+                            </p>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -469,18 +481,37 @@ const StudentDashboard = () => {
                       {payment.status === 'APPROVED' && <StatusBadge status="APPROVED" label="Paid" />}
                       {payment.status === 'REJECTED' && <StatusBadge status="REJECTED" />}
                       {payment.status === 'PENDING' && payment.submittedAt && <StatusBadge status="PENDING" label="In Review" />}
+                      {payment.status === 'PENDING' && !payment.submittedAt && <StatusBadge status="UNPAID" label="Not Submitted" />}
                     </div>
 
-                    {/* Right Side - Actions */}
-                    <div className="flex gap-2">
-                      {(payment.submittedAt === null || payment.submittedAt === undefined) &&
+                    {/* Right Side - Actions. Re-submission stays open until an
+                        admin approves the payment. */}
+                    <div className="flex flex-wrap gap-2">
+                      {payment.screenshot && (
                         <button
-                          onClick={() => setUploadModal({ isOpen: true, paymentId: payment.id })}
+                          onClick={() => setScreenshotModal({
+                            isOpen: true,
+                            imageUrl: payment.screenshot,
+                            caption: `${payment.month} ${payment.year} · ₹${payment.amount}`,
+                          })}
+                          className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg border border-steel/30 bg-steel/10 text-steel hover:bg-steel/20 transition-colors"
+                        >
+                          <FiEye className="w-4 h-4" /> View Proof
+                        </button>
+                      )}
+                      {payment.status !== 'APPROVED' && (
+                        <button
+                          onClick={() => setUploadModal({
+                            isOpen: true,
+                            paymentId: payment.id,
+                            isResubmit: Boolean(payment.submittedAt),
+                          })}
                           className="btn-primary py-2 px-4 text-sm shadow-none flex items-center gap-2"
                         >
-                          <FiUploadCloud className="w-4 h-4" /> Upload Proof
+                          <FiUploadCloud className="w-4 h-4" />
+                          {payment.submittedAt ? 'Re-submit Proof' : 'Upload Proof'}
                         </button>
-                      }
+                      )}
                     </div>
                   </div>
                 </motion.div>
@@ -492,14 +523,18 @@ const StudentDashboard = () => {
         {/* Upload Modal */}
         <AnimatePresence>
           {uploadModal.isOpen && (
-            <>
+            // z-[60] clears the z-50 navbar; the flex overlay + max-h keeps the
+            // panel inside the window whatever the screen height.
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-[60] flex items-center justify-center p-4"
+            >
               {/* Backdrop */}
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
+              <div
                 onClick={() => setUploadModal({ isOpen: false, paymentId: null })}
-                className="fixed inset-0 bg-black/70 backdrop-blur-md z-40"
+                className="absolute inset-0 bg-black/70 backdrop-blur-md"
               />
 
               {/* Modal */}
@@ -508,12 +543,16 @@ const StudentDashboard = () => {
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95, y: 20 }}
                 transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-                className="fixed inset-4 sm:inset-8 top-auto max-w-sm mx-auto z-50 max-h-[calc(100vh-2rem)] overflow-y-auto"
+                role="dialog"
+                aria-modal="true"
+                className="relative w-full max-w-sm max-h-full overflow-y-auto"
               >
                 <div className="bg-bg p-4 rounded-2xl border-2 border-primary shadow-2xl">
                   {/* Header */}
                   <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-2xl font-bold text-content">Upload Payment Proof</h2>
+                    <h2 className="text-2xl font-bold text-content">
+                      {uploadModal.isResubmit ? 'Re-submit Payment Proof' : 'Upload Payment Proof'}
+                    </h2>
                     <button
                       onClick={() => setUploadModal({ isOpen: false, paymentId: null })}
                       className="text-content-muted hover:text-content transition-colors p-2 rounded-lg hover:bg-surface-2"
@@ -521,6 +560,12 @@ const StudentDashboard = () => {
                       <FiX className="w-6 h-6" />
                     </button>
                   </div>
+
+                  {uploadModal.isResubmit && (
+                    <p className="text-content-muted text-xs mb-3">
+                      This replaces the proof you submitted earlier and sends the payment back for review.
+                    </p>
+                  )}
 
                   {/* Form */}
                   <form onSubmit={submitUpload} className="space-y-3">
@@ -611,7 +656,7 @@ const StudentDashboard = () => {
                         ) : (
                           <>
                             <FiUploadCloud className="w-4 h-4" />
-                            Upload Proof
+                            {uploadModal.isResubmit ? 'Re-submit Proof' : 'Upload Proof'}
                           </>
                         )}
                       </button>
@@ -619,9 +664,18 @@ const StudentDashboard = () => {
                   </form>
                 </div>
               </motion.div>
-            </>
+            </motion.div>
           )}
         </AnimatePresence>
+
+        {/* Submitted Proof Preview */}
+        <ScreenshotModal
+          isOpen={screenshotModal.isOpen}
+          imageUrl={screenshotModal.imageUrl}
+          caption={screenshotModal.caption}
+          title="Your Payment Proof"
+          onClose={() => setScreenshotModal({ isOpen: false, imageUrl: null, caption: null })}
+        />
 
       </div>
     </div>

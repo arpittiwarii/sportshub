@@ -37,7 +37,7 @@ const OtpPage = () => {
     };
     return (
         <>
-            <div className="min-h-screen pt-24 pb-16 flex items-center justify-center">
+            <div className="min-h-screen page-shell pb-16 flex items-center justify-center">
                 <div className="w-full max-w-md px-6">
                     <motion.div
                         initial={{ opacity: 0, scale: 0.95 }}

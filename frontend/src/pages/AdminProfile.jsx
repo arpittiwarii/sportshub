@@ -57,11 +57,11 @@ const AdminProfile = () => {
   };
 
   if (loading) {
-    return <div className="min-h-screen pt-24 bg-bg text-center text-content-muted">Loading...</div>;
+    return <div className="min-h-screen page-shell bg-bg text-center text-content-muted">Loading...</div>;
   }
 
   return (
-    <div className="min-h-screen pt-24 pb-16 bg-bg">
+    <div className="min-h-screen page-shell pb-16 bg-bg">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-2xl">
         <div className="mb-8">
           <h1 className="font-display text-4xl font-bold text-content">Admin Profile</h1>

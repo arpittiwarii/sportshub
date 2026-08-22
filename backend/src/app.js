@@ -7,8 +7,8 @@ const pinoHttp = require('pino-http');
 
 const { config } = require('./env');
 const { logger } = require('./utils/logger');
+const { attachRateLimitKey, rateLimiterClient, defaultLimiter } = require('./utils/rateLimit');
 const { connectDB, mongoose } = require('./config/db');
-const { createRedisConnection } = require('./config/redis');
 const { verifyCloudinaryConnection } = require('./config/cloudinary');
 const { routes } = require('./routes/index');
 require('./models/index');
@@ -28,67 +28,6 @@ const isAllowedOrigin = (origin) => {
   }
   return false;
 };
-
-// Dedicated Redis client backing the rate limiters. A memory store (the default)
-// is per-process, so limits reset on restart and are not shared across instances —
-// useless behind a load balancer and the exact opposite of what brute-force
-// protection needs. This client is shared by all limiters below.
-const rateLimiterClient = createRedisConnection();
-const makeRedisStore = (prefix) =>
-  new RedisStore({
-    prefix,
-    sendCommand: (...args) => rateLimiterClient.call(...args),
-  });
-
-const defaultLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: isProduction ? 200 : 1000,
-  standardHeaders: true,
-  legacyHeaders: false,
-  store: makeRedisStore('rl:default:'),
-  message: { code: 'RATE_LIMIT_EXCEEDED', message: 'Too many requests, please try again later.' },
-});
-
-const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: isProduction ? 10 : 25,
-  standardHeaders: true,
-  legacyHeaders: false,
-  store: makeRedisStore('rl:auth:'),
-  message: { code: 'AUTH_RATE_LIMIT_EXCEEDED', message: 'Too many authentication attempts, please try again later.' },
-});
-
-const otpLimiter = rateLimit({
-  windowMs: 10 * 60 * 1000,
-  max: isProduction ? 5 : 20,
-  standardHeaders: true,
-  legacyHeaders: false,
-  store: makeRedisStore('rl:otp:'),
-  message: { code: 'OTP_RATE_LIMIT_EXCEEDED', message: 'Too many OTP requests, please try again later.' },
-});
-
-// Requesting a reset sends an email, so it is capped tightly to stop this being
-// used as a mail bomb against a third party.
-const forgotPasswordLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: isProduction ? 5 : 20,
-  standardHeaders: true,
-  legacyHeaders: false,
-  store: makeRedisStore('rl:forgot-pw:'),
-  message: { code: 'PASSWORD_RESET_RATE_LIMIT_EXCEEDED', message: 'Too many password reset requests, please try again later.' },
-});
-
-// Submitting a code is already bounded per-code by MAX_OTP_ATTEMPTS, so this
-// limiter only exists to stop an attacker cycling fresh codes; it can afford to
-// be a little looser than the request side to allow for honest typos.
-const resetPasswordLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: isProduction ? 10 : 40,
-  standardHeaders: true,
-  legacyHeaders: false,
-  store: makeRedisStore('rl:reset-pw:'),
-  message: { code: 'PASSWORD_RESET_RATE_LIMIT_EXCEEDED', message: 'Too many password reset attempts, please try again later.' },
-});
 
 // Trust the first proxy hop (Render / Nginx / a load balancer) so client IPs —
 // which the rate limiters key on — are read from X-Forwarded-For instead of
@@ -119,6 +58,7 @@ const corsOptions = {
 
 app.options(/^(.*)$/, cors(corsOptions));
 app.use(cors(corsOptions));
+app.use(attachRateLimitKey);
 
 // Structured request logging with a per-request id. Health checks are noisy and
 // omitted from the access log.
@@ -142,11 +82,6 @@ app.get('/health', (req, res) => {
   });
 });
 
-app.use('/api/auth/login', authLimiter);
-app.use('/api/auth/register', authLimiter);
-app.use('/api/auth/forgot-password', forgotPasswordLimiter);
-app.use('/api/auth/reset-password', resetPasswordLimiter);
-app.use('/api/otps', otpLimiter);
 app.use('/api', defaultLimiter, routes);
 
 // JSON 404 for anything unmatched, so API clients never receive Express's

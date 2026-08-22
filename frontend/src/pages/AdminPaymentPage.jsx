@@ -12,7 +12,7 @@ const AdminPaymentPage = () => {
   const [filteredPayments, setFilteredPayments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeFilter, setActiveFilter] = useState('all');
-  const [screenshotModal, setScreenshotModal] = useState({ isOpen: false, imageUrl: null });
+  const [screenshotModal, setScreenshotModal] = useState({ isOpen: false, imageUrl: null, caption: null });
   const [processingId, setProcessingId] = useState(null);
   const navigate = useNavigate();
 
@@ -105,12 +105,15 @@ const AdminPaymentPage = () => {
     }
   };
 
-  const handleViewScreenshot = (screenshotUrl) => {
+  const handleViewScreenshot = (screenshotUrl, payment) => {
     setScreenshotModal({
       isOpen: true,
       imageUrl: screenshotUrl?.startsWith('http')
         ? screenshotUrl
         : `https://sportshub-backend-mzth.onrender.com${screenshotUrl}`,
+      caption: payment
+        ? `${payment.user?.name || 'Unknown athlete'} · ${payment.month} ${payment.year} · ₹${payment.amount}`
+        : null,
     });
   };
 
@@ -134,7 +137,7 @@ const AdminPaymentPage = () => {
   ];
 
   return (
-    <div className="min-h-screen pt-24 pb-16 bg-gradient-to-b from-bg via-bg to-surface">
+    <div className="min-h-screen page-shell pb-16 bg-gradient-to-b from-bg via-bg to-surface">
       <div className="container mx-auto px-6 max-w-7xl">
 
         {/* Header */}
@@ -219,7 +222,8 @@ const AdminPaymentPage = () => {
       <ScreenshotModal
         isOpen={screenshotModal.isOpen}
         imageUrl={screenshotModal.imageUrl}
-        onClose={() => setScreenshotModal({ isOpen: false, imageUrl: null })}
+        caption={screenshotModal.caption}
+        onClose={() => setScreenshotModal({ isOpen: false, imageUrl: null, caption: null })}
       />
     </div>
   );

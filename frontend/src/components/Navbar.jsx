@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { FiMenu, FiMoon, FiSun, FiX } from 'react-icons/fi';
 import { motion } from 'framer-motion';
@@ -8,6 +8,7 @@ import { useTheme } from '../context/theme-context';
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const headerRef = useRef(null);
   const location = useLocation();
   const { theme, toggleTheme } = useTheme();
 
@@ -17,6 +18,27 @@ const Navbar = () => {
     };
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Publish the real navbar height as --navbar-h so pages can pad past it
+  // (see .page-shell in index.css). Only the expanded state is measured:
+  // padding has to clear the tallest navbar, and rewriting the value while
+  // the user scrolls would shift the page under them.
+  useEffect(() => {
+    const el = headerRef.current;
+    if (!el) return;
+
+    const publishHeight = () => {
+      if (window.scrollY > 50) return;
+      document.documentElement.style.setProperty('--navbar-h', `${el.offsetHeight}px`);
+    };
+
+    publishHeight();
+
+    if (typeof ResizeObserver === 'undefined') return;
+    const observer = new ResizeObserver(publishHeight);
+    observer.observe(el);
+    return () => observer.disconnect();
   }, []);
 
   const userStr = localStorage.getItem('user');
@@ -47,6 +69,7 @@ const Navbar = () => {
 
   return (
     <header
+      ref={headerRef}
       className={`app-navbar fixed top-0 w-full z-50 transition-all duration-300 backdrop-blur-md border-b ${
         isScrolled
           ? 'bg-bg/95 border-border py-3 shadow-lg'

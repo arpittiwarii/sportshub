@@ -13,7 +13,7 @@ const StudentPaymentPage = () => {
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [uploadModal, setUploadModal] = useState({ isOpen: false, paymentId: null });
-  const [screenshotModal, setScreenshotModal] = useState({ isOpen: false, imageUrl: null });
+  const [screenshotModal, setScreenshotModal] = useState({ isOpen: false, imageUrl: null, caption: null });
   const navigate = useNavigate();
 
   const userStr = localStorage.getItem('user');
@@ -53,7 +53,16 @@ const StudentPaymentPage = () => {
   };
 
   const handleUploadClick = (paymentId) => {
-    setUploadModal({ isOpen: true, paymentId });
+    const payment = payments.find((p) => p.id === paymentId);
+    setUploadModal({ isOpen: true, paymentId, isResubmit: Boolean(payment?.submittedAt) });
+  };
+
+  const handleViewScreenshot = (screenshotUrl, payment) => {
+    setScreenshotModal({
+      isOpen: true,
+      imageUrl: screenshotUrl,
+      caption: payment ? `${payment.month} ${payment.year} · ₹${payment.amount}` : null,
+    });
   };
 
   const handleUploadSubmit = async (paymentId, file, transactionId) => {
@@ -103,7 +112,7 @@ const StudentPaymentPage = () => {
   ];
 
   return (
-    <div className="min-h-screen pt-24 pb-16 bg-gradient-to-b from-bg via-bg to-surface">
+    <div className="min-h-screen page-shell pb-16 bg-gradient-to-b from-bg via-bg to-surface">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-6xl">
 
         {/* Header */}
@@ -194,6 +203,7 @@ const StudentPaymentPage = () => {
             payments={payments}
             isAdmin={false}
             onUpload={handleUploadClick}
+            onViewScreenshot={handleViewScreenshot}
             loading={loading}
           />
         </div>
@@ -203,6 +213,7 @@ const StudentPaymentPage = () => {
       <UploadModal
         isOpen={uploadModal.isOpen}
         paymentId={uploadModal.paymentId}
+        isResubmit={uploadModal.isResubmit}
         onClose={() => setUploadModal({ isOpen: false, paymentId: null })}
         onUpload={handleUploadSubmit}
         loading={uploading}
@@ -212,7 +223,9 @@ const StudentPaymentPage = () => {
       <ScreenshotModal
         isOpen={screenshotModal.isOpen}
         imageUrl={screenshotModal.imageUrl}
-        onClose={() => setScreenshotModal({ isOpen: false, imageUrl: null })}
+        caption={screenshotModal.caption}
+        title="Your Payment Proof"
+        onClose={() => setScreenshotModal({ isOpen: false, imageUrl: null, caption: null })}
       />
     </div>
   );

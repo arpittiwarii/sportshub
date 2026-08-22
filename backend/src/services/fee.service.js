@@ -49,6 +49,11 @@ const uploadFeeProof = async (feeId, userId, file, transactionId) => {
         const fee = await findById(feeId);
         if (!fee) throw new ValidationError('Fee record not found');
         if (fee.userId?.toString() !== userId?.toString()) throw new ValidationError('Not authorized to update this record');
+        // Proof can be re-submitted as often as needed while the payment is
+        // awaiting review or was rejected — but an approved payment is final.
+        if (fee.status === 'APPROVED') {
+            throw new ValidationError('This payment is already approved. No further proof can be submitted.');
+        }
 
         const folder = CLOUDINARY_FOLDERS.FEES(fee.id.toString());
         const result = await uploadBufferToCloudinary(file.buffer, { folder, publicId: 'screenshot' });
@@ -57,6 +62,9 @@ const uploadFeeProof = async (feeId, userId, file, transactionId) => {
             screenshot: result.secure_url,
             status: 'PENDING',
             submittedAt: new Date(),
+            // A fresh proof needs a fresh review: drop the previous verdict so a
+            // re-submission after a rejection re-enters the admin's queue clean.
+            verifiedAt: null,
         };
 
         const trimmedTxn = transactionId ? String(transactionId).trim() : '';

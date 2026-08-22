@@ -155,11 +155,11 @@ const EditRegistration = () => {
   };
 
   if (loading) {
-    return <div className="min-h-screen pt-24 bg-bg text-center text-content-muted">Loading profile...</div>;
+    return <div className="min-h-screen page-shell bg-bg text-center text-content-muted">Loading profile...</div>;
   }
 
   return (
-    <div className="min-h-screen pt-24 pb-16 bg-bg relative">
+    <div className="min-h-screen page-shell pb-16 bg-bg relative">
       <div className="absolute top-0 right-0 w-1/3 h-full bg-primary/5 blur-3xl rounded-full"></div>
 
       <div className="container mx-auto px-6 max-w-2xl relative z-10">

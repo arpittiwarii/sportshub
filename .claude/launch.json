@@ -12,6 +12,12 @@
       "runtimeExecutable": "npm",
       "runtimeArgs": ["--prefix", "frontend", "run", "dev", "--", "--port", "4173", "--strictPort"],
       "port": 4173
+    },
+    {
+      "name": "frontend-payments",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["--prefix", "frontend", "run", "dev", "--", "--port", "4188", "--strictPort"],
+      "port": 4188
     }
   ]
 }

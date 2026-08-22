@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'react-toastify';
 import AlertBox from './AlertBox';
 
-const UploadModal = ({ isOpen, paymentId, onClose, onUpload, loading = false }) => {
+const UploadModal = ({ isOpen, paymentId, onClose, onUpload, loading = false, isResubmit = false }) => {
   const [file, setFile] = useState(null);
   const [transactionId, setTransactionId] = useState('');
   const [dragActive, setDragActive] = useState(false);
@@ -63,14 +63,18 @@ const UploadModal = ({ isOpen, paymentId, onClose, onUpload, loading = false }) 
   return (
     <AnimatePresence>
       {isOpen && (
-        <>
+        // z-[60] clears the z-50 navbar, and the flex overlay keeps the panel
+        // inside the window on short screens instead of overflowing it.
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-[60] flex items-center justify-center p-4"
+        >
           {/* Backdrop */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+          <div
             onClick={onClose}
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40"
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
           />
 
           {/* Modal */}
@@ -79,12 +83,16 @@ const UploadModal = ({ isOpen, paymentId, onClose, onUpload, loading = false }) 
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full max-w-md z-50 mx-4"
+            role="dialog"
+            aria-modal="true"
+            className="relative w-full max-w-md max-h-full overflow-y-auto"
           >
             <div className="glass-panel p-6 rounded-xl border border-primary/20 shadow-2xl">
               {/* Header */}
               <div className="flex items-center justify-between mb-6">
-                <h2 className="font-display text-2xl font-bold text-content">Upload Payment Proof</h2>
+                <h2 className="font-display text-2xl font-bold text-content">
+                  {isResubmit ? 'Re-submit Payment Proof' : 'Upload Payment Proof'}
+                </h2>
                 <button
                   onClick={onClose}
                   className="text-content-muted hover:text-content transition-colors p-1 rounded hover:bg-surface-2"
@@ -92,6 +100,12 @@ const UploadModal = ({ isOpen, paymentId, onClose, onUpload, loading = false }) 
                   <FiX className="w-6 h-6" />
                 </button>
               </div>
+
+              {isResubmit && (
+                <p className="text-content-muted text-sm -mt-3 mb-4">
+                  This replaces the proof you submitted earlier and sends the payment back for review.
+                </p>
+              )}
 
               {/* Form */}
               <form onSubmit={handleSubmit} className="space-y-5">
@@ -201,7 +215,7 @@ const UploadModal = ({ isOpen, paymentId, onClose, onUpload, loading = false }) 
                     ) : (
                       <>
                         <FiUploadCloud className="w-4 h-4" />
-                        Upload Proof
+                        {isResubmit ? 'Re-submit Proof' : 'Upload Proof'}
                       </>
                     )}
                   </button>
@@ -209,7 +223,7 @@ const UploadModal = ({ isOpen, paymentId, onClose, onUpload, loading = false }) 
               </form>
             </div>
           </motion.div>
-        </>
+        </motion.div>
       )}
     </AnimatePresence>
   );

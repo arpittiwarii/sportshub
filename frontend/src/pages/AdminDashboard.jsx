@@ -159,7 +159,7 @@ const approvedStudents = (Array.isArray(students) ? students : [])
   const fieldLabel = 'text-content-subtle font-semibold text-xs uppercase mb-1';
 
   return (
-    <div className="min-h-screen pt-24 pb-16 bg-bg">
+    <div className="min-h-screen page-shell pb-16 bg-bg">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
 
         {/* Header */}

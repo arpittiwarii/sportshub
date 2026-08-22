@@ -4,11 +4,11 @@ import api from '../services/api';
 import { toast } from 'react-toastify';
 import { FiEdit2, FiTrash2, FiPlus, FiBookOpen } from 'react-icons/fi';
 
-const truncate = (text, maxLen) => {
-  if (!text) return '';
-  if (text.length <= maxLen) return text;
-  return `${text.slice(0, maxLen).trim()}...`;
-};
+// const truncate = (text, maxLen) => {
+//   if (!text) return '';
+//   if (text.length <= maxLen) return text;
+//   return `${text.slice(0, maxLen).trim()}...`;
+// };
 
 const Blogs = () => {
   const [blogs, setBlogs] = useState([]);
@@ -51,7 +51,7 @@ const Blogs = () => {
   }, []);
 
   if (loading) {
-    return <div className="min-h-screen pt-24 bg-bg text-center text-content-muted">Loading blogs...</div>;
+    return <div className="min-h-screen page-shell bg-bg text-center text-content-muted">Loading blogs...</div>;
   }
 
   const handleCreateOrUpdate = async (e) => {
@@ -109,7 +109,7 @@ const Blogs = () => {
 
 
   return (
-    <div className="min-h-screen pt-24 pb-16 bg-bg">
+    <div className="min-h-screen page-shell pb-16 bg-bg">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-6xl">
         <div className="mb-10">
           <h1 className="font-display text-4xl font-bold text-content">Blogs</h1>

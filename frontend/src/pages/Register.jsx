@@ -13,8 +13,8 @@ const Register = () => {
     email: '',
     password: '',
     confirmpassword: '',
-    age: 1,
-    sport: 'Shot Put',
+    age: '',
+    sport: '',
     contact: '',
     afiId: '',
     schoolName: '',
@@ -118,7 +118,7 @@ const Register = () => {
   };
 
   return (
-    <div className="min-h-screen pt-24 pb-16 bg-bg relative">
+    <div className="min-h-screen page-shell pb-16 bg-bg relative">
       <div className="absolute top-0 right-0 w-1/3 h-full bg-primary/5 blur-3xl rounded-full"></div>
 
       <div className="container mx-auto px-6 max-w-xl relative z-10">
@@ -233,7 +233,7 @@ const Register = () => {
 
                   <div className="grid grid-cols-2 gap-3">
                     <select
-                      name="sports"
+                      name="sport"
                       id="sports-select"
                       onChange={handleChange}
                       className="col-span-2 bg-surface-2 border border-border rounded-xl px-3 py-2 text-content cursor-pointer hover:border-primary/40 transition-colors appearance-none focus:outline-none focus:border-primary"
@@ -304,6 +304,7 @@ const Register = () => {
                   // onChange={handleAadharCardFileChange}
                   // required
                   className="w-full bg-surface-2 border border-border text-content rounded-xl px-4 py-3 transition-colors"
+                  placeholder="12 Digit Aadhar No."
                 />
               </div>
 

@@ -74,7 +74,7 @@ const PaymentTable = ({
                 {isAdmin && (
                   <td className="px-6 py-4 text-sm">
                     {payment.screenshot ? (
-                      <ActionButton variant="view" icon={FiEye} onClick={() => onViewScreenshot(payment.screenshot)}>
+                      <ActionButton variant="view" icon={FiEye} onClick={() => onViewScreenshot(payment.screenshot, payment)}>
                         View
                       </ActionButton>
                     ) : (
@@ -84,9 +84,15 @@ const PaymentTable = ({
                 )}
                 <td className="px-6 py-4 text-right">
                   <div className="flex items-center justify-end gap-2">
-                    {!isAdmin && (payment.status === 'PENDING' || payment.status === 'REJECTED') && (
+                    {/* Athletes keep re-submitting until the proof is approved */}
+                    {!isAdmin && payment.screenshot && onViewScreenshot && (
+                      <ActionButton variant="view" icon={FiEye} onClick={() => onViewScreenshot(payment.screenshot, payment)}>
+                        View
+                      </ActionButton>
+                    )}
+                    {!isAdmin && payment.status !== 'APPROVED' && (
                       <ActionButton variant="upload" icon={FiUploadCloud} onClick={() => onUpload(payment.id)}>
-                        Upload
+                        {payment.submittedAt ? 'Re-submit' : 'Upload'}
                       </ActionButton>
                     )}
                     {isAdmin && payment.status === 'PENDING' && payment.submittedAt && (
@@ -148,7 +154,7 @@ const PaymentTable = ({
               <ActionButton
                 variant="view"
                 icon={FiEye}
-                onClick={() => onViewScreenshot(payment.screenshot)}
+                onClick={() => onViewScreenshot(payment.screenshot, payment)}
                 className="w-full"
               >
                 View Screenshot
@@ -156,9 +162,14 @@ const PaymentTable = ({
             )}
 
             <div className="flex gap-2 mt-3 flex-wrap">
-              {!isAdmin && (payment.status === 'PENDING' || payment.status === 'REJECTED') && (
+              {!isAdmin && payment.screenshot && onViewScreenshot && (
+                <ActionButton variant="view" icon={FiEye} onClick={() => onViewScreenshot(payment.screenshot, payment)} className="flex-1">
+                  View Proof
+                </ActionButton>
+              )}
+              {!isAdmin && payment.status !== 'APPROVED' && (
                 <ActionButton variant="upload" icon={FiUploadCloud} onClick={() => onUpload(payment.id)} className="flex-1">
-                  Upload
+                  {payment.submittedAt ? 'Re-submit' : 'Upload'}
                 </ActionButton>
               )}
               {isAdmin && payment.status === 'PENDING' && payment.submittedAt && (

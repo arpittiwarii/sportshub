@@ -26,6 +26,11 @@
   --success: 87 160 110;         /* #57A06E muted green */
   --danger: 193 90 78;           /* #C15A4E muted brick */
   --ring: 201 162 75;            /* gold focus ring */
+
+  /* Height of the fixed navbar in its expanded (unscrolled) state. Navbar.jsx
+     re-publishes the measured value on mount/resize; this is the fallback for
+     the first paint. Page padding derives from it — see .page-shell. */
+  --navbar-h: 105px;
 }
 
 .theme-light {                   /* LIGHT */
@@ -89,6 +94,19 @@
 
   .nav-link {
     @apply text-content-muted hover:text-primary transition-colors duration-200 font-medium text-sm tracking-wide;
+  }
+
+  /* Top padding for every routed page that starts below the fixed navbar.
+     Replaces a hardcoded pt-24 (96px) that was shorter than the navbar
+     itself, which tucked the first row of content under the header. */
+  .page-shell {
+    padding-top: calc(var(--navbar-h) + 1.5rem);
+  }
+
+  /* Sticky column that must park below the navbar, not under it. */
+  .sticky-under-nav {
+    position: sticky;
+    top: calc(var(--navbar-h) + 1rem);
   }
 
   .theme-toggle {
