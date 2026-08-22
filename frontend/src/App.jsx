@@ -34,13 +34,13 @@ class ErrorBoundary extends React.Component {
   render() {
     if (this.state.hasError) {
       return (
-        <div className="w-full h-screen bg-dark-900 text-light flex items-center justify-center p-4">
+        <div className="w-full h-screen bg-bg text-content flex items-center justify-center p-4">
           <div className="text-center">
-            <h1 className="text-3xl font-bold mb-4">Something went wrong</h1>
-            <p className="text-red-500 mb-4">{this.state.error?.message}</p>
+            <h1 className="font-display text-3xl font-bold mb-4">Something went wrong</h1>
+            <p className="text-danger mb-4">{this.state.error?.message}</p>
             <button
               onClick={() => window.location.reload()}
-              className="bg-primary px-6 py-2 rounded hover:opacity-90"
+              className="bg-primary text-primary-contrast font-semibold px-6 py-2 rounded-lg hover:bg-primary-hover transition-colors"
             >
               Reload Page
             </button>
@@ -108,7 +108,7 @@ function App() {
   return (
     <ErrorBoundary>
       <Router>
-        <div className="flex flex-col min-h-screen bg-dark-900 text-light font-sans">
+        <div className="flex flex-col min-h-screen bg-bg text-content font-sans">
           <ToastContainer theme={theme} />
           <Navbar />
           <main className="flex-grow">

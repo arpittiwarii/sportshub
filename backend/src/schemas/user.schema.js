@@ -1,4 +1,10 @@
-const { additionalProperties, properties } = require("./fees.schema");
+// Password policy mirrors validatePasswordStrength() in register.service.js:
+// at least 8 characters, containing both a letter and a digit.
+const passwordRule = {
+    type: "string",
+    minLength: 8,
+    pattern: "^(?=.*[A-Za-z])(?=.*\\d).{8,}$",
+};
 
 const registerSchema = {
     type: "object",
@@ -24,10 +30,7 @@ const registerSchema = {
             format: "email"
         },
 
-        password: {
-            type: "string",
-            minLength: 6
-        },
+        password: passwordRule,
 
         role: {
             type: "string",
@@ -78,35 +81,25 @@ const loginSchema = {
 
         password: {
             type: "string",
-            minLength: 6
+            minLength: 1
         }
     },
 
     additionalProperties: false
 };
 
+// Self-service profile update (PUT /athlete/:id). Only the fields the athlete
+// service actually persists are accepted; role/email/password/status are
+// deliberately excluded so a user can never escalate or hijack their account
+// through this endpoint.
 const updateSchema = {
     type: "object",
     additionalProperties: false,
+    minProperties: 1,
     properties: {
         name: {
             type: "string",
             minLength: 2
-        },
-
-        email: {
-            type: "string",
-            format: "email"
-        },
-
-        password: {
-            type: "string",
-            minLength: 6
-        },
-
-        role: {
-            type: "string",
-            enum: ["ATHLETE", "ADMIN", "COACH"]
         },
 
         age: {
@@ -124,10 +117,6 @@ const updateSchema = {
         },
 
         afiId: {
-            type: "string"
-        },
-
-        aadhar: {
             type: "string"
         },
 

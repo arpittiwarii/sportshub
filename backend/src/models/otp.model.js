@@ -13,11 +13,25 @@ const otpSchema = new mongoose.Schema(
             trim: true,
             required: true,
         },
+        attempts: {
+            type: Number,
+            default: 0,
+        },
+        expiresAt: {
+            type: Date,
+            default: null,
+        },
     },
     baseSchemaOptions()
 );
 
 withSoftDelete(otpSchema);
+
+// Fast lookup of a user's active OTP.
+otpSchema.index({ UId: 1 });
+// TTL cleanup: Mongo removes each document once `expiresAt` has passed.
+// Documents with expiresAt = null (legacy) are left untouched.
+otpSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 
 const OTP = mongoose.models.otps || mongoose.model('otps', otpSchema);
 

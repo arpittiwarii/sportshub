@@ -57,35 +57,35 @@ const AdminProfile = () => {
   };
 
   if (loading) {
-    return <div className="min-h-screen pt-24 bg-dark-900 text-center text-gray-400">Loading...</div>;
+    return <div className="min-h-screen pt-24 bg-bg text-center text-content-muted">Loading...</div>;
   }
 
   return (
-    <div className="min-h-screen pt-24 pb-16 bg-dark-900">
+    <div className="min-h-screen pt-24 pb-16 bg-bg">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-2xl">
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-white">Admin Profile</h1>
-          <p className="text-gray-400 mt-2">View details and update profile image.</p>
+          <h1 className="font-display text-4xl font-bold text-content">Admin Profile</h1>
+          <p className="text-content-muted mt-2">View details and update profile image.</p>
         </div>
 
         <div className="glass-panel p-8 md:p-10">
           <div className="flex flex-col items-center mb-8">
-            <div className="w-24 h-24 rounded-full overflow-hidden border border-dark-700 bg-dark-800">
+            <div className="w-24 h-24 rounded-full overflow-hidden border border-border bg-surface-2">
               {profile?.profileImage ? (
                 <img src={profile.profileImage} alt="Admin profile" className="w-full h-full object-cover" />
               ) : (
-                <div className="w-full h-full flex items-center justify-center text-gray-500">No Image</div>
+                <div className="w-full h-full flex items-center justify-center text-content-subtle">No Image</div>
               )}
             </div>
             <div className="text-center mt-4">
-              <p className="text-white font-bold text-lg">{profile?.name || 'N/A'}</p>
-              <p className="text-gray-400 text-sm mt-1">{profile?.email || 'N/A'}</p>
+              <p className="text-content font-bold text-lg">{profile?.name || 'N/A'}</p>
+              <p className="text-content-muted text-sm mt-1">{profile?.email || 'N/A'}</p>
             </div>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-gray-300 font-medium mb-2" htmlFor="profileImage">
+              <label className="block text-content-muted font-medium mb-2" htmlFor="profileImage">
                 Profile Image (JPG/PNG)
               </label>
               <input
@@ -98,7 +98,7 @@ const AdminProfile = () => {
                   setFile(f || null);
                 }}
                 disabled={saving}
-                className="w-full bg-dark-900 border border-dark-700 text-white rounded-xl px-4 py-3"
+                className="w-full bg-surface-2 border border-border text-content rounded-xl px-4 py-3"
               />
             </div>
 

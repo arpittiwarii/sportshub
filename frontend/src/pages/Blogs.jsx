@@ -14,7 +14,6 @@ const Blogs = () => {
   const [blogs, setBlogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [admin, setAdmin] = useState({})
   let userStr;
   // let user;
   const emptyForm = {
@@ -26,7 +25,6 @@ const Blogs = () => {
     try {
        userStr = localStorage.getItem('user');
        const user = userStr ? JSON.parse(userStr) : null;
-       setAdmin(user)
       setIsAdmin(user?.role === 'ADMIN');
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to load user.');
@@ -53,7 +51,7 @@ const Blogs = () => {
   }, []);
 
   if (loading) {
-    return <div className="min-h-screen pt-24 bg-dark-900 text-center text-gray-400">Loading blogs...</div>;
+    return <div className="min-h-screen pt-24 bg-bg text-center text-content-muted">Loading blogs...</div>;
   }
 
   const handleCreateOrUpdate = async (e) => {
@@ -75,7 +73,7 @@ const Blogs = () => {
         setBlogs((prev) => prev.map((b) => (b._id === updatedBlog._id ? updatedBlog : b)));
       } else {
 
-        const res = await api.post('/blogs', { title, content, userId:admin.id });
+        const res = await api.post('/blogs', { title, content });
         const createdBlog = res.data?.data || res.data;
         toast.success('Blog created successfully!');
         setForm(emptyForm);
@@ -111,11 +109,11 @@ const Blogs = () => {
 
 
   return (
-    <div className="min-h-screen pt-24 pb-16 bg-dark-900">
+    <div className="min-h-screen pt-24 pb-16 bg-bg">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-6xl">
         <div className="mb-10">
-          <h1 className="text-4xl font-bold text-white">Blogs</h1>
-          <p className="text-gray-400 mt-2 flex items-center gap-2">
+          <h1 className="font-display text-4xl font-bold text-content">Blogs</h1>
+          <p className="text-content-muted mt-2 flex items-center gap-2">
             <FiBookOpen className="text-primary" /> Updates, tips, and training insights.
           </p>
         </div>
@@ -126,21 +124,21 @@ const Blogs = () => {
           transition={{ duration: 0.4 }}
           className="glass-panel p-6 md:p-10"
         >
-          <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-2">
+          <h2 className="font-display text-2xl font-bold text-content mb-6 flex items-center gap-2">
             <FiBookOpen className="text-primary" />
             {form.id ? 'Edit Blog' : 'Create Blog'}
           </h2>
 
           <form onSubmit={handleCreateOrUpdate} className="space-y-4">
             <div>
-              <label className="block text-gray-300 font-medium mb-2" htmlFor="title">
+              <label className="block text-content-muted font-medium mb-2" htmlFor="title">
                 Title
               </label>
               <input
                 id="title"
                 value={form.title}
                 onChange={(e) => setForm((prev) => ({ ...prev, title: e.target.value }))}
-                className="w-full bg-dark-900 border border-dark-700 text-white rounded-xl px-4 py-3 transition-colors"
+                className="w-full bg-surface-2 border border-border focus:border-primary outline-none text-content rounded-xl px-4 py-3 transition-colors"
                 placeholder="e.g., Sprint Training Tips"
                 disabled={submitting}
                 required
@@ -148,14 +146,14 @@ const Blogs = () => {
             </div>
 
             <div>
-              <label className="block text-gray-300 font-medium mb-2" htmlFor="content">
+              <label className="block text-content-muted font-medium mb-2" htmlFor="content">
                 Content
               </label>
               <textarea
                 id="content"
                 value={form.content}
                 onChange={(e) => setForm((prev) => ({ ...prev, content: e.target.value }))}
-                className="w-full min-h-36 bg-dark-900 border border-dark-700 text-white rounded-xl px-4 py-3 transition-colors"
+                className="w-full min-h-36 bg-surface-2 border border-border focus:border-primary outline-none text-content rounded-xl px-4 py-3 transition-colors"
                 placeholder="Write your blog post..."
                 disabled={submitting}
                 required
@@ -175,7 +173,7 @@ const Blogs = () => {
                 type="button"
                 disabled={submitting}
                 onClick={() => setForm(emptyForm)}
-                className="flex-1 border border-dark-700 text-gray-300 hover:text-white hover:border-dark-600 px-6 py-3 rounded-xl transition-colors font-medium disabled:opacity-50"
+                className="flex-1 border border-border text-content-muted hover:text-content hover:border-primary/40 px-6 py-3 rounded-xl transition-colors font-medium disabled:opacity-50"
               >
                 Cancel
               </button>
@@ -185,16 +183,16 @@ const Blogs = () => {
         )}
 
         {blogs.length === 0 ? (
-          <div className="border border-dark-700 rounded-2xl bg-dark-800/30 p-10 text-center">
-            <p className="text-gray-400">No blogs published yet.</p>
+          <div className="border border-border rounded-2xl bg-surface p-10 text-center">
+            <p className="text-content-muted">No blogs published yet.</p>
           </div>
         ) : (
           <div>
-            <h2 className="text-xl font-bold text-white mb-4">Existing Posts</h2>
+            <h2 className="font-display text-xl font-bold text-content mb-4 mt-10">Existing Posts</h2>
             {loading ? (
-              <div className="text-center text-gray-400 py-10">Loading...</div>
+              <div className="text-center text-content-muted py-10">Loading...</div>
             ) : blogs.length === 0 ? (
-              <div className="text-center text-gray-400 py-10 border border-dark-700 rounded-2xl bg-dark-800/30">
+              <div className="text-center text-content-muted py-10 border border-border rounded-2xl bg-surface">
                 No blogs yet.
               </div>
             ) : (
@@ -205,10 +203,10 @@ const Blogs = () => {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.25 }}
-                    className="bg-dark-800/30 border border-dark-700 hover:border-primary/40 rounded-2xl p-6 shadow-xl"
+                    className="bg-surface border border-border hover:border-primary/40 rounded-2xl p-6 shadow-card transition-colors"
                   >
                     <div className="flex items-start justify-between gap-4">
-                      <h3 className="text-lg font-bold text-white truncate">{blog.title}</h3>
+                      <h3 className="font-display text-lg font-bold text-content truncate">{blog.title}</h3>
                       {isAdmin && (<div className="flex items-center gap-2">
                         <button
                           type="button"
@@ -220,7 +218,7 @@ const Blogs = () => {
                         <button
                           type="button"
                           onClick={() => handleDelete(blog.id)}
-                          className="px-3 py-2 rounded-lg bg-red-500/10 hover:bg-red-500/15 text-red-300 border border-red-500/30 transition-colors"
+                          className="px-3 py-2 rounded-lg bg-danger/10 hover:bg-danger/15 text-danger border border-danger/30 transition-colors"
                         >
                           <FiTrash2 />
                         </button>
@@ -228,11 +226,11 @@ const Blogs = () => {
                       }
                     </div>
 
-                    <p className="text-gray-400 text-sm mt-3 leading-relaxed">
+                    <p className="text-content-muted text-sm mt-3 leading-relaxed">
                       {blog.content?.slice(0, 160) ? `${blog.content.slice(0, 160)}...` : blog.content}
                     </p>
 
-                    <p className="text-gray-500 text-xs mt-4">
+                    <p className="text-content-subtle text-xs mt-4">
                       {blog.createdAt ? new Date(blog.createdAt).toLocaleDateString() : '—'}
                     </p>
                   </motion.div>
@@ -247,4 +245,3 @@ const Blogs = () => {
 };
 
 export default Blogs;
-

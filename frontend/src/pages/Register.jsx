@@ -4,6 +4,7 @@ import api from '../services/api';
 import { FiCheckCircle, FiAlertCircle } from 'react-icons/fi';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import AlertBox from '../components/AlertBox';
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -109,7 +110,7 @@ const Register = () => {
   };
 
   return (
-    <div className="min-h-screen pt-24 pb-16 bg-dark-900 relative">
+    <div className="min-h-screen pt-24 pb-16 bg-bg relative">
       <div className="absolute top-0 right-0 w-1/3 h-full bg-primary/5 blur-3xl rounded-full"></div>
 
       <div className="container mx-auto px-6 max-w-xl relative z-10">
@@ -118,9 +119,9 @@ const Register = () => {
           animate={{ opacity: 1, y: 0 }}
           className="text-center mb-10"
         >
-          <span className="text-primary font-bold tracking-wider uppercase text-sm mb-2 block">Admissions Open</span>
-          <h1 className="text-4xl md:text-5xl font-display font-bold text-white mb-4">Join <span className="text-primary">Sports Hub</span></h1>
-          <p className="text-gray-400">Register now. Once approved by the admin, you can log in to your student dashboard.</p>
+          <span className="eyebrow text-primary mb-2 block">Admissions Open</span>
+          <h1 className="text-4xl md:text-5xl font-display font-bold text-content mb-4">Join <span className="text-primary">Arambh</span></h1>
+          <p className="text-content-muted">Register now. Once approved by the admin, you can log in to your student dashboard.</p>
         </motion.div>
 
         <motion.div
@@ -130,17 +131,18 @@ const Register = () => {
           className="glass-panel p-8 md:p-10"
         >
           {status.message && (
-            <div className={`p-4 rounded-lg flex flex-col items-start gap-2 mb-6 ${status.type === 'success' ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-red-500/10 text-red-500 border border-red-500/20'}`}>
-              <div className="flex items-center gap-3">
-                {status.type === 'success' ? <FiCheckCircle className="text-xl flex-shrink-0" /> : <FiAlertCircle className="text-xl flex-shrink-0" />}
-                <p className="font-medium">{status.message}</p>
-              </div>
-            </div>
+            <AlertBox
+              variant={status.type === 'success' ? 'success' : 'danger'}
+              icon={status.type === 'success' ? FiCheckCircle : FiAlertCircle}
+              className="mb-6"
+            >
+              <p className="font-medium">{status.message}</p>
+            </AlertBox>
           )}
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label className="block text-gray-300 font-medium mb-2" htmlFor="name">Full Name*</label>
+              <label className="block text-content-muted font-medium mb-2" htmlFor="name">Full Name*</label>
               <input
                 type="text"
                 id="name"
@@ -148,13 +150,13 @@ const Register = () => {
                 value={formData.name}
                 onChange={handleChange}
                 required
-                className="w-full bg-dark-900 border border-dark-700 focus:border-primary focus:ring-1 focus:ring-primary outline-none text-white rounded-xl px-4 py-3 transition-colors"
+                className="w-full bg-surface-2 border border-border focus:border-primary focus:ring-1 focus:ring-primary outline-none text-content rounded-xl px-4 py-3 transition-colors"
                 placeholder="John Doe"
               />
             </div>
 
             <div>
-              <label className="block text-gray-300 font-medium mb-2" htmlFor="email">Email Address*</label>
+              <label className="block text-content-muted font-medium mb-2" htmlFor="email">Email Address*</label>
               <input
                 type="email"
                 id="email"
@@ -162,13 +164,13 @@ const Register = () => {
                 value={formData.email}
                 onChange={handleChange}
                 required
-                className="w-full bg-dark-900 border border-dark-700 focus:border-primary focus:ring-1 focus:ring-primary outline-none text-white rounded-xl px-4 py-3 transition-colors"
+                className="w-full bg-surface-2 border border-border focus:border-primary focus:ring-1 focus:ring-primary outline-none text-content rounded-xl px-4 py-3 transition-colors"
                 placeholder="john@example.com"
               />
             </div>
 
             <div>
-              <label className="block text-gray-300 font-medium mb-2" htmlFor="password">Password*</label>
+              <label className="block text-content-muted font-medium mb-2" htmlFor="password">Password*</label>
               <input
                 type="password"
                 id="password"
@@ -176,13 +178,13 @@ const Register = () => {
                 value={formData.password}
                 onChange={handleChange}
                 required
-                className="w-full bg-dark-900 border border-dark-700 focus:border-primary focus:ring-1 focus:ring-primary outline-none text-white rounded-xl px-4 py-3 transition-colors"
+                className="w-full bg-surface-2 border border-border focus:border-primary focus:ring-1 focus:ring-primary outline-none text-content rounded-xl px-4 py-3 transition-colors"
                 placeholder="••••••••"
               />
             </div>
 
             <div>
-              <label className="block text-gray-300 font-medium mb-2" htmlFor="confirmpassword">Confirm Password*</label>
+              <label className="block text-content-muted font-medium mb-2" htmlFor="confirmpassword">Confirm Password*</label>
               <input
                 type="password"
                 id="cofirmpassword"
@@ -191,14 +193,14 @@ const Register = () => {
                 onBlur={(e)=>{if(e.target.value !== formData.password) toast("Confirm Password must be same as password")}}
                 onChange={handleChange}
                 required
-                className="w-full bg-dark-900 border border-dark-700 focus:border-primary focus:ring-1 focus:ring-primary outline-none text-white rounded-xl px-4 py-3 transition-colors"
+                className="w-full bg-surface-2 border border-border focus:border-primary focus:ring-1 focus:ring-primary outline-none text-content rounded-xl px-4 py-3 transition-colors"
                 placeholder="••••••••"
               />
             </div>
 
             <div className="grid grid-cols-2 gap-6">
               <div>
-                <label className="block text-gray-300 font-medium mb-2" htmlFor="age">Age*</label>
+                <label className="block text-content-muted font-medium mb-2" htmlFor="age">Age*</label>
                 <input
                   type="number"
                   id="age"
@@ -208,13 +210,13 @@ const Register = () => {
                   required
                   min="5"
                   max="60"
-                  className="w-full bg-dark-900 border border-dark-700 focus:border-primary focus:ring-1 focus:ring-primary outline-none text-white rounded-xl px-4 py-3 transition-colors"
+                  className="w-full bg-surface-2 border border-border focus:border-primary focus:ring-1 focus:ring-primary outline-none text-content rounded-xl px-4 py-3 transition-colors"
                   placeholder="e.g. 15"
                 />
               </div>
 
               <div>
-                <label className="block text-gray-300 font-medium mb-2" htmlFor="sports">Select Sport</label>
+                <label className="block text-content-muted font-medium mb-2" htmlFor="sports">Select Sport</label>
                 <div className="flex flex-col gap-2">
                   {/* The Label remains separate from the loop */}
 
@@ -223,7 +225,7 @@ const Register = () => {
                       name="sports"
                       id="sports-select"
                       onChange={handleChange}
-                      className="col-span-2 bg-dark-900/30 border border-dark-700 rounded-xl px-3 py-2 text-white/90 cursor-pointer hover:border-primary/40 transition-colors appearance-none focus:outline-none focus:border-primary"
+                      className="col-span-2 bg-surface-2 border border-border rounded-xl px-3 py-2 text-content cursor-pointer hover:border-primary/40 transition-colors appearance-none focus:outline-none focus:border-primary"
                     >
                       {[
                         'Select',
@@ -236,7 +238,7 @@ const Register = () => {
                         'Running 1600m',
                         'Other',
                       ].map((s) => (
-                        <option key={s} value={s} className="bg-dark-900 text-white">
+                        <option key={s} value={s} className="bg-surface text-content">
                           {s}
                         </option>
                       ))}
@@ -248,7 +250,7 @@ const Register = () => {
             </div>
 
             <div>
-              <label className="block text-gray-300 font-medium mb-2" htmlFor="contact">Contact Number*</label>
+              <label className="block text-content-muted font-medium mb-2" htmlFor="contact">Contact Number*</label>
               <input
                 type="tel"
                 id="contact"
@@ -256,14 +258,14 @@ const Register = () => {
                 value={formData.contact}
                 onChange={handleChange}
                 required
-                className="w-full bg-dark-900 border border-dark-700 focus:border-primary focus:ring-1 focus:ring-primary outline-none text-white rounded-xl px-4 py-3 transition-colors"
+                className="w-full bg-surface-2 border border-border focus:border-primary focus:ring-1 focus:ring-primary outline-none text-content rounded-xl px-4 py-3 transition-colors"
                 placeholder="9989898989 "
               />
             </div>
 
             <div className="grid grid-cols-1 gap-6">
               {/* <div>
-                <label className="block text-gray-300 font-medium mb-2" htmlFor="birthCertificate">
+                <label className="block text-content-muted font-medium mb-2" htmlFor="birthCertificate">
                   Birth Certificate Registration Number :
                 </label>
                 <input
@@ -273,12 +275,12 @@ const Register = () => {
                   // accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"
                   // onChange={handleBirthCertificateFileChange}
                   // required
-                  className="w-full bg-dark-900 border border-dark-700 text-white rounded-xl px-4 py-3 transition-colors"
+                  className="w-full bg-surface-2 border border-border text-content rounded-xl px-4 py-3 transition-colors"
                 />
               </div> */}
 
               <div>
-                <label className="block text-gray-300 font-medium mb-2" htmlFor="aadharCard">
+                <label className="block text-content-muted font-medium mb-2" htmlFor="aadharCard">
                   Aadhar Card Number :
                 </label>
                 <input
@@ -290,12 +292,12 @@ const Register = () => {
                   // accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"
                   // onChange={handleAadharCardFileChange}
                   // required
-                  className="w-full bg-dark-900 border border-dark-700 text-white rounded-xl px-4 py-3 transition-colors"
+                  className="w-full bg-surface-2 border border-border text-content rounded-xl px-4 py-3 transition-colors"
                 />
               </div>
 
               <div>
-                <label className="block text-gray-300 font-medium mb-2" htmlFor="afiId">
+                <label className="block text-content-muted font-medium mb-2" htmlFor="afiId">
                   AFI ID
                 </label>
                 <input
@@ -305,14 +307,14 @@ const Register = () => {
                   value={formData.afiId}
                   onChange={handleChange}
                   required
-                  className="w-full bg-dark-900 border border-dark-700 focus:border-primary focus:ring-1 focus:ring-primary outline-none text-white rounded-xl px-4 py-3 transition-colors"
+                  className="w-full bg-surface-2 border border-border focus:border-primary focus:ring-1 focus:ring-primary outline-none text-content rounded-xl px-4 py-3 transition-colors"
                   placeholder="Enter your AFI ID"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-gray-300 font-medium mb-2" htmlFor="schoolName">School / College Name</label>
+              <label className="block text-content-muted font-medium mb-2" htmlFor="schoolName">School / College Name</label>
               <input
                 type="text"
                 id="schoolName"
@@ -320,7 +322,7 @@ const Register = () => {
                 value={formData.schoolName}
                 onChange={handleChange}
                 required
-                className="w-full bg-dark-900 border border-dark-700 focus:border-primary focus:ring-1 focus:ring-primary outline-none text-white rounded-xl px-4 py-3 transition-colors"
+                className="w-full bg-surface-2 border border-border focus:border-primary focus:ring-1 focus:ring-primary outline-none text-content rounded-xl px-4 py-3 transition-colors"
                 placeholder="e.g. ABC School"
               />
             </div>
@@ -332,7 +334,7 @@ const Register = () => {
             >
               {loading ? 'Submitting...' : 'Register as Student'}
             </button>
-            <p className="text-center text-sm text-gray-400 mt-4">
+            <p className="text-center text-sm text-content-muted mt-4">
               Already registered and approved? <Link to="/login" className="text-primary hover:underline">Log in</Link>
             </p>
           </form>

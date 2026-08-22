@@ -124,25 +124,35 @@ const AdminPaymentPage = () => {
     needsReview: allPayments.filter(p => p.status === 'PENDING' && p.submittedAt).length
   };
 
+  const statTiles = [
+    { label: 'Total', value: stats.total, tone: 'text-primary' },
+    { label: 'Pending', value: stats.pending, tone: 'text-steel' },
+    { label: 'Approved', value: stats.approved, tone: 'text-success' },
+    { label: 'Rejected', value: stats.rejected, tone: 'text-danger' },
+    { label: 'With Proof', value: stats.withScreenshot, tone: 'text-steel' },
+    { label: 'Review Needed', value: stats.needsReview, tone: 'text-primary' },
+  ];
+
   return (
-    <div className="min-h-screen pt-24 pb-16 bg-gradient-to-b from-dark-900 via-dark-900 to-dark-800">
+    <div className="min-h-screen pt-24 pb-16 bg-gradient-to-b from-bg via-bg to-surface">
       <div className="container mx-auto px-6 max-w-7xl">
 
         {/* Header */}
-        <div className="flex flex-col md:flex-row justify-between items-center mb-10 gap-4 border-b border-dark-700 pb-6">
+        <div className="flex flex-col md:flex-row justify-between items-center mb-10 gap-4 border-b border-border pb-6">
           <div className="flex items-center gap-4">
-            <div className="w-16 h-16 bg-gradient-to-br from-primary to-primary/50 rounded-xl flex items-center justify-center text-white text-2xl font-bold shadow-lg shadow-primary/50">
+            <div className="w-16 h-16 bg-gradient-to-br from-primary to-primary/60 rounded-xl flex items-center justify-center text-primary-contrast text-2xl shadow-lg shadow-primary/40">
               <FiDollarSign />
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-white">Payment Management</h1>
-              <p className="text-gray-400">Verify and manage atheletes payments</p>
+              <p className="eyebrow">Management Center</p>
+              <h1 className="text-3xl font-display text-content">Payment Management</h1>
+              <p className="text-content-muted">Verify and manage athletes' payments</p>
             </div>
           </div>
 
           <button
             onClick={handleLogout}
-            className="flex items-center gap-2 text-red-400 hover:bg-red-400/10 px-4 py-2 rounded-lg transition-colors border border-transparent hover:border-red-400/20"
+            className="flex items-center gap-2 text-danger hover:bg-danger/10 px-4 py-2 rounded-lg transition-colors border border-transparent hover:border-danger/20"
           >
             <FiLogOut /> Logout
           </button>
@@ -150,20 +160,13 @@ const AdminPaymentPage = () => {
 
         {/* Statistics Cards */}
         <div className="grid grid-cols-2 md:grid-cols-6 gap-4 mb-8">
-          {[
-            { label: 'Total', value: stats.total, color: 'from-primary to-primary/80' },
-            { label: 'Pending', value: stats.pending, color: 'from-primary to-primary/80' },
-            { label: 'Approved', value: stats.approved, color: 'from-accent-green to-green-500' },
-            { label: 'Rejected', value: stats.rejected, color: 'from-accent-red to-red-500' },
-            { label: 'With Proof', value: stats.withScreenshot, color: 'from-primary to-primary/80' },
-            { label: 'Review Needed', value: stats.needsReview, color: 'from-primary to-primary/80' }
-          ].map((stat, idx) => (
+          {statTiles.map((stat, idx) => (
             <div
               key={idx}
-              className="glass-panel p-3 border border-dark-700 hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:shadow-primary/20"
+              className="glass-panel p-3 border border-border hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:shadow-primary/20"
             >
-              <p className="text-gray-400 text-xs mb-1">{stat.label}</p>
-              <p className={`text-2xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent`}>
+              <p className="text-content-muted text-xs mb-1">{stat.label}</p>
+              <p className={`text-2xl font-display font-bold tabular-nums ${stat.tone}`}>
                 {stat.value}
               </p>
             </div>
@@ -184,7 +187,7 @@ const AdminPaymentPage = () => {
 
         {/* Payments Table */}
         <div>
-          <h2 className="text-2xl font-bold text-white mb-6">
+          <h2 className="text-2xl font-display text-content mb-6">
             {activeFilter === 'all' && 'All Payments'}
             {activeFilter === 'pending' && `Pending Review (${stats.needsReview})`}
             {activeFilter === 'approved' && `Approved Payments (${stats.approved})`}
@@ -204,8 +207,8 @@ const AdminPaymentPage = () => {
         {/* Help Section */}
         {stats.needsReview > 0 && (
           <div className="glass-panel p-6 mt-8 border border-primary/30 bg-primary/5">
-            <h3 className="text-lg font-bold text-white mb-3">⚠️ Action Required</h3>
-            <p className="text-gray-400">
+            <h3 className="text-lg font-bold text-content mb-3">⚠️ Action Required</h3>
+            <p className="text-content-muted">
               You have <span className="font-bold text-primary">{stats.needsReview}</span> pending payment{stats.needsReview !== 1 ? 's' : ''} with proof that need verification. Review them above and approve or reject.
             </p>
           </div>

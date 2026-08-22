@@ -22,7 +22,7 @@ const Navbar = () => {
   const userStr = localStorage.getItem('user');
   let role = null;
   if (userStr) {
-    try { role = JSON.parse(userStr).role; } catch (e) { }
+    try { role = JSON.parse(userStr).role; } catch (e) { /* ignore malformed user */ }
   }
 
   const renderNavLinks = () => {
@@ -35,7 +35,6 @@ const Navbar = () => {
           <>
             <Link to="/admin" className={`nav-link ${location.pathname === '/admin' ? 'text-primary' : ''}`} onClick={() => setMobileMenuOpen(false)}>Dashboard</Link>
             <Link to="/admin/payments" className={`nav-link ${location.pathname === '/admin/payments' ? 'text-primary' : ''}`} onClick={() => setMobileMenuOpen(false)}>Payments</Link>
-
           </>
         )}
 
@@ -48,18 +47,21 @@ const Navbar = () => {
 
   return (
     <header
-      className={`app-navbar fixed top-0 w-full z-50 transition-all duration-300 bg-dark-900/90 backdrop-blur-md border-b border-white/10 py-3 shadow-lg bg-dark-900/75 backdrop-blur-sm py-5'
-        }`}
+      className={`app-navbar fixed top-0 w-full z-50 transition-all duration-300 backdrop-blur-md border-b ${
+        isScrolled
+          ? 'bg-bg/95 border-border py-3 shadow-lg'
+          : 'bg-bg/90 border-transparent py-5'
+      }`}
     >
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 flex justify-between items-center">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-3 group">
-          <div className="w-16 h-16">
+          <div className="w-16 h-16 rounded-xl overflow-hidden ring-1 ring-border">
             <img src={logo} alt="logo" className="w-full h-full object-contain" />
           </div>
-          <div className="flex flex-col">
-            <span className="font-bold text-xl tracking-wider text-white leading-tight">Arambh</span>
-            <span className="text-xs text-gray-400 font-semibold uppercase">Athletics Hub Indore</span>
+          <div className="flex flex-col leading-tight">
+            <span className="font-display font-bold text-2xl tracking-wide text-content">Arambh</span>
+            <span className="text-[0.65rem] text-content-muted font-semibold uppercase tracking-[0.18em]">Athletics Hub Indore</span>
           </div>
         </Link>
 
@@ -71,13 +73,13 @@ const Navbar = () => {
             <div className="flex items-center gap-4">
               <Link
                 to="/login"
-                className="text-gray-400 hover:text-primary font-semibold transition-colors"
+                className="text-content-muted hover:text-primary font-semibold transition-colors"
               >
                 Sign In
               </Link>
               <Link
                 to="/register"
-                className="bg-primary hover:brightness-110 text-black font-bold py-2.5 px-6 rounded-lg transition-all hover:scale-105 shadow-lg shadow-primary/50"
+                className="bg-primary hover:bg-primary-hover text-primary-contrast font-bold py-2.5 px-6 rounded-lg transition-all hover:scale-105 shadow-lg shadow-primary/30 uppercase tracking-wide text-sm"
               >
                 Join Now
               </Link>
@@ -99,28 +101,28 @@ const Navbar = () => {
           transition={{ duration: 0.3 }}
           className="lg:hidden overflow-hidden absolute top-full left-0 w-full z-40"
         >
-          <div className="bg-dark-900 border-b border-primary/20 p-4 sm:p-6 flex flex-col gap-4 shadow-2xl">
+          <div className="bg-bg border-b border-primary/20 p-4 sm:p-6 flex flex-col gap-4 shadow-2xl">
             {renderNavLinks()}
 
             {!role ? (
-              <div className="flex flex-col gap-3 mt-2 border-t border-dark-700 pt-4">
+              <div className="flex flex-col gap-3 mt-2 border-t border-border pt-4">
                 <Link
                   to="/login"
-                  className="text-white font-semibold text-lg hover:text-primary transition-colors"
+                  className="text-content font-semibold text-lg hover:text-primary transition-colors"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   Sign In
                 </Link>
                 <Link
                   to="/register"
-                  className="bg-primary text-black font-bold py-2.5 px-6 rounded-lg text-center hover:brightness-110 transition-all shadow-lg shadow-primary/50"
+                  className="bg-primary text-primary-contrast font-bold py-2.5 px-6 rounded-lg text-center hover:bg-primary-hover transition-all shadow-lg shadow-primary/30 uppercase tracking-wide"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   Join Now
                 </Link>
               </div>
             ) : (
-              <div className="flex flex-col gap-3 mt-2 border-t border-dark-700 pt-4">
+              <div className="flex flex-col gap-3 mt-2 border-t border-border pt-4">
                 <button
                   onClick={() => {
                     localStorage.removeItem('token');
@@ -128,7 +130,7 @@ const Navbar = () => {
                     setMobileMenuOpen(false);
                     window.location.href = '/';
                   }}
-                  className="text-red-500 font-semibold text-lg hover:text-red-400 transition-colors text-left"
+                  className="text-danger font-semibold text-lg hover:text-danger/80 transition-colors text-left"
                 >
                   Logout
                 </button>
@@ -150,8 +152,9 @@ const Navbar = () => {
 
         {/* Mobile Menu Toggle Button */}
         <button
-          className="lg:hidden text-white text-2xl focus:outline-none"
+          className="lg:hidden text-content text-2xl focus:outline-none"
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          aria-label="Toggle menu"
         >
           {mobileMenuOpen ? <FiX /> : <FiMenu />}
         </button>

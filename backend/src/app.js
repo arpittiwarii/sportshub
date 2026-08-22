@@ -1,11 +1,14 @@
 const express = require('express');
 const cors = require('cors');
-const path = require('path');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
-const { config } = require('./env');
+const { RedisStore } = require('rate-limit-redis');
+const pinoHttp = require('pino-http');
 
-const { connectDB } = require('./config/db');
+const { config } = require('./env');
+const { logger } = require('./utils/logger');
+const { connectDB, mongoose } = require('./config/db');
+const { createRedisConnection } = require('./config/redis');
 const { verifyCloudinaryConnection } = require('./config/cloudinary');
 const { routes } = require('./routes/index');
 require('./models/index');
@@ -14,8 +17,9 @@ const paymentReminderJob = require('./jobs/paymentReminder');
 
 const app = express();
 const PORT = config.app.port;
-const isProduction = config.nodeEnv === 'production';
+const isProduction = config.isProduction;
 const allowedOrigins = config.app.frontendUrls;
+
 const isAllowedOrigin = (origin) => {
   if (!origin) return true;
   if (allowedOrigins.includes(origin)) return true;
@@ -25,11 +29,23 @@ const isAllowedOrigin = (origin) => {
   return false;
 };
 
+// Dedicated Redis client backing the rate limiters. A memory store (the default)
+// is per-process, so limits reset on restart and are not shared across instances —
+// useless behind a load balancer and the exact opposite of what brute-force
+// protection needs. This client is shared by all limiters below.
+const rateLimiterClient = createRedisConnection();
+const makeRedisStore = (prefix) =>
+  new RedisStore({
+    prefix,
+    sendCommand: (...args) => rateLimiterClient.call(...args),
+  });
+
 const defaultLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: isProduction ? 200 : 1000,
   standardHeaders: true,
   legacyHeaders: false,
+  store: makeRedisStore('rl:default:'),
   message: { code: 'RATE_LIMIT_EXCEEDED', message: 'Too many requests, please try again later.' },
 });
 
@@ -38,6 +54,7 @@ const authLimiter = rateLimit({
   max: isProduction ? 10 : 25,
   standardHeaders: true,
   legacyHeaders: false,
+  store: makeRedisStore('rl:auth:'),
   message: { code: 'AUTH_RATE_LIMIT_EXCEEDED', message: 'Too many authentication attempts, please try again later.' },
 });
 
@@ -46,12 +63,16 @@ const otpLimiter = rateLimit({
   max: isProduction ? 5 : 20,
   standardHeaders: true,
   legacyHeaders: false,
+  store: makeRedisStore('rl:otp:'),
   message: { code: 'OTP_RATE_LIMIT_EXCEEDED', message: 'Too many OTP requests, please try again later.' },
 });
 
-paymentReminderJob();
-
+// Trust the first proxy hop (Render / Nginx / a load balancer) so client IPs —
+// which the rate limiters key on — are read from X-Forwarded-For instead of
+// collapsing to the proxy's address.
+app.set('trust proxy', 1);
 app.disable('x-powered-by');
+
 app.use(helmet({
   crossOriginResourcePolicy: { policy: 'cross-origin' },
   contentSecurityPolicy: isProduction ? undefined : false,
@@ -65,7 +86,6 @@ const corsOptions = {
     if (isAllowedOrigin(origin)) {
       return callback(null, true);
     }
-
     return callback(new Error('Not allowed by CORS'));
   },
   credentials: true,
@@ -77,15 +97,46 @@ const corsOptions = {
 app.options(/^(.*)$/, cors(corsOptions));
 app.use(cors(corsOptions));
 
+// Structured request logging with a per-request id. Health checks are noisy and
+// omitted from the access log.
+app.use(pinoHttp({
+  logger,
+  autoLogging: { ignore: (req) => req.url === '/health' },
+}));
+
 app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: true, limit: '1mb' }));
-app.use('/uploads', express.static(path.join(__dirname, 'uploads'), { index: false, redirect: false }));
+
+// Liveness/readiness endpoint for load balancers, Docker HEALTHCHECK and uptime
+// monitors. Reports DB connectivity; unauthenticated and never rate limited.
+app.get('/health', (req, res) => {
+  const mongoUp = mongoose.connection.readyState === 1;
+  res.status(mongoUp ? 200 : 503).json({
+    status: mongoUp ? 'ok' : 'degraded',
+    uptime: process.uptime(),
+    timestamp: new Date().toISOString(),
+    checks: { mongo: mongoUp ? 'up' : 'down' },
+  });
+});
 
 app.use('/api/auth/login', authLimiter);
 app.use('/api/auth/register', authLimiter);
 app.use('/api/otps', otpLimiter);
 app.use('/api', defaultLimiter, routes);
+
+// JSON 404 for anything unmatched, so API clients never receive Express's
+// default HTML error page.
+app.use((req, res) => {
+  res.status(404).json({ code: 'NOT_FOUND', message: 'The requested resource was not found.' });
+});
+
 app.use(errorHandler);
+
+// --- Non-fatal readiness checks -------------------------------------------------
+// These verify external dependencies at boot but must NOT prevent the server from
+// starting: email is queued and retried, Cloudinary is only needed for uploads,
+// and Redis reconnects on its own. A transient blip in any of them should degrade
+// a feature, not take the whole API offline. MongoDB is the exception (below).
 
 const verifyEmailConnection = () => new Promise((resolve, reject) => {
   const nodemailer = require('nodemailer');
@@ -93,48 +144,83 @@ const verifyEmailConnection = () => new Promise((resolve, reject) => {
     host: config.email.host,
     port: config.email.port,
     secure: config.email.port === 465,
-    auth: {
-      user: config.email.user,
-      pass: config.email.pass,
-    },
+    auth: { user: config.email.user, pass: config.email.pass },
   });
-
-  transporter.verify((error) => {
-    if (error) {
-      reject(new Error(`Email service check failed: ${error.message}`));
-      return;
-    }
-    resolve(true);
-  });
+  transporter.verify((error) => (error ? reject(error) : resolve(true)));
 });
 
 const verifyRedisConnection = () => new Promise((resolve, reject) => {
   const net = require('net');
   const socket = net.createConnection({ host: config.redis.host, port: config.redis.port });
-
-  socket.on('connect', () => {
-    socket.end();
-    resolve(true);
-  });
-
-  socket.on('error', (error) => {
-    reject(new Error(`Redis service check failed: ${error.message}`));
-  });
+  socket.on('connect', () => { socket.end(); resolve(true); });
+  socket.on('error', reject);
 });
 
-Promise.resolve()
-  .then(() => connectDB())
-  .then(() => verifyCloudinaryConnection())
-  .then(() => verifyEmailConnection())
-  .then(() => verifyRedisConnection())
-  .then(() => {
-    app.listen(PORT, () => {
-      console.log(`Server running on port ${PORT}`);
-    });
-  })
-  .catch((err) => {
-    console.error('Internal error: something went wrong', err);
-    process.exit(1);
+const runReadinessChecks = async () => {
+  const checks = [
+    ['cloudinary', verifyCloudinaryConnection],
+    ['email', verifyEmailConnection],
+    ['redis', verifyRedisConnection],
+  ];
+  const results = await Promise.allSettled(checks.map(([, fn]) => fn()));
+  results.forEach((result, i) => {
+    const [name] = checks[i];
+    if (result.status === 'fulfilled') {
+      logger.info({ dependency: name }, 'Dependency check passed');
+    } else {
+      logger.warn({ dependency: name, err: result.reason?.message }, 'Dependency check failed — starting anyway');
+    }
   });
+};
 
+let server;
 
+const gracefulShutdown = (signal) => {
+  logger.info({ signal }, 'Shutting down API server');
+  const forceExit = setTimeout(() => {
+    logger.error('Forced shutdown after timeout');
+    process.exit(1);
+  }, 10000);
+  forceExit.unref();
+
+  const close = async () => {
+    try {
+      if (server) await new Promise((res) => server.close(res));
+      await mongoose.connection.close(false);
+      await rateLimiterClient.quit();
+    } catch (err) {
+      logger.error({ err: err?.message }, 'Error during shutdown');
+    } finally {
+      clearTimeout(forceExit);
+      process.exit(0);
+    }
+  };
+  close();
+};
+
+const start = async () => {
+  await connectDB(); // fatal: the app cannot function without the database
+  await runReadinessChecks();
+  paymentReminderJob();
+
+  server = app.listen(PORT, () => {
+    logger.info({ port: PORT, env: config.nodeEnv }, 'Server running');
+  });
+};
+
+start().catch((err) => {
+  logger.fatal({ err: err?.message }, 'Failed to start server');
+  process.exit(1);
+});
+
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+process.on('unhandledRejection', (reason) => {
+  logger.error({ err: reason?.message || reason }, 'Unhandled promise rejection');
+});
+process.on('uncaughtException', (err) => {
+  logger.fatal({ err: err?.message, stack: err?.stack }, 'Uncaught exception');
+  gracefulShutdown('uncaughtException');
+});
+
+module.exports = app;

@@ -9,15 +9,16 @@ const { InternalServerError } = require('../Error/InternalServerError');
 const { ValidationError } = require('../Error/ValidationError');
 const { Authentication } = require('../Error/AuthenticationError');
 const { ALLOWED_SPORTS, ATHLETE_STATUS } = require('../utils/constants');
+const { emailQueue } = require('../queues/email.queue');
+const { logger } = require('../utils/logger');
 
 
 const getAllAthletesService = async () => {
     try {
         const athletes = await findAllAthletes();
-        if (!athletes || athletes.length === 0) {
-            return 'Athletes are not registered yet';
-        }
-        return athletes;
+        // Always return an array so callers (and the frontend) can safely map
+        // over the result even when no athletes exist yet.
+        return athletes || [];
     } catch (error) {
         throw new InternalServerError(`Server error, error: ${error.message}`);
     }
@@ -90,9 +91,9 @@ const deleteAthleteService = async (id) => {
     }
 };
 
-const updateAthleteStatusService = async (id, { status }) => {
+const updateAthleteStatusService = async (id, { status, reason }) => {
     try {
-        const validStatuses = ['PENDING', 'APPROVED', 'REJECTED'];
+        const validStatuses = [ATHLETE_STATUS.PENDING, ATHLETE_STATUS.APPROVED, ATHLETE_STATUS.REJECTED];
         if (!validStatuses.includes(status)) {
             throw new ValidationError('Invalid status');
         }
@@ -104,6 +105,28 @@ const updateAthleteStatusService = async (id, { status }) => {
         }
 
         const updatedAthlete = await updateUserById(id, { status });
+
+        // Notify the athlete of the decision. Enqueued best-effort: a mail
+        // backlog must never fail an admin's approve/reject action.
+        try {
+            if (status === ATHLETE_STATUS.APPROVED) {
+                await emailQueue.add('approval-confirm-email', {
+                    email: athlete.email,
+                    name: athlete.name,
+                    role,
+                });
+            } else if (status === ATHLETE_STATUS.REJECTED) {
+                await emailQueue.add('approval-reject-email', {
+                    email: athlete.email,
+                    name: athlete.name,
+                    role,
+                    reason: reason || 'Your submitted documentation could not be verified.',
+                });
+            }
+        } catch (queueErr) {
+            logger.error({ err: queueErr?.message, athleteId: id, status }, 'Failed to enqueue approval email');
+        }
+
         return {
             id: updatedAthlete.id,
             name: updatedAthlete.name,

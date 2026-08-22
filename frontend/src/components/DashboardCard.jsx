@@ -1,13 +1,17 @@
 import { motion } from 'framer-motion';
+import IconChip from './IconChip';
 
-export default function DashboardCard({ 
-  title, 
-  value, 
-  subtitle, 
-  icon: Icon, 
-  gradient = 'from-primary to-accent-green',
+// Canonical dashboard stat tile. Token-driven `tone` replaces the old
+// free-form `gradient` prop (which mixed brand tokens with Tailwind
+// default rainbow scales).
+export default function DashboardCard({
+  title,
+  value,
+  subtitle,
+  icon: Icon,
+  tone = 'primary',
   trends = null,
-  index = 0 
+  index = 0,
 }) {
   return (
     <motion.div
@@ -18,34 +22,29 @@ export default function DashboardCard({
       whileHover={{ y: -5 }}
       className="group relative"
     >
-      <div className={`absolute inset-0 bg-gradient-to-br ${gradient} rounded-2xl blur-xl opacity-20 group-hover:opacity-30 transition-opacity duration-300`}></div>
-      
-      <div className="bg-gradient-to-br from-dark-800 to-dark-900 border border-dark-700 group-hover:border-primary/50 rounded-2xl p-6 shadow-xl group-hover:shadow-2xl transition-all duration-300 relative z-10">
-        
-        {/* Header */}
+      <div className="bg-gradient-to-br from-surface to-bg border border-border group-hover:border-primary/50 rounded-2xl p-6 shadow-card group-hover:shadow-xl group-hover:shadow-primary/20 transition-all duration-300 relative z-10">
         <div className="flex items-start justify-between mb-4">
-          <div>
-            <p className="text-gray-400 text-sm font-medium">{title}</p>
-            <p className="text-2xl md:text-3xl font-bold text-white mt-1">{value}</p>
+          <div className="min-w-0">
+            <p className="text-content-muted text-sm font-medium">{title}</p>
+            <p className="text-2xl md:text-3xl font-display font-bold text-content mt-1 tabular-nums">{value}</p>
           </div>
           {Icon && (
-            <div className={`w-12 h-12 bg-gradient-to-br ${gradient} rounded-xl flex items-center justify-center text-white group-hover:scale-110 transition-transform duration-300 shadow-lg shadow-primary/30`}>
-              <Icon size={24} />
-            </div>
+            <IconChip
+              icon={Icon}
+              tone={tone}
+              className="group-hover:scale-110 transition-transform duration-300"
+            />
           )}
         </div>
 
-        {/* Subtitle/Trend */}
-        {subtitle && (
-          <p className="text-gray-500 text-sm">{subtitle}</p>
-        )}
+        {subtitle && <p className="text-content-subtle text-sm">{subtitle}</p>}
 
         {trends && (
-          <div className="mt-4 pt-4 border-t border-dark-700 flex items-center gap-2">
-            <span className={`text-sm font-semibold ${trends.positive ? 'text-green-400' : 'text-red-400'}`}>
+          <div className="mt-4 pt-4 border-t border-border flex items-center gap-2">
+            <span className={`text-sm font-semibold ${trends.positive ? 'text-success' : 'text-danger'}`}>
               {trends.positive ? '↑' : '↓'} {trends.value}
             </span>
-            <span className="text-gray-500 text-xs">{trends.label}</span>
+            <span className="text-content-subtle text-xs">{trends.label}</span>
           </div>
         )}
       </div>

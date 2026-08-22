@@ -17,7 +17,7 @@ const verifyOtpSchema = {
         uid: objectId,
         otp: {
             type: "string",
-            pattern: "^[0-9]{4}$",
+            pattern: "^[0-9]{6}$",
         },
     },
 };

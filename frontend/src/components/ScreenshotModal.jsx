@@ -23,11 +23,11 @@ const ScreenshotModal = ({ isOpen, imageUrl, onClose }) => {
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
             className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full max-w-2xl z-50 mx-4"
           >
-            <div className="relative bg-dark-900 rounded-xl overflow-hidden shadow-2xl border border-dark-700">
+            <div className="relative bg-surface rounded-xl overflow-hidden shadow-2xl border border-border">
               {/* Close Button */}
               <button
                 onClick={onClose}
-                className="absolute top-4 right-4 bg-dark-800 hover:bg-dark-700 text-white p-2 rounded-lg transition-colors z-10"
+                className="absolute top-4 right-4 bg-surface-2 hover:bg-surface text-content p-2 rounded-lg transition-colors z-10"
               >
                 <FiX className="w-6 h-6" />
               </button>

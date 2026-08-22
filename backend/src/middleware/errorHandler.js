@@ -1,4 +1,5 @@
 const { config } = require('../env');
+const { logger } = require('../utils/logger');
 
 function errorHandler(err, req, res, next) {
     const isProduction = config.nodeEnv === 'production';
@@ -30,12 +31,15 @@ function errorHandler(err, req, res, next) {
     }
 
     // Everything else is a server error: log server-side, return a generic body.
-    console.error('Unhandled application error', {
+    const log = req.log || logger;
+    log.error({
         path: req.originalUrl,
         method: req.method,
-        message: err?.message,
-        ...(isProduction ? {} : { stack: err?.stack }),
-    });
+        code: err?.code,
+        statusCode: err?.statusCode,
+        err: err?.message,
+        stack: err?.stack,
+    }, 'Unhandled application error');
 
     return res.status(500).json({
         code: 'INTERNAL_ERROR',

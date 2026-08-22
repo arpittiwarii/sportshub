@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { FiX, FiUploadCloud, FiAlertCircle } from 'react-icons/fi';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'react-toastify';
+import AlertBox from './AlertBox';
 
 const UploadModal = ({ isOpen, paymentId, onClose, onUpload, loading = false }) => {
   const [file, setFile] = useState(null);
@@ -53,7 +54,7 @@ const UploadModal = ({ isOpen, paymentId, onClose, onUpload, loading = false }) 
     }
 
     await onUpload(paymentId, file, transactionId);
-    
+
     // Reset form
     setFile(null);
     setTransactionId('');
@@ -83,10 +84,10 @@ const UploadModal = ({ isOpen, paymentId, onClose, onUpload, loading = false }) 
             <div className="glass-panel p-6 rounded-xl border border-primary/20 shadow-2xl">
               {/* Header */}
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-white">Upload Payment Proof</h2>
+                <h2 className="font-display text-2xl font-bold text-content">Upload Payment Proof</h2>
                 <button
                   onClick={onClose}
-                  className="text-gray-400 hover:text-white transition-colors p-1 rounded hover:bg-dark-700"
+                  className="text-content-muted hover:text-content transition-colors p-1 rounded hover:bg-surface-2"
                 >
                   <FiX className="w-6 h-6" />
                 </button>
@@ -106,7 +107,7 @@ const UploadModal = ({ isOpen, paymentId, onClose, onUpload, loading = false }) 
                     ${
                       dragActive
                         ? 'border-primary bg-primary/10 scale-105'
-                        : 'border-dark-600 bg-dark-800/50 hover:border-primary/50'
+                        : 'border-border bg-surface-2/50 hover:border-primary/50'
                     }
                   `}
                 >
@@ -126,10 +127,10 @@ const UploadModal = ({ isOpen, paymentId, onClose, onUpload, loading = false }) 
                       </div>
                     </div>
                     <div>
-                      <p className="text-white font-medium">
+                      <p className="text-content font-medium">
                         {file ? file.name : 'Choose or drag file here'}
                       </p>
-                      <p className="text-gray-400 text-sm mt-1">
+                      <p className="text-content-muted text-sm mt-1">
                         {file ? `${(file.size / 1024).toFixed(2)} KB` : 'JPG, PNG up to 5MB'}
                       </p>
                     </div>
@@ -142,7 +143,7 @@ const UploadModal = ({ isOpen, paymentId, onClose, onUpload, loading = false }) 
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: 'auto' }}
                     exit={{ opacity: 0, height: 0 }}
-                    className="rounded-lg overflow-hidden bg-dark-800 p-2"
+                    className="rounded-lg overflow-hidden bg-surface-2 p-2"
                   >
                     <img
                       src={URL.createObjectURL(file)}
@@ -154,7 +155,7 @@ const UploadModal = ({ isOpen, paymentId, onClose, onUpload, loading = false }) 
 
                 {/* Transaction ID Input */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-content-muted mb-2">
                     Transaction ID (Optional)
                   </label>
                   <input
@@ -162,21 +163,20 @@ const UploadModal = ({ isOpen, paymentId, onClose, onUpload, loading = false }) 
                     value={transactionId}
                     onChange={(e) => setTransactionId(e.target.value)}
                     placeholder="e.g., TXN123456789"
-                    className="w-full bg-dark-800 border border-dark-700 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-primary transition-colors"
+                    className="w-full bg-surface-2 border border-border rounded-lg px-4 py-2 text-content placeholder-content-subtle focus:outline-none focus:border-primary transition-colors"
                     disabled={loading}
                   />
-                  <p className="text-gray-500 text-xs mt-1">
+                  <p className="text-content-subtle text-xs mt-1">
                     Helps us track your payment faster
                   </p>
                 </div>
 
                 {/* Info */}
-                <div className="flex gap-3 bg-primary/10 border border-primary/30 rounded-lg p-3">
-                  <FiAlertCircle className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
-                  <p className="text-sm text-primary/90">
+                <AlertBox variant="primary" icon={FiAlertCircle}>
+                  <p className="text-sm">
                     Upload a clear screenshot of your UPI/PhonePe payment receipt showing the payment amount and transaction ID.
                   </p>
-                </div>
+                </AlertBox>
 
                 {/* Buttons */}
                 <div className="flex gap-3 pt-4">
@@ -184,7 +184,7 @@ const UploadModal = ({ isOpen, paymentId, onClose, onUpload, loading = false }) 
                     type="button"
                     onClick={onClose}
                     disabled={loading}
-                    className="flex-1 px-4 py-2 bg-dark-700 text-gray-300 rounded-lg hover:bg-dark-600 transition-colors font-medium disabled:opacity-50"
+                    className="flex-1 px-4 py-2 bg-surface-2 text-content rounded-lg hover:bg-surface-2/70 transition-colors font-medium disabled:opacity-50"
                   >
                     Cancel
                   </button>
@@ -195,7 +195,7 @@ const UploadModal = ({ isOpen, paymentId, onClose, onUpload, loading = false }) 
                   >
                     {loading ? (
                       <>
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary-contrast"></div>
                         Uploading...
                       </>
                     ) : (

@@ -12,24 +12,24 @@ export default function CoachCard({ name, role, experience, specialty, icon: Ico
       className="group relative"
     >
       <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-primary/10 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-      
-      <div className="bg-gradient-to-br from-dark-800 to-dark-900 border border-dark-700 group-hover:border-primary/30 rounded-2xl p-8 shadow-xl group-hover:shadow-2xl group-hover:shadow-primary/20 transition-all duration-300 relative z-10">
+
+      <div className="bg-gradient-to-br from-surface to-bg border border-border group-hover:border-primary/40 rounded-2xl p-8 shadow-card group-hover:shadow-2xl group-hover:shadow-primary/20 transition-all duration-300 relative z-10">
         {/* Icon Background */}
         <div className="w-16 h-16 bg-primary/10 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
           <Icon className="text-2xl text-primary" />
         </div>
 
         {/* Content */}
-        <h3 className="text-2xl font-bold text-white mb-2">{name}</h3>
-        <p className="text-primary font-semibold text-sm uppercase tracking-wider mb-3">{role}</p>
-        
+        <h3 className="font-display text-2xl font-bold text-content mb-2">{name}</h3>
+        <p className="eyebrow text-primary mb-3">{role}</p>
+
         <div className="space-y-2 mb-6">
-          <p className="text-gray-400 flex items-center gap-2">
+          <p className="text-content-muted flex items-center gap-2">
             <FiTarget className="text-primary" size={16} />
             <span>{experience}</span>
           </p>
           {specialty && (
-            <p className="text-gray-400 flex items-center gap-2">
+            <p className="text-content-muted flex items-center gap-2">
               <FiAward className="text-primary" size={16} />
               <span>{specialty}</span>
             </p>

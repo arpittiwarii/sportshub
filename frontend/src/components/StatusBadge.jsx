@@ -1,44 +1,36 @@
-import { FiCheckCircle, FiClock, FiXCircle } from 'react-icons/fi';
+import { FiCheckCircle, FiClock, FiXCircle, FiAlertTriangle } from 'react-icons/fi';
 
-const StatusBadge = ({ status }) => {
-  const statusConfig = {
-    APPROVED: {
-      icon: FiCheckCircle,
-      bg: 'bg-accent-green/10',
-      border: 'border-accent-green/30',
-      text: 'text-accent-green',
-      label: 'Approved'
-    },
-    PENDING: {
-      icon: FiClock,
-      bg: 'bg-primary/10',
-      border: 'border-primary/30',
-      text: 'text-primary',
-      label: 'Pending'
-    },
-    REJECTED: {
-      icon: FiXCircle,
-      bg: 'bg-accent-red/10',
-      border: 'border-accent-red/30',
-      text: 'text-accent-red',
-      label: 'Rejected'
-    }
-  };
+// Single source of truth for payment/fee status pills.
+// Accepts any casing (backend returns UPPERCASE) and normalizes it, which also
+// fixes prior lowercase comparisons that never matched.
+const STATUS_CONFIG = {
+  APPROVED: { icon: FiCheckCircle, tone: 'success', label: 'Approved' },
+  PENDING:  { icon: FiClock,       tone: 'primary', label: 'Pending' },
+  REJECTED: { icon: FiXCircle,     tone: 'danger',  label: 'Rejected' },
+  UNPAID:   { icon: FiAlertTriangle, tone: 'danger', label: 'Unpaid' },
+  DEFAULTER:{ icon: FiAlertTriangle, tone: 'danger', label: 'Defaulter' },
+};
 
-  const config = statusConfig[status] || statusConfig.PENDING;
+const TONE = {
+  success: 'bg-success/10 border-success/30 text-success',
+  primary: 'bg-primary/10 border-primary/30 text-primary',
+  danger:  'bg-danger/10 border-danger/30 text-danger',
+  steel:   'bg-steel/10 border-steel/30 text-steel',
+};
+
+const StatusBadge = ({ status, label }) => {
+  const key = String(status || '').toUpperCase();
+  const config = STATUS_CONFIG[key] || STATUS_CONFIG.PENDING;
   const Icon = config.icon;
 
   return (
     <span
-      className={`
-        inline-flex items-center gap-2 px-3 py-1.5 rounded-full
-        font-medium text-sm transition-all duration-300
-        ${config.bg} border ${config.border} ${config.text}
-        hover:shadow-lg hover:scale-105
-      `}
+      className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full border
+        font-medium text-sm transition-all duration-300 hover:shadow-lg hover:scale-105
+        ${TONE[config.tone]}`}
     >
       <Icon className="w-4 h-4" />
-      {config.label}
+      {label || config.label}
     </span>
   );
 };

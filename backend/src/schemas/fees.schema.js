@@ -34,7 +34,8 @@ const createFeeSchema = {
 
         year: {
             type: "integer",
-            minimum: 2026,
+            minimum: 2000,
+            maximum: 2100,
         },
 
         screenshot: {
@@ -46,7 +47,6 @@ const createFeeSchema = {
             enum: [
                 "PENDING",
                 "APPROVED",
-                "REJECT",
                 "REJECTED"
             ]
         }

@@ -18,7 +18,13 @@ const getBlogs = async (req, res, next) => {
 // @access Private (admin)
 const createBlog = async (req, res, next) => {
   try {
-    const created = await blogService.create(req.body);
+    // Author is taken from the authenticated session, never from the request
+    // body, so a client cannot attribute a post to another user.
+    const created = await blogService.create({
+      title: req.body.title,
+      content: req.body.content,
+      userId: req.user.id,
+    });
     return success(res, created, 'Blog created', 201);
   } catch (error) {
     next(error);

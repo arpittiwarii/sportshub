@@ -4,6 +4,7 @@ import api from '../services/api';
 import { FiLock, FiAlertCircle } from 'react-icons/fi';
 import { motion } from 'framer-motion';
 import { toast } from 'react-toastify';
+import AlertBox from '../components/AlertBox';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -62,22 +63,21 @@ const Login = () => {
             <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
               <FiLock className="text-primary text-2xl" />
             </div>
-            <h2 className="text-2xl font-display font-bold text-white mb-2">
+            <h2 className="text-2xl font-display font-bold text-content mb-2">
               Login
             </h2>
-            <p className="text-gray-400 text-sm">Sign in to your account</p>
+            <p className="text-content-muted text-sm">Sign in to your account</p>
           </div>
 
           {error && (
-            <div className="bg-red-500/10 text-red-500 border border-red-500/20 p-3 rounded-lg flex items-center gap-2 mb-6">
-              <FiAlertCircle className="shrink-0" />
+            <AlertBox variant="danger" icon={FiAlertCircle} className="mb-6">
               <span className="text-sm">{error}</span>
-            </div>
+            </AlertBox>
           )}
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label className="block text-gray-400 text-sm font-medium mb-1" htmlFor="email">
+              <label className="block text-content-muted text-sm font-medium mb-1" htmlFor="email">
                 Email Address
               </label>
               <input
@@ -86,18 +86,18 @@ const Login = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full bg-dark-800 border border-dark-700 focus:border-primary outline-none text-white rounded-lg px-4 py-2"
+                className="w-full bg-surface-2 border border-border focus:border-primary outline-none text-content rounded-lg px-4 py-2"
               />
             </div>
             <div>
-              <label className="block text-gray-400 text-sm font-medium mb-1" htmlFor="password">Password</label>
+              <label className="block text-content-muted text-sm font-medium mb-1" htmlFor="password">Password</label>
               <input
                 type="password"
                 id="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="w-full bg-dark-800 border border-dark-700 focus:border-primary outline-none text-white rounded-lg px-4 py-2"
+                className="w-full bg-surface-2 border border-border focus:border-primary outline-none text-content rounded-lg px-4 py-2"
               />
             </div>
             <button

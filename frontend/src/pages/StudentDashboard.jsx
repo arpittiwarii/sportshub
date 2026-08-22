@@ -1,11 +1,13 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
-import { FiLogOut, FiUser, FiUploadCloud, FiCheckCircle, FiClock, FiXCircle, FiEdit2, FiDollarSign, FiAlertCircle, FiX, FiTrendingUp, FiAward } from 'react-icons/fi';
+import { FiLogOut, FiUser, FiUploadCloud, FiCheckCircle, FiClock, FiEdit2, FiDollarSign, FiAlertCircle, FiX } from 'react-icons/fi';
 import { toast } from 'react-toastify';
 import { motion as Motion, AnimatePresence } from 'framer-motion';
 /* eslint-disable no-unused-vars */
 import DashboardCard from '../components/DashboardCard';
+import StatusBadge from '../components/StatusBadge';
+import AlertBox from '../components/AlertBox';
 
 // Animation variants
 const fadeUpVariant = {
@@ -44,10 +46,6 @@ const StudentDashboard = () => {
       return null;
     }
   }, []);
-
-  // console.log(userId)
-
-  // Redirect and initial data fetch should happen in an effect
 
   const fetchDashboardData = async () => {
     setLoading(true);
@@ -88,10 +86,6 @@ const StudentDashboard = () => {
     navigate('/login');
   };
 
-  // const handleUploadClick = (paymentId) => {
-  //   setUploadModal({ isOpen: true, paymentId });
-  // };
-
   const handleFileChange = (e) => {
     if (e.target.files && e.target.files[0]) {
       const selectedFile = e.target.files[0];
@@ -129,24 +123,13 @@ const StudentDashboard = () => {
   };
 
   const applytopaid = async (paymentId) => {
-    // e.preventDefault();
-    // console.log('clicked')
-    // if (!uploadFile) return toast.warning('Please select a file to upload');
-
-    // setUploading(true);
-    // console.log(userId, paymentId)
     const formData = {
       userId: userId
     }
-    // formData.append({submitedAt:new Date()})
-
-    // formData.append('screenshot', uploadFile);
 
     try {
       await api.put(`/payments/${paymentId}/approve`, formData);
       toast.success('✓ payment approval sent to admin successfully!');
-      // setUploadModal({ isOpen: false, paymentId: null });
-      // setUploadFile(null);
       fetchDashboardData();
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to send approval.');
@@ -202,75 +185,68 @@ const StudentDashboard = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen pt-24 bg-dark-900 flex items-center justify-center">
+      <div className="min-h-screen pt-24 bg-bg flex items-center justify-center">
         <Motion.div
           animate={{ rotate: 360 }}
           transition={{ duration: 2, repeat: Infinity }}
-          className="w-12 h-12 border-3 border-primary border-t-transparent rounded-full"
+          className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full"
         />
       </div>
     );
   }
 
-  // Calculate payment statistics
+  const profileLabel = 'text-content-muted text-xs uppercase font-semibold tracking-wider mb-1';
 
   return (
-    <div className="min-h-screen pt-24 pb-16 bg-dark-900">
+    <div className="min-h-screen pt-24 pb-16 bg-bg">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-6xl space-y-12">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="flex justify-between items-center mb-8 border-b border-dark-700 pb-6"
+          className="flex justify-between items-center mb-8 border-b border-border pb-6"
         >
           <div>
-            <h1 className="text-4xl font-bold text-white">My Dashboard</h1>
-            <p className="text-gray-400 mt-2">Fee Status & Payment Management</p>
+            <p className="eyebrow">Athlete Portal</p>
+            <h1 className="text-4xl font-display text-content">My Dashboard</h1>
+            <p className="text-content-muted mt-2">Fee Status & Payment Management</p>
           </div>
           <button
             onClick={handleLogout}
-            className="flex items-center gap-2 text-red-400 hover:bg-red-400/10 px-4 py-2 rounded-lg transition-colors border border-transparent hover:border-red-400/20"
+            className="flex items-center gap-2 text-danger hover:bg-danger/10 px-4 py-2 rounded-lg transition-colors border border-transparent hover:border-danger/20"
           >
             <FiLogOut /> Logout
           </button>
         </motion.div>
 
         {/* Statistics Cards */}
-        <motion.div
-          initial="hidden"
-          animate="visible"
-          variants={staggerContainerVariant}
-          className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12"
-        >
-          <motion.div variants={fadeUpVariant}>
-            <DashboardCard
-              title="Total Fees"
-              value={`₹${stats.total}`}
-              subtitle={`${payments.length} months`}
-              icon={FiDollarSign}
-              gradient="from-primary to-accent-green"
-            />
-          </motion.div>
-          <motion.div variants={fadeUpVariant}>
-            <DashboardCard
-              title="Paid"
-              value={`₹${stats.approved}`}
-              subtitle="Verified payments"
-              icon={FiCheckCircle}
-              gradient="from-green-400 to-emerald-500"
-            />
-          </motion.div>
-          <motion.div variants={fadeUpVariant}>
-            <DashboardCard
-              title="Pending"
-              value={stats.pending}
-              subtitle="Awaiting verification"
-              icon={FiClock}
-              gradient="from-primary to-accent-red"
-            />
-          </motion.div>
-        </motion.div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+          <DashboardCard
+            title="Total Fees"
+            value={`₹${stats.total}`}
+            subtitle={`${payments.length} months`}
+            icon={FiDollarSign}
+            tone="primary"
+            index={0}
+          />
+          <DashboardCard
+            title="Paid"
+            value={`₹${stats.approved}`}
+            subtitle="Verified payments"
+            icon={FiCheckCircle}
+            tone="success"
+            index={1}
+          />
+          <DashboardCard
+            title="Pending"
+            value={stats.pending}
+            subtitle="Awaiting verification"
+            icon={FiClock}
+            tone="steel"
+            index={2}
+          />
+        </div>
 
         {/* Main Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
@@ -282,8 +258,8 @@ const StudentDashboard = () => {
             className="lg:col-span-1 space-y-6"
           >
             {/* Profile Info Card */}
-            <div className="bg-gradient-to-br from-dark-800 to-dark-900 border border-dark-700 hover:border-primary/40 rounded-2xl p-6 shadow-xl sticky top-24">
-              <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
+            <div className="card p-6 sticky top-24">
+              <h2 className="text-xl font-bold text-content mb-6 flex items-center gap-2">
                 <FiUser className="text-primary" /> Complete Profile
               </h2>
 
@@ -292,10 +268,10 @@ const StudentDashboard = () => {
                   <img
                     src={profile.profileImage}
                     alt="Profile"
-                    className="w-24 h-24 rounded-full object-cover bg-dark-800 border border-dark-700"
+                    className="w-24 h-24 rounded-full object-cover bg-surface-2 border border-border"
                   />
                 ) : (
-                  <div className="w-24 h-24 rounded-full bg-dark-800 border border-dark-700 flex items-center justify-center text-primary font-bold text-3xl">
+                  <div className="w-24 h-24 rounded-full bg-surface-2 border border-border flex items-center justify-center text-primary font-bold text-3xl">
                     {profile?.name?.slice(0, 1)?.toUpperCase() || '—'}
                   </div>
                 )}
@@ -308,13 +284,13 @@ const StudentDashboard = () => {
                     accept=".jpg,.jpeg,.png,image/jpeg,image/png"
                     onChange={(e) => setProfileImageFile(e.target.files?.[0] || null)}
                     disabled={uploadingProfileImage}
-                    className="sm:flex-1 bg-dark-900 border border-dark-700 text-gray-300 rounded-lg px-1 py-1 text-sm"
+                    className="sm:flex-1 bg-bg border border-border text-content-muted rounded-lg px-1 py-1 text-sm"
                   />
                   <br />
                   <button
                     type="submit"
                     disabled={uploadingProfileImage}
-                    className="w-full sm:w-auto px-1 py-1 btn-primary text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    className="w-full sm:w-auto px-3 py-2 btn-primary text-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                   >
                     <FiUploadCloud size={16} />
                     {uploadingProfileImage ? 'Uploading...' : 'Update'}
@@ -322,41 +298,36 @@ const StudentDashboard = () => {
                 </div>
               </form>
 
-              <div className="space-y-3">
-                {/* Personal Information */}
-                <div className="pb-3 border-b border-dark-700">
-                  <p className="text-gray-400 text-xs uppercase font-semibold tracking-wider mb-1">Name</p>
-                  <p className="text-white font-bold text-lg">{profile?.name}</p>
+              <div className="space-y-3 mt-4">
+                <div className="pb-3 border-b border-border">
+                  <p className={profileLabel}>Name</p>
+                  <p className="text-content font-bold text-lg">{profile?.name}</p>
                 </div>
-                <div className="pb-3 border-b border-dark-700">
-                  <p className="text-gray-400 text-xs uppercase font-semibold tracking-wider mb-1">Email</p>
-                  <p className="text-white font-mono text-sm break-all">{profile?.email}</p>
+                <div className="pb-3 border-b border-border">
+                  <p className={profileLabel}>Email</p>
+                  <p className="text-content font-mono text-sm break-all">{profile?.email}</p>
                 </div>
-                <div className="pb-3 border-b border-dark-700">
-                  <p className="text-gray-400 text-xs uppercase font-semibold tracking-wider mb-1">Contact</p>
-                  <p className="text-white font-bold">{profile?.contact || 'N/A'}</p>
+                <div className="pb-3 border-b border-border">
+                  <p className={profileLabel}>Contact</p>
+                  <p className="text-content font-bold">{profile?.contact || 'N/A'}</p>
                 </div>
-
-                {/* Athletic Information */}
-                <div className="pb-3 border-b border-dark-700">
-                  <p className="text-gray-400 text-xs uppercase font-semibold tracking-wider mb-1">Sport</p>
+                <div className="pb-3 border-b border-border">
+                  <p className={profileLabel}>Sport</p>
                   <p className="text-primary font-semibold text-lg">
                     {Array.isArray(profile?.sports) ? profile.sports.join(', ') : (profile?.sports || 'N/A')}
                   </p>
                 </div>
-                <div className="pb-3 border-b border-dark-700">
-                  <p className="text-gray-400 text-xs uppercase font-semibold tracking-wider mb-1">Age</p>
-                  <p className="text-white font-bold">{profile?.age || 'N/A'} years</p>
+                <div className="pb-3 border-b border-border">
+                  <p className={profileLabel}>Age</p>
+                  <p className="text-content font-bold">{profile?.age || 'N/A'} years</p>
                 </div>
-
-                {/* Additional Details */}
-                <div className="pb-3 border-b border-dark-700">
-                  <p className="text-gray-400 text-xs uppercase font-semibold tracking-wider mb-1">School Name</p>
-                  <p className="text-white text-sm">{profile?.school || 'N/A'}</p>
+                <div className="pb-3 border-b border-border">
+                  <p className={profileLabel}>School Name</p>
+                  <p className="text-content text-sm">{profile?.school || 'N/A'}</p>
                 </div>
                 <div className="pb-3">
-                  <p className="text-gray-400 text-xs uppercase font-semibold tracking-wider mb-1">AFI ID</p>
-                  <p className="text-white font-mono text-sm">{profile?.afiId || 'N/A'}</p>
+                  <p className={profileLabel}>AFI ID</p>
+                  <p className="text-content font-mono text-sm">{profile?.afiId || 'N/A'}</p>
                 </div>
               </div>
               <button
@@ -377,13 +348,13 @@ const StudentDashboard = () => {
             className="lg:col-span-2 space-y-8"
           >
             {/* Payment Instructions Card */}
-            <div className="bg-gradient-to-br from-dark-800 to-dark-900 border border-dark-700 hover:border-primary/40 rounded-2xl p-8 shadow-xl">
+            <div className="card p-8">
 
-              <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
+              <h2 className="text-xl font-bold text-content mb-6 flex items-center gap-2">
                 <FiDollarSign className="text-primary" /> Payment Instructions
               </h2>
 
-              {/* 🔥 QR CODE AT TOP */}
+              {/* QR CODE AT TOP */}
               <div className="flex flex-col items-center mb-8">
                 <div className="w-full max-w-xs bg-white p-4 rounded-xl shadow-lg">
                   <img
@@ -393,10 +364,10 @@ const StudentDashboard = () => {
                   />
                 </div>
 
-                <p className="text-gray-300 text-sm text-center mt-3 font-medium">
+                <p className="text-content-muted text-sm text-center mt-3 font-medium">
                   Scan to pay via PhonePe / UPI
                 </p>
-                <p className="text-gray-400 text-xs text-center mt-1">
+                <p className="text-content-subtle text-xs text-center mt-1">
                   (Make payment before uploading proof)
                 </p>
               </div>
@@ -409,28 +380,25 @@ const StudentDashboard = () => {
                   { num: 3, title: "Upload Proof", desc: "Click 'Upload Proof' below" },
                   { num: 4, title: "Get Verified", desc: "Admin approves within 24 hours" }
                 ].map((step) => (
-                  <div key={step.num} className="flex gap-4 p-3 bg-dark-900/50 rounded-lg hover:bg-dark-900 transition-colors">
-                    <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary text-black font-bold flex-shrink-0 shadow-lg shadow-primary/50">
+                  <div key={step.num} className="flex gap-4 p-3 bg-bg/50 rounded-lg hover:bg-bg transition-colors">
+                    <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary text-primary-contrast font-display font-bold flex-shrink-0 shadow-lg shadow-primary/30 tabular-nums">
                       {step.num}
                     </div>
                     <div>
-                      <p className="font-semibold text-white text-sm">{step.title}</p>
-                      <p className="text-gray-400 text-xs mt-0.5">{step.desc}</p>
+                      <p className="font-semibold text-content text-sm">{step.title}</p>
+                      <p className="text-content-muted text-xs mt-0.5">{step.desc}</p>
                     </div>
                   </div>
                 ))}
               </div>
 
               {/* Info Box */}
-              <div className="p-4 bg-blue-500/10 border border-blue-500/30 rounded-xl flex gap-3">
-                <FiAlertCircle className="text-blue-400 flex-shrink-0 mt-0.5" />
-                <div>
-                  <p className="text-blue-300 font-semibold text-sm">Important</p>
-                  <p className="text-blue-200 text-xs mt-1">
-                    Ensure correct amount is paid and screenshot clearly shows transaction ID
-                  </p>
-                </div>
-              </div>
+              <AlertBox variant="info" icon={FiAlertCircle}>
+                <p className="font-semibold">Important</p>
+                <p className="text-xs mt-1 opacity-90">
+                  Ensure correct amount is paid and screenshot clearly shows transaction ID
+                </p>
+              </AlertBox>
             </div>
           </motion.div>
         </div>
@@ -440,9 +408,9 @@ const StudentDashboard = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.2 }}
-          className="bg-gradient-to-br from-dark-800 to-dark-900 border border-dark-700 rounded-2xl p-8 shadow-xl hover:shadow-2xl transition-all duration-300"
+          className="card p-8"
         >
-          <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
+          <h2 className="text-2xl font-bold text-content mb-6 flex items-center gap-3">
             <FiClock className="text-primary" />
             Fee Status & Payment History
           </h2>
@@ -453,8 +421,8 @@ const StudentDashboard = () => {
               className="text-center py-12"
             >
               <div className="text-5xl mb-4">📋</div>
-              <p className="text-gray-300 font-semibold mb-2">No fee records yet</p>
-              <p className="text-gray-400 text-sm">Admin will generate your monthly fees here</p>
+              <p className="text-content font-semibold mb-2">No fee records yet</p>
+              <p className="text-content-muted text-sm">Admin will generate your monthly fees here</p>
             </motion.div>
           ) : (
             <motion.div
@@ -465,9 +433,9 @@ const StudentDashboard = () => {
             >
               {payments.map((payment) => (
                 <motion.div
-                  key={payment._id}
+                  key={payment.id}
                   variants={fadeUpVariant}
-                  className="bg-dark-800/50 hover:bg-dark-800 border border-dark-700 hover:border-primary/40 rounded-xl p-6 transition-all duration-300 group"
+                  className="bg-surface/60 hover:bg-surface border border-border hover:border-primary/40 rounded-xl p-6 transition-all duration-300 group"
                 >
                   <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                     {/* Left Side - Fee Info */}
@@ -477,51 +445,25 @@ const StudentDashboard = () => {
                           <FiDollarSign className="text-primary text-xl" />
                         </div>
                         <div>
-                          <h3 className="text-lg font-bold text-white">{payment.month} {payment.year}</h3>
-                          <p className="text-2xl font-bold text-primary">₹{payment.amount}</p>
+                          <h3 className="text-lg font-bold text-content">{payment.month} {payment.year}</h3>
+                          <p className="text-2xl font-display font-bold text-primary tabular-nums">₹{payment.amount}</p>
                         </div>
                       </div>
                     </div>
 
                     {/* Middle - Status Badge */}
                     <div className="flex gap-2 items-center">
-                      {payment.status === 'APPROVED' && (
-                        <motion.div
-                          initial={{ scale: 0.8 }}
-                          animate={{ scale: 1 }}
-                          className="flex items-center gap-2 px-4 py-2 bg-green-500/15 border border-green-500/40 rounded-lg"
-                        >
-                          <FiCheckCircle className="text-green-400" />
-                          <span className="text-green-400 font-semibold text-sm">Paid</span>
-                        </motion.div>
-                      )}
-                      {payment.status === 'REJECTED' && (
-                        <div className="flex items-center gap-2 px-4 py-2 bg-red-500/15 border border-red-500/40 rounded-lg">
-                          <FiXCircle className="text-red-400" />
-                          <span className="text-red-400 font-semibold text-sm">Rejected</span>
-                        </div>
-                      )}
-                      {payment.status === "PENDING" && payment.submittedAt && (
-                        <div className="flex items-center gap-2 px-4 py-2 bg-primary/15 border border-primary/40 rounded-lg">
-                          <FiClock className="text-primary" />
-                          <span className="text-primary font-semibold text-sm">In Review</span>
-                        </div>
-
-                      )}
-                      {/* {payment.status === 'pending' && !payment.screenshot && (
-                        <div className="flex items-center gap-2 px-4 py-2 bg-gray-500/15 border border-gray-500/40 rounded-lg">
-                          <FiAlertCircle className="text-gray-400" />
-                          <span className="text-gray-400 font-semibold text-sm">Awaiting Proof</span>
-                        </div>
-                      )} */}
+                      {payment.status === 'APPROVED' && <StatusBadge status="APPROVED" label="Paid" />}
+                      {payment.status === 'REJECTED' && <StatusBadge status="REJECTED" />}
+                      {payment.status === 'PENDING' && payment.submittedAt && <StatusBadge status="PENDING" label="In Review" />}
                     </div>
 
                     {/* Right Side - Actions */}
-                    <div className="flex gap-2 mt-6 pt-4 border-t border-dark-700">
-                      {(payment.submittedAt === null) &&
+                    <div className="flex gap-2">
+                      {(payment.submittedAt === null || payment.submittedAt === undefined) &&
                         <button
                           onClick={() => applytopaid(payment.id)}
-                          className="flex-1 btn-primary py-2 px-3 text-sm font-semibold shadow-none"
+                          className="btn-primary py-2 px-4 text-sm shadow-none"
                         >
                           Apply to paid
                         </button>
@@ -555,13 +497,13 @@ const StudentDashboard = () => {
                 transition={{ type: 'spring', damping: 25, stiffness: 300 }}
                 className="fixed inset-4 sm:inset-8 top-auto max-w-sm mx-auto z-50 max-h-[calc(100vh-2rem)] overflow-y-auto"
               >
-                <div className="bg-dark-900 p-4 rounded-2xl border-2 border-primary shadow-2xl">
+                <div className="bg-bg p-4 rounded-2xl border-2 border-primary shadow-2xl">
                   {/* Header */}
                   <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-2xl font-bold text-white">Upload Payment Proof</h2>
+                    <h2 className="text-2xl font-bold text-content">Upload Payment Proof</h2>
                     <button
                       onClick={() => setUploadModal({ isOpen: false, paymentId: null })}
-                      className="text-gray-400 hover:text-white transition-colors p-2 rounded-lg hover:bg-dark-700"
+                      className="text-content-muted hover:text-content transition-colors p-2 rounded-lg hover:bg-surface-2"
                     >
                       <FiX className="w-6 h-6" />
                     </button>
@@ -576,7 +518,7 @@ const StudentDashboard = () => {
                       onDragOver={handleDrag}
                       onDrop={handleDrop}
                       className={`
-                        relative border-3 border-dashed rounded-2xl p-5 text-center cursor-pointer
+                        relative border-2 border-dashed rounded-2xl p-5 text-center cursor-pointer
                         transition-all duration-300
                         ${dragActive
                           ? 'border-primary bg-primary/20 scale-105'
@@ -595,15 +537,15 @@ const StudentDashboard = () => {
 
                       <div className="space-y-1">
                         <div className="flex justify-center">
-                          <div className="bg-primary/30 p-2 rounded-full">
+                          <div className="bg-primary/20 p-2 rounded-full">
                             <FiUploadCloud className="w-7 h-7 text-primary" />
                           </div>
                         </div>
                         <div>
-                          <p className="text-white font-bold text-sm">
+                          <p className="text-content font-bold text-sm">
                             {uploadFile ? uploadFile.name : 'Drag image or click to select'}
                           </p>
-                          <p className="text-gray-300 text-xs mt-1">
+                          <p className="text-content-muted text-xs mt-1">
                             {uploadFile ? `${(uploadFile.size / 1024).toFixed(2)} KB` : 'JPG, PNG up to 5MB'}
                           </p>
                         </div>
@@ -616,7 +558,7 @@ const StudentDashboard = () => {
                         initial={{ opacity: 0, height: 0 }}
                         animate={{ opacity: 1, height: 'auto' }}
                         exit={{ opacity: 0, height: 0 }}
-                        className="rounded-xl overflow-hidden bg-dark-800 p-3 border border-primary/30"
+                        className="rounded-xl overflow-hidden bg-surface p-3 border border-primary/30"
                       >
                         <img
                           src={URL.createObjectURL(uploadFile)}
@@ -627,12 +569,11 @@ const StudentDashboard = () => {
                     )}
 
                     {/* Info */}
-                    <div className="flex gap-2 bg-blue-500/15 border-2 border-blue-500/50 rounded-lg p-2">
-                      <FiAlertCircle className="w-4 h-4 text-blue-400 flex-shrink-0 mt-0.5" />
-                      <p className="text-xs text-blue-200 font-medium leading-tight">
+                    <AlertBox variant="info" icon={FiAlertCircle}>
+                      <p className="text-xs font-medium leading-tight">
                         Upload screenshot showing payment amount and transaction ID from your UPI/PhonePe app
                       </p>
-                    </div>
+                    </AlertBox>
 
                     {/* Buttons */}
                     <div className="flex gap-2 pt-2 pb-1">
@@ -640,18 +581,18 @@ const StudentDashboard = () => {
                         type="button"
                         onClick={() => setUploadModal({ isOpen: false, paymentId: null })}
                         disabled={uploading}
-                        className="flex-1 px-3 py-2 bg-dark-700 text-gray-200 rounded-lg hover:bg-dark-600 transition-colors font-semibold disabled:opacity-50 text-xs border border-dark-600"
+                        className="flex-1 px-3 py-2 bg-surface-2 text-content-muted rounded-lg hover:bg-surface transition-colors font-semibold disabled:opacity-50 text-xs border border-border"
                       >
                         Cancel
                       </button>
                       <button
                         type="submit"
                         disabled={!uploadFile || uploading}
-                        className="flex-1 px-3 py-2 btn-primary rounded-lg font-semibold disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1 text-xs"
+                        className="flex-1 px-3 py-2 btn-primary rounded-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1 text-xs"
                       >
                         {uploading ? (
                           <>
-                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary-contrast"></div>
                             Uploading...
                           </>
                         ) : (

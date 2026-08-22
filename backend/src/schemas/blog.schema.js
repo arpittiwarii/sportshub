@@ -1,6 +1,6 @@
 const createBlogSchema = {
     type: "object",
-    required: ["title", "content", "userId"],
+    required: ["title", "content"],
     additionalProperties: false,
 
     properties: {
@@ -11,11 +11,6 @@ const createBlogSchema = {
         },
 
         content: {
-            type: "string",
-            minLength: 1
-        },
-
-        userId: {
             type: "string",
             minLength: 1
         }

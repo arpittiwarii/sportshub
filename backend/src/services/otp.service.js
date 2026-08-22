@@ -2,14 +2,18 @@ const crypto = require('crypto');
 const { DatabaseError } = require('../Error/DataBaseError');
 const { ValidationError } = require('../Error/ValidationError');
 const { AppError } = require('../Error/AppError');
-const { getOtpRepository, createOtpRepository } = require('../repositories/Otp.repository');
+const { findActiveOtpByUser, createOtpRepository, incrementOtpAttempts } = require('../repositories/Otp.repository');
 const { findUserById, updateUserById } = require('../repositories/User.repository');
 const { emailQueue } = require('../queues/email.queue');
 
+// Maximum wrong guesses allowed against a single active OTP before it is
+// burned and the user must request a fresh code.
+const MAX_OTP_ATTEMPTS = 5;
+
 function generateOTP() {
-    return crypto.randomInt(0, 10000)
+    return crypto.randomInt(0, 1000000)
         .toString()
-        .padStart(4, '0');
+        .padStart(6, '0');
 }
 
 const sendOtp = async ({ uid, otp, email, name, session }) => {
@@ -63,12 +67,22 @@ const resendOtpService = async ({ uid }) => {
 };
 
 const verifyOtpService = async ({ uid, otp }) => {
-    const match = await getOtpRepository(uid, otp);
-    if (!match) {
+    const record = await findActiveOtpByUser(uid);
+    if (!record) {
+        throw new ValidationError('This OTP has expired or was not found. Please request a new code.');
+    }
+
+    if (record.attempts >= MAX_OTP_ATTEMPTS) {
+        await record.softDelete();
+        throw new ValidationError('Too many incorrect attempts. Please request a new code.');
+    }
+
+    if (record.otp !== String(otp)) {
+        await incrementOtpAttempts(record.id);
         throw new ValidationError('Invalid OTP. Please enter the code sent to your email.');
     }
 
-    await match.softDelete();
+    await record.softDelete();
     await updateUserById(uid, { verify: true });
 
     return { message: 'OTP verified successfully. Your account Under Admin Review.' };

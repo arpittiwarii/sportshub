@@ -6,6 +6,7 @@ import { toast } from 'react-toastify';
 import PaymentTable from '../components/PaymentTable';
 import UploadModal from '../components/UploadModal';
 import ScreenshotModal from '../components/ScreenshotModal';
+import AlertBox from '../components/AlertBox';
 
 const StudentPaymentPage = () => {
   const [payments, setPayments] = useState([]);
@@ -17,7 +18,6 @@ const StudentPaymentPage = () => {
 
   const userStr = localStorage.getItem('user');
   const userId = userStr ? JSON.parse(userStr).id : null;
-  const userName = userStr ? JSON.parse(userStr).name : 'Student';
 
   // Fetch payments
   const fetchPayments = async () => {
@@ -80,33 +80,48 @@ const StudentPaymentPage = () => {
     }
   };
 
-  // Calculate statistics
+  // Calculate statistics (backend returns UPPERCASE statuses)
   const stats = {
     total: payments.reduce((sum, p) => sum + (p.amount || 0), 0),
-    approved: payments.reduce((sum, p) => p.status === 'approved' ? sum + (p.amount || 0) : sum, 0),
-    pending: payments.filter(p => p.status === 'pending').length,
-    rejected: payments.filter(p => p.status === 'rejected').length
+    approved: payments.reduce((sum, p) => p.status === 'APPROVED' ? sum + (p.amount || 0) : sum, 0),
+    pending: payments.filter(p => p.status === 'PENDING').length,
+    rejected: payments.filter(p => p.status === 'REJECTED').length
   };
 
+  const steps = [
+    { title: 'Scan the QR code with your phone', desc: 'Use PhonePe, Google Pay, or any UPI app' },
+    { title: 'Enter the amount', desc: 'Check the pending amount below' },
+    { title: 'Upload payment proof', desc: 'Click "Upload Payment Proof" button and submit screenshot' },
+    { title: 'Wait for verification', desc: 'Admin will review and mark it as approved' },
+  ];
+
+  const statTiles = [
+    { label: 'Total Fees', value: `₹${stats.total}`, tone: 'text-primary' },
+    { label: 'Approved', value: `₹${stats.approved}`, tone: 'text-success' },
+    { label: 'Pending', value: stats.pending, tone: 'text-steel' },
+    { label: 'Rejected', value: stats.rejected, tone: 'text-danger' },
+  ];
+
   return (
-    <div className="min-h-screen pt-24 pb-16 bg-gradient-to-b from-dark-900 via-dark-900 to-dark-800">
+    <div className="min-h-screen pt-24 pb-16 bg-gradient-to-b from-bg via-bg to-surface">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-6xl">
 
         {/* Header */}
-        <div className="flex flex-col md:flex-row justify-between items-center mb-10 gap-4 border-b border-dark-700 pb-6">
+        <div className="flex flex-col md:flex-row justify-between items-center mb-10 gap-4 border-b border-border pb-6">
           <div className="flex items-center gap-4">
-            <div className="w-16 h-16 bg-gradient-to-br from-primary to-primary/50 rounded-xl flex items-center justify-center text-white text-2xl font-bold shadow-lg shadow-primary/50">
+            <div className="w-16 h-16 bg-gradient-to-br from-primary to-primary/60 rounded-xl flex items-center justify-center text-primary-contrast text-2xl shadow-lg shadow-primary/40">
               <FiDollarSign />
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-white">Payment History</h1>
-              <p className="text-gray-400">Manage your academy fee payments</p>
+              <p className="eyebrow">Athlete Portal</p>
+              <h1 className="text-3xl font-display text-content">Payment History</h1>
+              <p className="text-content-muted">Manage your academy fee payments</p>
             </div>
           </div>
 
           <button
             onClick={handleLogout}
-            className="flex items-center gap-2 text-red-400 hover:bg-red-400/10 px-4 py-2 rounded-lg transition-colors border border-transparent hover:border-red-400/20"
+            className="flex items-center gap-2 text-danger hover:bg-danger/10 px-4 py-2 rounded-lg transition-colors border border-transparent hover:border-danger/20"
           >
             <FiLogOut /> Logout
           </button>
@@ -124,76 +139,48 @@ const StudentPaymentPage = () => {
                   className="w-40 h-40"
                 />
               </div>
-              <p className="text-sm text-gray-400">PhonePe/UPI QR Code</p>
+              <p className="text-sm text-content-muted">PhonePe/UPI QR Code</p>
             </div>
 
             {/* Payment Details Section */}
             <div className="md:col-span-2 space-y-4">
               <div>
-                <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                <h3 className="text-lg font-bold text-content mb-4 flex items-center gap-2">
                   <FiQrCode className="text-primary" />
                   How to Pay Your Fees
                 </h3>
               </div>
 
               <div className="space-y-3">
-                <div className="flex items-start gap-3">
-                  <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary text-white font-bold text-sm flex-shrink-0">1</div>
-                  <div>
-                    <p className="font-medium text-white">Scan the QR code with your phone</p>
-                    <p className="text-sm text-gray-400">Use PhonePe, Google Pay, or any UPI app</p>
+                {steps.map((step, i) => (
+                  <div key={i} className="flex items-start gap-3">
+                    <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary text-primary-contrast font-display font-bold text-sm flex-shrink-0 tabular-nums">{i + 1}</div>
+                    <div>
+                      <p className="font-medium text-content">{step.title}</p>
+                      <p className="text-sm text-content-muted">{step.desc}</p>
+                    </div>
                   </div>
-                </div>
-
-                <div className="flex items-start gap-3">
-                  <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary text-white font-bold text-sm flex-shrink-0">2</div>
-                  <div>
-                    <p className="font-medium text-white">Enter the amount</p>
-                    <p className="text-sm text-gray-400">Check the pending amount below</p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-3">
-                  <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary text-white font-bold text-sm flex-shrink-0">3</div>
-                  <div>
-                    <p className="font-medium text-white">Upload payment proof</p>
-                    <p className="text-sm text-gray-400">Click "Upload Payment Proof" button and submit screenshot</p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-3">
-                  <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary text-white font-bold text-sm flex-shrink-0">4</div>
-                  <div>
-                    <p className="font-medium text-white">Wait for verification</p>
-                    <p className="text-sm text-gray-400">Admin will review and mark it as approved</p>
-                  </div>
-                </div>
+                ))}
               </div>
 
-              <div className="mt-4 p-3 bg-primary/10 border border-primary/30 rounded-lg flex items-start gap-2">
-                <FiAlertCircle className="text-primary flex-shrink-0 mt-0.5" />
-                <p className="text-sm text-primary/90">
+              <AlertBox variant="primary" icon={FiAlertCircle} className="mt-4">
+                <p className="text-sm">
                   Make sure to upload a clear screenshot showing the transaction amount and confirmation
                 </p>
-              </div>
+              </AlertBox>
             </div>
           </div>
         </div>
 
         {/* Statistics Cards */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          {[
-            { label: 'Total Fees', value: `₹${stats.total}`, color: 'from-blue-600 to-blue-500' },
-            { label: 'Approved', value: `₹${stats.approved}`, color: 'from-green-600 to-green-500' },
-            { label: 'Pending', value: stats.pending, color: 'from-primary to-primary/80' },
-            { label: 'Rejected', value: stats.rejected, color: 'from-red-600 to-red-500' }
-          ].map((stat, idx) => (
+          {statTiles.map((stat, idx) => (
             <div
               key={idx}
-              className={`glass-panel p-4 border border-dark-700 hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:shadow-primary/20`}
+              className="glass-panel p-4 border border-border hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:shadow-primary/20"
             >
-              <p className="text-gray-400 text-sm mb-2">{stat.label}</p>
-              <p className={`text-2xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent`}>
+              <p className="text-content-muted text-sm mb-2">{stat.label}</p>
+              <p className={`text-2xl font-display font-bold tabular-nums ${stat.tone}`}>
                 {stat.value}
               </p>
             </div>
@@ -202,7 +189,7 @@ const StudentPaymentPage = () => {
 
         {/* Payments Table */}
         <div className="mb-8">
-          <h2 className="text-2xl font-bold text-white mb-6">Your Payments</h2>
+          <h2 className="text-2xl font-display text-content mb-6">Your Payments</h2>
           <PaymentTable
             payments={payments}
             isAdmin={false}

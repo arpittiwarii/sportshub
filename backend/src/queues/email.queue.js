@@ -1,13 +1,17 @@
 const { Queue } = require('bullmq');
-const { config } = require('../env');
+const { createRedisConnection } = require('../config/redis');
 
+// A dedicated Redis connection for the queue. Honors REDIS_URL when set
+// (see config/redis.js) — the previous `{ connectionString }` form was ignored
+// by ioredis and always connected to localhost.
 const emailQueue = new Queue('email-queue', {
-    connection: config.redis.url
-        ? { connectionString: config.redis.url }
-        : {
-            host: config.redis.host,
-            port: config.redis.port,
-        },
+    connection: createRedisConnection(),
+    defaultJobOptions: {
+        attempts: 3,
+        backoff: { type: 'exponential', delay: 2000 },
+        removeOnComplete: 1000,
+        removeOnFail: 5000,
+    },
 });
 
-module.exports = { emailQueue }
+module.exports = { emailQueue };

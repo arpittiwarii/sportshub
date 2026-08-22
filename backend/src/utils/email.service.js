@@ -1,5 +1,6 @@
 const nodemailer = require('nodemailer');
 const { config } = require('../env');
+const { logger } = require('./logger');
 
 const {
     otpEmailTemplate,
@@ -18,13 +19,16 @@ const transporter = nodemailer.createTransport({
         user: config.email.user,
         pass: config.email.pass,
     },
+    pool: true,
+    maxConnections: 3,
+    maxMessages: 100,
 });
 
-transporter.verify((error, success) => {
+transporter.verify((error) => {
     if (error) {
-        console.error('SMTP Error:', error);
+        logger.error({ err: error?.message }, 'SMTP verification failed');
     } else {
-        console.log('SMTP Ready');
+        logger.info('SMTP transport ready');
     }
 });
 

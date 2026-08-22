@@ -7,25 +7,25 @@ const FilterTabs = ({ activeFilter, onFilterChange, counts = {} }) => {
   ];
 
   return (
-    <div className="flex flex-wrap gap-2 mb-6 pb-4 border-b border-dark-700">
+    <div className="flex flex-wrap gap-2 mb-6 pb-4 border-b border-border">
       {filters.map(filter => (
         <button
           key={filter.id}
           onClick={() => onFilterChange(filter.id)}
           className={`
-            px-4 py-2 rounded-lg font-medium text-sm transition-all duration-300
+            px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-300
             flex items-center gap-2 whitespace-nowrap
             ${
               activeFilter === filter.id
-                ? 'bg-primary text-white shadow-lg shadow-primary/50'
-                : 'bg-dark-800 text-gray-400 hover:text-white hover:bg-dark-700'
+                ? 'bg-primary text-primary-contrast shadow-lg shadow-primary/30'
+                : 'bg-surface text-content-muted hover:text-content hover:bg-surface-2'
             }
           `}
         >
           {filter.label}
           <span className={`
-            text-xs font-bold px-2 py-0.5 rounded-full
-            ${activeFilter === filter.id ? 'bg-white/20' : 'bg-dark-700'}
+            text-xs font-bold px-2 py-0.5 rounded-full tabular-nums
+            ${activeFilter === filter.id ? 'bg-primary-contrast/20' : 'bg-surface-2'}
           `}>
             {filter.count}
           </span>

@@ -1,5 +1,6 @@
 import { FiEye, FiUploadCloud, FiCheck, FiX } from 'react-icons/fi';
 import StatusBadge from './StatusBadge';
+import ActionButton from './ActionButton';
 import { motion } from 'framer-motion';
 
 const PaymentTable = ({
@@ -15,7 +16,7 @@ const PaymentTable = ({
     return (
       <div className="glass-panel p-8 text-center">
         <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-        <p className="text-gray-400 mt-4">Loading payments...</p>
+        <p className="text-content-muted mt-4">Loading payments...</p>
       </div>
     );
   }
@@ -23,7 +24,7 @@ const PaymentTable = ({
   if (!payments || payments.length === 0) {
     return (
       <div className="glass-panel p-12 text-center">
-        <p className="text-gray-400 text-lg">No payments found</p>
+        <p className="text-content-muted text-lg">No payments found</p>
       </div>
     );
   }
@@ -34,14 +35,14 @@ const PaymentTable = ({
       <div className="hidden md:block overflow-x-auto">
         <table className="w-full">
           <thead>
-            <tr className="border-b border-dark-700 bg-dark-800/50">
-              {isAdmin && <th className="px-6 py-4 text-left text-sm font-bold text-gray-400">Student Name</th>}
-              <th className="px-6 py-4 text-left text-sm font-bold text-gray-400">Month</th>
-              <th className="px-6 py-4 text-left text-sm font-bold text-gray-400">Year</th>
-              <th className="px-6 py-4 text-left text-sm font-bold text-gray-400">Amount</th>
-              <th className="px-6 py-4 text-left text-sm font-bold text-gray-400">Status</th>
-              {isAdmin && <th className="px-6 py-4 text-left text-sm font-bold text-gray-400">Screenshot</th>}
-              <th className="px-6 py-4 text-right text-sm font-bold text-gray-400">Actions</th>
+            <tr className="border-b border-border bg-surface-2/40">
+              {isAdmin && <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-content-muted">Student Name</th>}
+              <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-content-muted">Month</th>
+              <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-content-muted">Year</th>
+              <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-content-muted">Amount</th>
+              <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-content-muted">Status</th>
+              {isAdmin && <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-content-muted">Screenshot</th>}
+              <th className="px-6 py-4 text-right text-xs font-bold uppercase tracking-wider text-content-muted">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -51,20 +52,20 @@ const PaymentTable = ({
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: idx * 0.05 }}
-                className="border-b border-dark-700 hover:bg-dark-800/50 transition-colors duration-300 group"
+                className="border-b border-border hover:bg-surface-2/40 transition-colors duration-300 group"
               >
                 {isAdmin && (
-                  <td className="px-6 py-4 text-sm text-gray-300 font-medium">
+                  <td className="px-6 py-4 text-sm text-content-muted font-medium">
                     {payment.user?.name || 'Unknown'}
                   </td>
                 )}
-                <td className="px-6 py-4 text-sm text-gray-300">
+                <td className="px-6 py-4 text-sm text-content-muted">
                   {payment.month}
                 </td>
-                <td className="px-6 py-4 text-sm text-gray-300">
+                <td className="px-6 py-4 text-sm text-content-muted">
                   {payment.year}
                 </td>
-                <td className="px-6 py-4 text-sm font-semibold text-primary">
+                <td className="px-6 py-4 text-sm font-semibold text-primary tabular-nums">
                   ₹{payment.amount}
                 </td>
                 <td className="px-6 py-4 text-sm">
@@ -73,47 +74,29 @@ const PaymentTable = ({
                 {isAdmin && (
                   <td className="px-6 py-4 text-sm">
                     {payment.screenshot ? (
-                      <button
-                        onClick={() => onViewScreenshot(payment.screenshot)}
-                        className="flex items-center gap-2 text-blue-400 hover:text-blue-300 transition-colors px-3 py-1 rounded hover:bg-blue-500/10"
-                      >
-                        <FiEye className="w-4 h-4" />
+                      <ActionButton variant="view" icon={FiEye} onClick={() => onViewScreenshot(payment.screenshot)}>
                         View
-                      </button>
+                      </ActionButton>
                     ) : (
-                      <span className="text-gray-500 text-xs">Not uploaded</span>
+                      <span className="text-content-subtle text-xs">Not uploaded</span>
                     )}
                   </td>
                 )}
                 <td className="px-6 py-4 text-right">
                   <div className="flex items-center justify-end gap-2">
                     {!isAdmin && (payment.status === 'PENDING' || payment.status === 'REJECTED') && (
-                      <button
-                        onClick={() => onUpload(payment.id)}
-                        className="flex items-center gap-2 px-3 py-1.5 bg-blue-500/10 text-blue-400 border border-blue-500/30 rounded-lg hover:bg-blue-500/20 transition-all duration-300 text-xs font-medium hover:scale-105"
-                      >
-                        <FiUploadCloud className="w-4 h-4" />
+                      <ActionButton variant="upload" icon={FiUploadCloud} onClick={() => onUpload(payment.id)}>
                         Upload
-                      </button>
+                      </ActionButton>
                     )}
                     {isAdmin && payment.status === 'PENDING' && payment.submittedAt && (
                       <>
-                        <button
-                          onClick={() => onApprove(payment.id)}
-                          className="flex items-center gap-1 px-3 py-1.5 bg-green-500/10 text-green-400 border border-green-500/30 rounded-lg hover:bg-green-500/20 transition-all duration-300 text-xs font-medium hover:scale-105"
-                          title="Approve payment"
-                        >
-                          <FiCheck className="w-4 h-4" />
+                        <ActionButton variant="approve" icon={FiCheck} onClick={() => onApprove(payment.id)} title="Approve payment">
                           Approve
-                        </button>
-                        <button
-                          onClick={() => onReject(payment.id)}
-                          className="flex items-center gap-1 px-3 py-1.5 bg-red-500/10 text-red-400 border border-red-500/30 rounded-lg hover:bg-red-500/20 transition-all duration-300 text-xs font-medium hover:scale-105"
-                          title="Reject payment"
-                        >
-                          <FiX className="w-4 h-4" />
+                        </ActionButton>
+                        <ActionButton variant="reject" icon={FiX} onClick={() => onReject(payment.id)} title="Reject payment">
                           Reject
-                        </button>
+                        </ActionButton>
                       </>
                     )}
                   </div>
@@ -128,33 +111,33 @@ const PaymentTable = ({
       <div className="md:hidden space-y-4 p-4">
         {payments.map((payment, idx) => (
           <motion.div
-            key={payment._id}
+            key={payment.id}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: idx * 0.05 }}
-            className="bg-dark-800 rounded-lg p-4 space-y-3 border border-dark-700"
+            className="bg-surface rounded-lg p-4 space-y-3 border border-border"
           >
             {isAdmin && (
               <div className="flex items-center justify-between">
-                <span className="text-gray-500 text-xs">Student</span>
-                <span className="font-medium text-white">{payment.athleteId?.name || 'Unknown'}</span>
+                <span className="text-content-subtle text-xs">Student</span>
+                <span className="font-medium text-content">{payment.user?.name || 'Unknown'}</span>
               </div>
             )}
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <span className="text-gray-500 text-xs">Month</span>
-                <p className="font-medium text-white">{payment.month}</p>
+                <span className="text-content-subtle text-xs">Month</span>
+                <p className="font-medium text-content">{payment.month}</p>
               </div>
               <div>
-                <span className="text-gray-500 text-xs">Year</span>
-                <p className="font-medium text-white">{payment.year}</p>
+                <span className="text-content-subtle text-xs">Year</span>
+                <p className="font-medium text-content">{payment.year}</p>
               </div>
               <div>
-                <span className="text-gray-500 text-xs">Amount</span>
-                <p className="font-semibold text-primary">₹{payment.amount}</p>
+                <span className="text-content-subtle text-xs">Amount</span>
+                <p className="font-semibold text-primary tabular-nums">₹{payment.amount}</p>
               </div>
               <div>
-                <span className="text-gray-500 text-xs">Status</span>
+                <span className="text-content-subtle text-xs">Status</span>
                 <div className="mt-1">
                   <StatusBadge status={payment.status} />
                 </div>
@@ -162,41 +145,30 @@ const PaymentTable = ({
             </div>
 
             {isAdmin && payment.screenshot && (
-              <button
+              <ActionButton
+                variant="view"
+                icon={FiEye}
                 onClick={() => onViewScreenshot(payment.screenshot)}
-                className="w-full flex items-center justify-center gap-2 text-blue-400 hover:text-blue-300 transition-colors px-3 py-2 rounded bg-blue-500/5 border border-blue-500/20 mt-2"
+                className="w-full"
               >
-                <FiEye className="w-4 h-4" />
                 View Screenshot
-              </button>
+              </ActionButton>
             )}
 
             <div className="flex gap-2 mt-3 flex-wrap">
               {!isAdmin && (payment.status === 'PENDING' || payment.status === 'REJECTED') && (
-                <button
-                  onClick={() => onUpload(payment.id)}
-                  className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-blue-500/10 text-blue-400 border border-blue-500/30 rounded-lg hover:bg-blue-500/20 transition-all duration-300 text-xs font-medium"
-                >
-                  <FiUploadCloud className="w-4 h-4" />
+                <ActionButton variant="upload" icon={FiUploadCloud} onClick={() => onUpload(payment.id)} className="flex-1">
                   Upload
-                </button>
+                </ActionButton>
               )}
-              {isAdmin && payment.status === 'PENDING' && payment.screenshot && (
+              {isAdmin && payment.status === 'PENDING' && payment.submittedAt && (
                 <>
-                  <button
-                    onClick={() => onApprove(payment._id)}
-                    className="flex-1 flex items-center justify-center gap-1 px-3 py-2 bg-green-500/10 text-green-400 border border-green-500/30 rounded-lg hover:bg-green-500/20 transition-all duration-300 text-xs font-medium"
-                  >
-                    <FiCheck className="w-4 h-4" />
+                  <ActionButton variant="approve" icon={FiCheck} onClick={() => onApprove(payment.id)} className="flex-1">
                     Approve
-                  </button>
-                  <button
-                    onClick={() => onReject(payment._id)}
-                    className="flex-1 flex items-center justify-center gap-1 px-3 py-2 bg-red-500/10 text-red-400 border border-red-500/30 rounded-lg hover:bg-red-500/20 transition-all duration-300 text-xs font-medium"
-                  >
-                    <FiX className="w-4 h-4" />
+                  </ActionButton>
+                  <ActionButton variant="reject" icon={FiX} onClick={() => onReject(payment.id)} className="flex-1">
                     Reject
-                  </button>
+                  </ActionButton>
                 </>
               )}
             </div>

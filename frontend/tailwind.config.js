@@ -1,4 +1,10 @@
 /** @type {import('tailwindcss').Config} */
+
+// Every color is backed by a CSS variable holding space-separated RGB channels,
+// so utilities keep working with opacity modifiers (bg-primary/10) AND swap
+// automatically between the .theme-light / :root(dark) token sets in index.css.
+const c = (v) => `rgb(var(${v}) / <alpha-value>)`;
+
 export default {
   content: [
     "./index.html",
@@ -7,25 +13,52 @@ export default {
   theme: {
     extend: {
       colors: {
-        primary: "#E6FF00", // Neon Yellow - Main accent
-        accent: {
-          red: "#FF2D2D",     // Strength/Power sections
-          green: "#2ECC71",   // Performance/Endurance sections
-          yellow: "#E6FF00"   // Primary accent
+        // Semantic tokens — use these in new/refactored code
+        bg: c('--bg'),
+        surface: {
+          DEFAULT: c('--surface'),
+          2: c('--surface-2'),
         },
+        border: c('--border'),
+        content: {
+          DEFAULT: c('--text'),
+          muted: c('--text-muted'),
+          subtle: c('--text-subtle'),
+        },
+        primary: {
+          DEFAULT: c('--primary'),
+          hover: c('--primary-hover'),
+          contrast: c('--primary-contrast'),
+        },
+        steel: c('--steel'),
+        success: c('--success'),
+        danger: c('--danger'),
+        ring: c('--ring'),
+
+        // Legacy aliases — repoint the classes already scattered through the app
+        // to the new variable-backed tokens (zero JSX churn, auto theme-swap).
         dark: {
-          900: "#0B0B0B",     // Main background
-          800: "#1A1A1A",     // Section/card background
-          700: "#2A2A2A",     // Borders
-          600: "#3B3B3B",     // Muted controls
+          900: c('--bg'),
+          800: c('--surface'),
+          700: c('--border'),
+          600: c('--surface-2'),
         },
-        secondary: "#1d4ed8", // Deep blue (kept for compatibility)
-        light: "#FFFFFF"      // Primary text
+        light: c('--text'),
+        accent: {
+          green: c('--success'),
+          red: c('--danger'),
+          yellow: c('--primary'),
+        },
+        secondary: c('--steel'),
       },
       fontFamily: {
         sans: ['Inter', 'sans-serif'],
-        display: ['Outfit', 'sans-serif'],
-      }
+        display: ['"Barlow Condensed"', 'sans-serif'],
+      },
+      boxShadow: {
+        // Soft elevation tuned for the navy surfaces
+        card: '0 10px 30px -12px rgb(0 0 0 / 0.45)',
+      },
     },
   },
   plugins: [],

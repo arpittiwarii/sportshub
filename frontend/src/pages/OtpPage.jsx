@@ -4,6 +4,7 @@ import api from '../services/api';
 import { toast } from 'react-toastify';
 import { motion } from 'framer-motion';
 import { FiLock, FiAlertCircle } from 'react-icons/fi';
+import AlertBox from '../components/AlertBox';
 
 const OtpPage = () => {
     const [error, setError] = useState('');
@@ -47,31 +48,33 @@ const OtpPage = () => {
                             <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
                                 <FiLock className="text-primary text-2xl" />
                             </div>
-                            <h2 className="text-2xl font-display font-bold text-white mb-2">
-                                Enter Otp
+                            <h2 className="text-2xl font-display font-bold text-content mb-2">
+                                Enter OTP
                             </h2>
-                            <p className="text-gray-400 text-sm">Check your Eamil for otp</p>
+                            <p className="text-content-muted text-sm">Check your email for the OTP</p>
                         </div>
 
                         {error && (
-                            <div className="bg-red-500/10 text-red-500 border border-red-500/20 p-3 rounded-lg flex items-center gap-2 mb-6">
-                                <FiAlertCircle className="shrink-0" />
+                            <AlertBox variant="danger" icon={FiAlertCircle} className="mb-6">
                                 <span className="text-sm">{error}</span>
-                            </div>
+                            </AlertBox>
                         )}
 
                         <form onSubmit={handleSubmit} className="space-y-5">
                             <div>
-                                <label className="block text-gray-400 text-sm font-medium mb-1" htmlFor="otp">
+                                <label className="block text-content-muted text-sm font-medium mb-1" htmlFor="otp">
                                     Enter OTP
                                 </label>
                                 <input
                                     type="text"
                                     id="otp"
                                     value={otp}
-                                    onChange={(e) => setOtp(e.target.value)}
+                                    onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
                                     required
-                                    className="w-full bg-dark-800 border border-dark-700 focus:border-primary outline-none text-white rounded-lg px-4 py-2"
+                                    inputMode="numeric"
+                                    autoComplete="one-time-code"
+                                    maxLength={6}
+                                    className="w-full bg-surface-2 border border-border focus:border-primary outline-none text-content rounded-lg px-4 py-2"
                                 />
                             </div>
 
@@ -81,7 +84,7 @@ const OtpPage = () => {
                                 disabled={loading}
                                 className="w-full btn-primary py-3"
                             >
-                                {loading ? 'Submiting...' : 'Submit'}
+                                {loading ? 'Submitting...' : 'Submit'}
                             </button>
                         </form>
                     </motion.div>
