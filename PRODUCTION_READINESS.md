@@ -1,4 +1,4 @@
-# SportsHub — Production Readiness Audit
+# Aarambh Athletics Hub — Production Readiness Audit
 
 **Reviewed as:** Senior Software Architect · Security Engineer · DevOps Engineer · Backend Engineer · Frontend Engineer · Production Reviewer
 **Stack:** MERN — Express 5 · Mongoose 8 · MongoDB · Redis + BullMQ · React 19 / Vite · Cloudinary · Nodemailer

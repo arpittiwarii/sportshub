@@ -1,9 +1,9 @@
 {
     "info": {
-        "name": "SportsHub API",
-        "description": "Complete API collection for SportsHub backend\n\n**Environment Variables Required:**\n- `baseUrl`: Base URL of the API (e.g., http://localhost:8000/api)\n- `token`: JWT Bearer token from login response",
+        "name": "Aarambh Athletics Hub API",
+        "description": "Complete API collection for Aarambh Athletics Hub backend\n\n**Environment Variables Required:**\n- `baseUrl`: Base URL of the API (e.g., http://localhost:8000/api)\n- `token`: JWT Bearer token from login response",
         "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-        "_exporter_id": "sportshub_2026"
+        "_exporter_id": "aarambh_athletics_hub_2026"
     },
     "item": [
         {
@@ -80,7 +80,7 @@
                         ],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n  \"email\": \"admin@sportshub.com\",\n  \"password\": \"password123\"\n}"
+                            "raw": "{\n  \"email\": \"admin@aarambhathleticshub.com\",\n  \"password\": \"password123\"\n}"
                         },
                         "url": {
                             "raw": "{{baseUrl}}/auth/login",
@@ -92,7 +92,7 @@
                                 "login"
                             ]
                         },
-                        "description": "Login with email and password. Returns JWT token which can be stored in the 'token' environment variable. Default admin credentials: admin@sportshub.com / password123"
+                        "description": "Login with email and password. Returns JWT token which can be stored in the 'token' environment variable. Default admin credentials: admin@aarambhathleticshub.com / password123"
                     },
                     "response": []
                 }

@@ -1,3 +1,18 @@
+const fs = require('fs');
+const path = require('path');
+
+const BRAND_NAME = 'Aarambh Athletics Hub';
+const BRAND_TAGLINE = 'Train • Compete • Achieve';
+const LOGO_PATH = path.resolve(__dirname, '../../../frontend/src/assets/logo.png');
+
+let logoDataUri = '';
+try {
+    const logoBuffer = fs.readFileSync(LOGO_PATH);
+    logoDataUri = `data:image/png;base64,${logoBuffer.toString('base64')}`;
+} catch (error) {
+    console.warn('Aarambh logo not found at frontend/src/assets/logo.png; continuing without embedded logo.');
+}
+
 const getEmailTemplate = (title, content) => `
 <!DOCTYPE html>
     <html>
@@ -12,10 +27,10 @@ const getEmailTemplate = (title, content) => `
                     style="background:#fff;border-radius:12px;overflow:hidden;">
 
                         <tr>
-                            <td align="center"
-                            style="background:#0f172a;color:white;padding:25px;">
-                                <h1>🏆 SportsHub</h1>
-                                <p>Connect • Compete • Grow</p>
+                            <td align="center" style="background:#0f172a;color:white;padding:25px 25px 18px;">
+                                ${logoDataUri ? `<img src="${logoDataUri}" alt="${BRAND_NAME}" width="120" height="120" style="display:block;border-radius:50%;margin:0 auto 12px;background:#fff;padding:8px;" />` : '<div style="font-size:28px;font-weight:700;letter-spacing:1px;margin-bottom:8px;">Aarambh</div>'}
+                                <div style="font-size:28px;font-weight:700;letter-spacing:1px;">${BRAND_NAME}</div>
+                                <div style="font-size:12px;letter-spacing:2px;text-transform:uppercase;color:#dbeafe;margin-top:8px;">${BRAND_TAGLINE}</div>
                             </td>
                         </tr>
 
@@ -29,7 +44,7 @@ const getEmailTemplate = (title, content) => `
                         <tr>
                             <td align="center"
                             style="background:#f8fafc;padding:20px;color:#64748b;">
-                            © ${new Date().getFullYear()} SportsHub
+                            © ${new Date().getFullYear()} ${BRAND_NAME}
                             </td>
                         </tr>
 
@@ -59,7 +74,7 @@ const paymentReminderTemplate = (name, amount, dueDate) =>
             <p><strong>Due Date:</strong> ${dueDate}</p>
         </div>
 
-        <p>Please log in to your SportsHub account and complete the payment at your earliest convenience.</p>
+        <p>Please log in to your Aarambh Athletics Hub account and complete the payment at your earliest convenience.</p>
 
         <p>If payment has already been made, please disregard this email.</p>
         `
@@ -91,7 +106,7 @@ const otpEmailTemplate = (name, otp) =>
 
 const welcomeEmailTemplate = (name) =>
     getEmailTemplate(
-        "Welcome to SportsHub 🎉",
+        "Welcome to Aarambh Athletics Hub 🎉",
         `
         <p>Hi <strong>${name}</strong>,</p>
 
@@ -128,7 +143,7 @@ const approvalConfirmedTemplate = (name, role) =>
             Approved Role: <strong>${role}</strong>
         </div>
 
-        <p>You can now log in and access SportsHub.</p>
+        <p>You can now log in and access Aarambh Athletics Hub.</p>
         `
     );
 
@@ -187,7 +202,7 @@ const passwordResetOtpTemplate = (name, otp) =>
         "Reset Your Password 🔑",
         `
         <p>Hi <strong>${name}</strong>,</p>
-        <p>We received a request to reset your SportsHub password. Use the code below to continue.</p>
+        <p>We received a request to reset your Aarambh Athletics Hub password. Use the code below to continue.</p>
 
         <div style="
             background:#eff6ff;
@@ -224,7 +239,7 @@ const passwordChangedTemplate = (name) =>
         `
         <p>Hi <strong>${name}</strong>,</p>
 
-        <p>Your SportsHub password was just changed successfully. You have been signed out on all devices and can now log in with your new password.</p>
+        <p>Your Aarambh Athletics Hub password was just changed successfully. You have been signed out on all devices and can now log in with your new password.</p>
 
         <div style="
             background:#fef2f2;
@@ -240,6 +255,7 @@ const passwordChangedTemplate = (name) =>
 
 
 module.exports = {
+    BRAND_NAME,
     otpEmailTemplate,
     passwordResetOtpTemplate,
     passwordChangedTemplate,

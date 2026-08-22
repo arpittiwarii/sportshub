@@ -1,5 +1,5 @@
 /**
- * Global Constants for SportsHub Application
+ * Global Constants for Aarambh Athletics Hub
  * Centralized constants to avoid duplication across services
  */
 
@@ -46,10 +46,10 @@ const OTP_PURPOSE = {
 
 // Cloudinary folder paths
 const CLOUDINARY_FOLDERS = {
-    STUDENT_PROFILES: (studentId) => `sports-hub/students/${studentId}/profiles`,
-    STUDENT_DOCS: (studentId) => `sports-hub/students/${studentId}`,
-    ADMIN_PROFILES: (adminId) => `sports-hub/admin-profiles/${adminId}`,
-    FEES: (feeId) => `sports-hub/fees/${feeId}`,
+    STUDENT_PROFILES: (studentId) => `aarambh-athletics-hub/students/${studentId}/profiles`,
+    STUDENT_DOCS: (studentId) => `aarambh-athletics-hub/students/${studentId}`,
+    ADMIN_PROFILES: (adminId) => `aarambh-athletics-hub/admin-profiles/${adminId}`,
+    FEES: (feeId) => `aarambh-athletics-hub/fees/${feeId}`,
 };
 
 // File upload constraints

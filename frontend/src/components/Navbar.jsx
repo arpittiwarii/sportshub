@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { FiMenu, FiMoon, FiSun, FiX } from 'react-icons/fi';
 import { motion } from 'framer-motion';
-import logo from "../assets/logo.jpg";
+import logo from "../assets/logo.png";
 import { useTheme } from '../context/theme-context';
 
 const Navbar = () => {
@@ -79,12 +79,12 @@ const Navbar = () => {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 flex justify-between items-center">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-3 group">
-          <div className="w-16 h-16 rounded-xl overflow-hidden ring-1 ring-border">
+          <div className="w-16 h-16 rounded-full overflow-hidden ring-1 ring-border">
             <img src={logo} alt="logo" className="w-full h-full object-contain" />
           </div>
           <div className="flex flex-col leading-tight">
-            <span className="font-display font-bold text-2xl tracking-wide text-content">Arambh</span>
-            <span className="text-[0.65rem] text-content-muted font-semibold uppercase tracking-[0.18em]">Athletics Hub Indore</span>
+            <span className="font-display font-bold text-2xl tracking-wide text-content">Aarambh</span>
+            <span className="text-[0.65rem] text-content-muted font-semibold uppercase tracking-[0.18em]">Athletics Hub</span>
           </div>
         </Link>
 

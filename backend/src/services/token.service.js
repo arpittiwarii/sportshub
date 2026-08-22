@@ -18,7 +18,7 @@ const generateToken = (user) => {
 
     const token = JWT.sign(payload, secret, {
         expiresIn,
-        issuer: 'sportshub',
+        issuer: 'aarambh-athletics-hub',
     });
 
     return { token, expiresIn };

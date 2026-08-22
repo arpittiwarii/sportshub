@@ -176,7 +176,7 @@ const approvedStudents = (Array.isArray(students) ? students : [])
             <div>
               <p className="eyebrow">Management Center</p>
               <h1 className="text-4xl font-display text-content">Admin Dashboard</h1>
-              <p className="text-content-muted text-lg">Arambh Athletes Management Center</p>
+              <p className="text-content-muted text-lg">Aarambh Athletics Hub Management Center</p>
             </div>
           </div>
 
@@ -210,7 +210,7 @@ const approvedStudents = (Array.isArray(students) ? students : [])
               </div>
               <div>
                 <p className="text-content font-bold text-lg">{adminProfile?.name || 'Admin'}</p>
-                <p className="text-content-muted text-sm">{adminProfile?.email || 'admin@sportshub.com'}</p>
+                <p className="text-content-muted text-sm">{adminProfile?.email || 'admin@aarambhathleticshub.com'}</p>
               </div>
             </div>
 

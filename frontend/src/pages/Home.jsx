@@ -35,7 +35,7 @@ const Home = () => {
       {/* ==================== HERO SECTION ==================== */}
       <HeroSection
         badge="ESTABLISHED 2026"
-        title="Arambh Athletics Hub"
+        title="Aarambh Athletics Hub"
         titleHighlight="Indore"
         subtitle="Empowering youth through athletics — train with intent, compete with heart."
         ctaText="Join Our Programs"

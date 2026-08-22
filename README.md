@@ -1,4 +1,4 @@
-# 🏅 SportsHub - Sports Registration & Payment Management Platform
+# 🏅 Aarambh Athletics Hub - Sports Registration & Payment Management Platform
 
 A full-stack application for managing sports registrations, user authentication, and payment processing.
 
@@ -62,7 +62,7 @@ A full-stack application for managing sports registrations, user authentication,
 ## 📁 Project Structure
 
 ```
-sportshub/
+aarambh-athletics-hub/
 ├── backend/
 │   ├── config/
 │   │   └── db.js          # Database connection
@@ -129,8 +129,8 @@ sportshub/
 
 #### 1. Clone the Repository
 ```bash
-git clone https://github.com/arpit-tiwarii/sportshub.git
-cd sportshub
+git clone https://github.com/your-username/aarambh-athletics-hub.git
+cd aarambh-athletics-hub
 ```
 
 #### 2. Backend Setup
@@ -180,12 +180,12 @@ This will populate the database with sample data.
 
 1. **Create GitHub Repository**
    - Go to https://github.com/new
-   - Create a public repository named `sportshub`
+   - Create a public repository named `aarambh-athletics-hub`
 
 2. **Push Code**
    ```bash
-   cd c:\Users\arpit\Desktop\sportshub
-   git remote add origin https://github.com/arpit-tiwarii/sportshub.git
+   cd c:\Users\arpit\Desktop\aarambh-athletics-hub
+   git remote add origin https://github.com/your-username/aarambh-athletics-hub.git
    git branch -M main
    git push -u origin main
    ```
@@ -196,7 +196,7 @@ This will populate the database with sample data.
 2. Create new Web Service
 3. Connect GitHub repository
 4. Configure:
-   - Name: `sportshub-backend`
+   - Name: `aarambh-athletics-hub-backend`
    - Root Directory: `backend`
    - Build Command: `npm install`
    - Start Command: `npm start`
@@ -224,7 +224,7 @@ This will populate the database with sample data.
 ```
 NODE_ENV=development
 PORT=8000
-MONGODB_URI=mongodb://localhost:27017/sportshub
+MONGODB_URI=mongodb://localhost:27017/aarambh_athletics_hub
 JWT_SECRET=your_secret_key_here
 FRONTEND_URL=http://localhost:5173
 ```
@@ -334,9 +334,9 @@ For issues and questions:
 ## 🎉 Live Demo
 
 Once deployed:
-- **Frontend**: https://sportshub-*.netlify.app
-- **Backend API**: https://sportshub-backend.onrender.com
-- **GitHub**: https://github.com/arpit-tiwarii/sportshub
+- **Frontend**: https://aarambh-athletics-hub-*.netlify.app
+- **Backend API**: https://aarambh-athletics-hub-backend.onrender.com
+- **GitHub**: https://github.com/your-username/aarambh-athletics-hub
 
 ---
 

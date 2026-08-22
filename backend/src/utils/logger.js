@@ -7,7 +7,7 @@ const { config } = require('../env');
 // you want colours (`node src/app.js | npx pino-pretty`).
 const logger = pino({
   level: process.env.LOG_LEVEL || (config.isProduction ? 'info' : 'debug'),
-  base: { service: 'sportshub-api' },
+  base: { service: 'aarambh-athletics-hub-api' },
   redact: {
     paths: [
       'req.headers.authorization',

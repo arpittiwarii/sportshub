@@ -128,7 +128,7 @@ const Register = () => {
           className="text-center mb-10"
         >
           <span className="eyebrow text-primary mb-2 block">Admissions Open</span>
-          <h1 className="text-4xl md:text-5xl font-display font-bold text-content mb-4">Join <span className="text-primary">Arambh</span></h1>
+          <h1 className="text-4xl md:text-5xl font-display font-bold text-content mb-4">Join <span className="text-primary">Aarambh</span></h1>
           <p className="text-content-muted">Register now. Once approved by the admin, you can log in to your student dashboard.</p>
         </motion.div>
 

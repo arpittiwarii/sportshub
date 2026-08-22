@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { FiInstagram, FiTwitter, FiFacebook, FiYoutube, FiMapPin, FiPhone, FiMail } from 'react-icons/fi';
+import logo from '../assets/logo.png'
 
 const Footer = () => {
   return (
@@ -10,12 +11,12 @@ const Footer = () => {
           {/* Brand */}
           <div>
             <Link to="/" className="flex items-center gap-3 group mb-6">
-              <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center font-bold text-primary-contrast text-lg shadow-lg shadow-primary/40 group-hover:scale-110 transition-transform">
-                🏃
-              </div>
+               <div className="w-16 h-16 rounded-xl overflow-hidden ring-1 ring-border">
+                  <img src={logo} alt="logo" className="w-full h-full object-contain" />
+                </div>
               <div className="flex flex-col">
-                <span className="font-display font-bold text-xl tracking-wide text-content">Arambh</span>
-                <span className="text-xs text-content-muted uppercase tracking-[0.15em]">Athletics Hub Indore</span>
+                <span className="font-display font-bold text-xl tracking-wide text-content">Aarambh</span>
+                <span className="text-xs text-content-muted uppercase tracking-[0.15em]">Athletics Hub</span>
               </div>
             </Link>
             <p className="text-content-muted mb-6 leading-relaxed">
@@ -78,7 +79,7 @@ const Footer = () => {
 
         <div className="border-t border-border pt-8 mt-8 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-content-subtle text-sm">
-            © {new Date().getFullYear()} Arambh Athletics Hub. All rights reserved.
+            © {new Date().getFullYear()} Aarambh Athletics Hub. All rights reserved.
           </p>
           <div className="flex gap-6 text-sm">
             <Link to="/login" className="text-content-subtle hover:text-content transition-colors">Admin Login</Link>

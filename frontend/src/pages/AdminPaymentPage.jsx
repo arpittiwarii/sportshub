@@ -110,7 +110,7 @@ const AdminPaymentPage = () => {
       isOpen: true,
       imageUrl: screenshotUrl?.startsWith('http')
         ? screenshotUrl
-        : `https://sportshub-backend-mzth.onrender.com${screenshotUrl}`,
+        : `${import.meta.env.VITE_API_URL || window.location.origin}${screenshotUrl}`,
       caption: payment
         ? `${payment.user?.name || 'Unknown athlete'} · ${payment.month} ${payment.year} · ₹${payment.amount}`
         : null,

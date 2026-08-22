@@ -3,6 +3,7 @@ const { config } = require('../env');
 const { logger } = require('./logger');
 
 const {
+    BRAND_NAME,
     otpEmailTemplate,
     passwordResetOtpTemplate,
     passwordChangedTemplate,
@@ -36,7 +37,7 @@ transporter.verify((error) => {
 
 const sendPaymentReminderEmail = async ({ email, name, amount, duedate }) => {
     await transporter.sendMail({
-        from: `"SportsHub" <${config.email.from}>`,
+        from: `"${BRAND_NAME}" <${config.email.from}>`,
         to: email,
         subject: 'Payment Reminder Email',
         html: `
@@ -48,9 +49,9 @@ const sendPaymentReminderEmail = async ({ email, name, amount, duedate }) => {
 
 const sendWelcomeEmail = async ({ email, name }) => {
     await transporter.sendMail({
-        from: `"SportsHub" <${config.email.from}>`,
+        from: `"${BRAND_NAME}" <${config.email.from}>`,
         to: email,
-        subject: 'Welcome to SportsHub 🎉',
+        subject: 'Welcome to Aarambh Athletics Hub 🎉',
         html: `
             ${welcomeEmailTemplate(name)}
         `,
@@ -60,7 +61,7 @@ const sendWelcomeEmail = async ({ email, name }) => {
 
 const sendOtpEmail = async ({ email, name, otp }) => {
     await transporter.sendMail({
-        from: `"SportsHub" <${config.email.from}>`,
+        from: `"${BRAND_NAME}" <${config.email.from}>`,
         to: email,
         subject: 'OTP verification Email',
         html: `
@@ -72,9 +73,9 @@ const sendOtpEmail = async ({ email, name, otp }) => {
 
 const sendPasswordResetOtpEmail = async ({ email, name, otp }) => {
     await transporter.sendMail({
-        from: `"SportsHub" <${config.email.from}>`,
+        from: `"${BRAND_NAME}" <${config.email.from}>`,
         to: email,
-        subject: 'Your SportsHub password reset code',
+        subject: 'Your Aarambh Athletics Hub password reset code',
         html: `
             ${passwordResetOtpTemplate(name, otp)}
         `,
@@ -84,9 +85,9 @@ const sendPasswordResetOtpEmail = async ({ email, name, otp }) => {
 
 const sendPasswordChangedEmail = async ({ email, name }) => {
     await transporter.sendMail({
-        from: `"SportsHub" <${config.email.from}>`,
+        from: `"${BRAND_NAME}" <${config.email.from}>`,
         to: email,
-        subject: 'Your SportsHub password was changed',
+        subject: 'Your Aarambh Athletics Hub password was changed',
         html: `
             ${passwordChangedTemplate(name)}
         `,
@@ -96,9 +97,9 @@ const sendPasswordChangedEmail = async ({ email, name }) => {
 
 const sendApprovalConfirmedEmail = async ({ email, name, role }) => {
     await transporter.sendMail({
-        from: `"SportsHub" <${config.email.from}>`,
+        from: `"${BRAND_NAME}" <${config.email.from}>`,
         to: email,
-        subject: 'Account Approval approves by admin 🎉',
+        subject: 'Account approval confirmed by admin 🎉',
         html: `
             ${approvalConfirmedTemplate(name, role)}
         `,
@@ -108,9 +109,9 @@ const sendApprovalConfirmedEmail = async ({ email, name, role }) => {
 
 const sendApprovalRejectedEmail = async ({ email, name, role, reason }) => {
     await transporter.sendMail({
-        from: `"SportsHub" <${config.email.from}>`,
+        from: `"${BRAND_NAME}" <${config.email.from}>`,
         to: email,
-        subject: 'Account Approval Rejects by admin because of wrong documentation',
+        subject: 'Account approval update from admin',
         html: `
             ${approvalRejectedTemplate(name, role, reason)}
         `,
@@ -120,9 +121,9 @@ const sendApprovalRejectedEmail = async ({ email, name, role, reason }) => {
 
 const sendApprovalRequestEmail = async ({ email, name, role }) => {
     await transporter.sendMail({
-        from: `"SportsHub" <${config.email.from}>`,
+        from: `"${BRAND_NAME}" <${config.email.from}>`,
         to: email,
-        subject: 'Account in under Review, wait for admin approval',
+        subject: 'Your application is under review',
         html: `
             ${approvalRequestTemplate(name, role)}
         `,
